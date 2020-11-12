@@ -33,7 +33,9 @@ function mainView (state, emit) {
       if(Array.isArray(d.example)) {
         code = Prism.highlight(d.example[state.tabIndex], Prism.languages.javascript, 'javascript');
         for(let i = 0; i < d.example.length; i++) {
-          tabs.push(html`<div onclick=${()=>emit('show details', obj, typeIndex, i)}>${i}</div>`);
+          const isSelected = i == state.tabIndex;
+          const hsl = `hsl(${20 + state.selectedIndex*60 }, ${isSelected?100:20}%, ${isSelected?90:60}%)`
+          tabs.push(html`<div class="tab courier pointer dib ma1 pa1 pv1" style="background-color:${hsl}" onclick=${()=>emit('show details', obj, typeIndex, i)}>Example ${i}</div>`);
         }
       }
       else {
@@ -46,7 +48,7 @@ function mainView (state, emit) {
 
     const functionName =   `${obj.name}( ${obj.inputs.map((input) => `${input.name}${input.default ? `: ${input.default}`: ''}`).join(', ')} )`
     functionEl = html`<pre class=""><code class=""></code></pre>`
-    codeExample = html`${tabs}<pre class="ma0">
+    codeExample = html`<div class="tabs">${tabs}</div><pre class="ma0">
       ${el}
     </pre>`
       // <ul>

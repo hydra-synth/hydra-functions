@@ -5,8 +5,7 @@ module.exports = {
 // noise interpolating between different scales and offsets
 noise( ({time}) => Math.sin(time/10)*50 , ({time}) => Math.sin(time/2)/500 )
 .out(o0)`,
-`
-noise().out(o0)`]
+`noise().out(o0)`]
    },
    voronoi: {
       description: "Generate [voronoi shapes](https://en.wikipedia.org/wiki/Voronoi_diagram).",

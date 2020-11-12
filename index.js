@@ -27,11 +27,11 @@ function mainView (state, emit) {
     const d = examples[obj.name]
     const typeIndex = Object.keys(hydraTypes).indexOf(obj.type);
 
-    let code = '';
+    let rawCode = '';
     let tabs = [];
     if(d && d.example) {
       if(Array.isArray(d.example)) {
-        code = Prism.highlight(d.example[state.tabIndex], Prism.languages.javascript, 'javascript');
+        rawCode = d.example[state.tabIndex];
         for(let i = 0; i < d.example.length; i++) {
           const isSelected = i == state.tabIndex;
           const hsl = `hsl(${20 + state.selectedIndex*60 }, ${isSelected?100:20}%, ${isSelected?90:60}%)`
@@ -39,9 +39,13 @@ function mainView (state, emit) {
         }
       }
       else {
-        code = Prism.highlight(d.example, Prism.languages.javascript, 'javascript');
+        rawCode = d.example;
       }
     }
+    if(rawCode.length > 0 && rawCode[0] != '\n') {
+      rawCode = '\n' + rawCode;
+    }
+    const code = Prism.highlight(rawCode, Prism.languages.javascript, 'javascript');
 
     const el = html`<code></code>`
     el.innerHTML = code

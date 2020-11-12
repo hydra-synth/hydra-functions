@@ -2,6 +2,6 @@
 
 ## Installation
 
-  sudo npm i -g budo
-  npm i
-  npm run dev
+    sudo npm i -g budo
+    npm i
+    npm run dev

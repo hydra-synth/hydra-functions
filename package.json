@@ -1,0 +1,20 @@
+{
+  "name": "hydra-doc-generator",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "dependencies": {
+    "choo": "^7.1.0",
+    "choo-devtools": "^3.0.4",
+    "hydra-synth": "^1.3.2",
+    "prismjs": "^1.22.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "dev": "budo index.js:bundle.js --open --live --dir public",
+    "build": "browserify index.js -o public/bundle.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC"
+}

@@ -25,15 +25,34 @@ function mainView (state, emit) {
 
     if(obj !== null) {
     const d = examples[obj.name]
-    console.log(d)
-    const code = d && d.example ? Prism.highlight(d.example, Prism.languages.javascript, 'javascript') : ''
+    const typeIndex = Object.keys(hydraTypes).indexOf(obj.type);
+
+    let rawCode = '';
+    let tabs = [];
+    if(d && d.example) {
+      if(Array.isArray(d.example)) {
+        rawCode = d.example[state.tabIndex];
+        for(let i = 0; i < d.example.length; i++) {
+          const isSelected = i == state.tabIndex;
+          const hsl = `hsl(${20 + state.selectedIndex*60 }, ${isSelected?100:20}%, ${isSelected?90:60}%)`
+          tabs.push(html`<div class="tab courier pointer dib ma1 pa1 pv1" style="background-color:${hsl}" onclick=${()=>emit('show details', obj, typeIndex, i)}>Example ${i}</div>`);
+        }
+      }
+      else {
+        rawCode = d.example;
+      }
+    }
+    if(rawCode.length > 0 && rawCode[0] != '\n') {
+      rawCode = '\n' + rawCode;
+    }
+    const code = Prism.highlight(rawCode, Prism.languages.javascript, 'javascript');
 
     const el = html`<code></code>`
     el.innerHTML = code
 
     const functionName =   `${obj.name}( ${obj.inputs.map((input) => `${input.name}${input.default ? `: ${input.default}`: ''}`).join(', ')} )`
     functionEl = html`<pre class=""><code class=""></code></pre>`
-    codeExample = html`<pre class="ma0">
+    codeExample = html`<div class="tabs">${tabs}</div><pre class="ma0">
       ${el}
     </pre>`
       // <ul>
@@ -82,7 +101,7 @@ function mainView (state, emit) {
               <div class="pv2">
                 <div class="mb3 f5">${val.label.charAt(0).toUpperCase() + val.label.slice(1)}</div>
                 ${state.functions.filter((obj) => obj.type === type).sort((a, b) => a.name - b.name).map((obj, index) => html`
-                <div class="courier dib ma1 pointer dim token function pa1 pv1" onclick=${()=>emit('show details', obj, typeIndex)}
+                <div class="courier dib ma1 pointer dim token function pa1 pv1" onclick=${()=>emit('show details', obj, typeIndex, 0)}
                   title=${obj.name}
                   style="border-bottom: 4px solid hsl(${20 + typeIndex*60 }, 100%, 70%);line-height:0.6"
                   >${obj.name}</div>
@@ -101,20 +120,27 @@ function store (state, emitter) {
   //const functions = new HydraGen()
   state.selected = null
   state.selectedIndex = null
+  state.tabIndex = 0
   state.functions = Object.values(hydraFunctions)
   //console.log(functions.generator.glslTransforms)
 
-  emitter.on('show details', (obj, index) => {
+  emitter.on('show details', (obj, typeIndex, tabIndex) => {
     state.selected = obj
-    state.selectedIndex = index
+    state.selectedIndex = typeIndex
+    state.tabIndex = tabIndex
+    console.log(obj, typeIndex)
 
     const d = examples[obj.name]
     if(d && d.example) {
-      eval(d.example)
+      if(Array.isArray(d.example)) {
+        eval(d.example[tabIndex])
+      }
+      else {
+        eval(d.example)
+      }
     }
     emitter.emit('render')
   })
-
 
   // emitter.on('increment', function (count) {
   //   state.count += count

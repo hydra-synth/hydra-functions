@@ -26,12 +26,12 @@ function mainView (state, emit) {
     if(obj !== null) {
     const d = examples[obj.name]
     const typeIndex = Object.keys(hydraTypes).indexOf(obj.type);
-    console.log(d)
+
     let code = '';
     let tabs = [];
     if(d && d.example) {
       if(Array.isArray(d.example)) {
-        code = Prism.highlight(d.example[0], Prism.languages.javascript, 'javascript');
+        code = Prism.highlight(d.example[state.tabIndex], Prism.languages.javascript, 'javascript');
         for(let i = 0; i < d.example.length; i++) {
           tabs.push(html`<div onclick=${()=>emit('show details', obj, typeIndex, i)}>${i}</div>`);
         }
@@ -95,7 +95,7 @@ function mainView (state, emit) {
               <div class="pv2">
                 <div class="mb3 f5">${val.label.charAt(0).toUpperCase() + val.label.slice(1)}</div>
                 ${state.functions.filter((obj) => obj.type === type).sort((a, b) => a.name - b.name).map((obj, index) => html`
-                <div class="courier dib ma1 pointer dim token function pa1 pv1" onclick=${()=>emit('show details', obj, typeIndex)}
+                <div class="courier dib ma1 pointer dim token function pa1 pv1" onclick=${()=>emit('show details', obj, typeIndex, 0)}
                   title=${obj.name}
                   style="border-bottom: 4px solid hsl(${20 + typeIndex*60 }, 100%, 70%);line-height:0.6"
                   >${obj.name}</div>
@@ -114,12 +114,14 @@ function store (state, emitter) {
   //const functions = new HydraGen()
   state.selected = null
   state.selectedIndex = null
+  state.tabIndex = 0
   state.functions = Object.values(hydraFunctions)
   //console.log(functions.generator.glslTransforms)
 
   emitter.on('show details', (obj, typeIndex, tabIndex) => {
     state.selected = obj
     state.selectedIndex = typeIndex
+    state.tabIndex = tabIndex
     console.log(obj, typeIndex)
 
     const d = examples[obj.name]

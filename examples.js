@@ -1,10 +1,11 @@
 module.exports = {
    noise: {
       description: "Generate [Perlin noise](https://en.wikipedia.org/wiki/Perlin_noise).",
-      example: `
+      example: [`
 // noise interpolating between different scales and offsets
 noise( ({time}) => Math.sin(time/10)*50 , ({time}) => Math.sin(time/2)/500 )
-.out(o0)`
+.out(o0)`,
+`noise().out(o0)`]
    },
    voronoi: {
       description: "Generate [voronoi shapes](https://en.wikipedia.org/wiki/Voronoi_diagram).",
@@ -62,16 +63,17 @@ osc(10,1,1)
    },
    scale: {
       description: "Scale texture.",
-      example: `
+      example: [`
 // default
-shape().scale(1.5,1,1).out()
+shape().scale(1.5,1,1).out()`,
+`
 shape().scale(1.5,[0.25,0.5,0.75,1].fast(0.25),[3,2,1])
   .invert([0,1].fast(0.25))
   .kaleid(5)
   .kaleid(12)
   .scale( ({time})=>Math.sin(time/5)*0.5 )
   .rotate(1,1)
-  .out(o0)`
+  .out(o0)`]
    },
    pixelate: {
       description: "Pixelate texture with `pixelX` segments and `pixelY` segments.",

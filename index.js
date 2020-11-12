@@ -25,15 +25,28 @@ function mainView (state, emit) {
 
     if(obj !== null) {
     const d = examples[obj.name]
+    const typeIndex = Object.keys(hydraTypes).indexOf(obj.type);
     console.log(d)
-    const code = d && d.example ? Prism.highlight(d.example, Prism.languages.javascript, 'javascript') : ''
+    let code = '';
+    let tabs = [];
+    if(d && d.example) {
+      if(Array.isArray(d.example)) {
+        code = Prism.highlight(d.example[0], Prism.languages.javascript, 'javascript');
+        for(let i = 0; i < d.example.length; i++) {
+          tabs.push(html`<div onclick=${()=>emit('show details', obj, typeIndex, i)}>${i}</div>`);
+        }
+      }
+      else {
+        code = Prism.highlight(d.example, Prism.languages.javascript, 'javascript');
+      }
+    }
 
     const el = html`<code></code>`
     el.innerHTML = code
 
     const functionName =   `${obj.name}( ${obj.inputs.map((input) => `${input.name}${input.default ? `: ${input.default}`: ''}`).join(', ')} )`
     functionEl = html`<pre class=""><code class=""></code></pre>`
-    codeExample = html`<pre class="ma0">
+    codeExample = html`${tabs}<pre class="ma0">
       ${el}
     </pre>`
       // <ul>
@@ -104,17 +117,22 @@ function store (state, emitter) {
   state.functions = Object.values(hydraFunctions)
   //console.log(functions.generator.glslTransforms)
 
-  emitter.on('show details', (obj, index) => {
+  emitter.on('show details', (obj, typeIndex, tabIndex) => {
     state.selected = obj
-    state.selectedIndex = index
+    state.selectedIndex = typeIndex
+    console.log(obj, typeIndex)
 
     const d = examples[obj.name]
     if(d && d.example) {
-      eval(d.example)
+      if(Array.isArray(d.example)) {
+        eval(d.example[tabIndex])
+      }
+      else {
+        eval(d.example)
+      }
     }
     emitter.emit('render')
   })
-
 
   // emitter.on('increment', function (count) {
   //   state.count += count

@@ -70,7 +70,7 @@ function mainView (state, emit) {
   return html`
     <body class="pa2 f6 georgia w-100 h-100 flex justify-center" style="background-color:${color};transition: background-color 1s;">
       <div style = "max-width: 1000px">
-        <div class="f3"> Hydra functions${state.selected === null ? '' : `::: ${state.selected.name}`} </div>
+        <div class="pt2 f3"> Hydra functions${state.selected === null ? '' : `::: ${state.selected.name}`} </div>
         <div class="flex flex-column-reverse flex-row-ns flex-column-reverse-m w-100" style="max-width:1000px">
 
           <div style="" class="overflow-y-auto w-50-ns w-100 w-100-m ">

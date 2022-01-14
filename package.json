@@ -11,10 +11,10 @@
   },
   "devDependencies": {},
   "scripts": {
-    "dev": "budo index.js:bundle.js --open --live --dir public",
-    "build": "browserify index.js -o public/bundle.js",
+    "dev": "budo index.js:bundle.js --open --live --dir docs",
+    "build": "browserify index.js -o docs/bundle.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "deploy": "git subtree push --prefix public origin gh-pages"
+    "deploy": "git subtree push --prefix docs origin gh-pages"
   },
   "author": "",
   "license": "ISC"

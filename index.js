@@ -18,6 +18,7 @@ app.mount('body')
 const editorContainer = document.createElement('div');
 
 const {EditorState} = require('@codemirror/state')
+const {defaultHighlightStyle} = require('@codemirror/highlight')
 const {EditorView, keymap, KeyBinding} = require('@codemirror/view')
 const {defaultKeymap} = require('@codemirror/commands')
 const {javascript} = require('@codemirror/lang-javascript')
@@ -27,7 +28,8 @@ let startState = EditorState.create({
   extensions: [
     keymap.of({key: 'Ctrl-Enter', run: evaluate, preventDefault: true}), 
     keymap.of(defaultKeymap),
-    javascript()
+    javascript(),
+    defaultHighlightStyle.fallback,
   ]
 })
 

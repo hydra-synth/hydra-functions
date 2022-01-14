@@ -32,15 +32,15 @@ module.exports = class CodeMirror extends Component {
         keymaps,
         javascript(),
         defaultHighlightStyle.fallback,
+        EditorView.editable.of(this.editable),
       ],
     })
     
     this.view = new EditorView({
       state: editorState,
       parent: element,
-      editable: this.editable,
+      extensions: [  ],
     })
-  
   }
 
   setCode (code) {

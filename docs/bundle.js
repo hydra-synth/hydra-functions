@@ -4432,33 +4432,20 @@ function mainView (state, emit) {
     const d = examples[obj.name]
     const typeIndex = Object.keys(hydraTypes).indexOf(obj.type);
 
-    let rawCode = '';
     let tabs = [];
     if(d && d.example) {
       if(Array.isArray(d.example)) {
-        rawCode = d.example[state.tabIndex];
         for(let i = 0; i < d.example.length; i++) {
           const isSelected = i == state.tabIndex;
           const hsl = `hsl(${20 + state.selectedIndex*60 }, ${isSelected?100:20}%, ${isSelected?90:60}%)`
           tabs.push(html`<div class="tab courier pointer dib ma1 pa1 pv1" style="background-color:${hsl}" onclick=${()=>emit('show details', obj, typeIndex, i)}>Example ${i}</div>`);
         }
       }
-      else {
-        rawCode = d.example;
-      }
     }
-    if(rawCode.length > 0 && rawCode[0] != '\n') {
-      rawCode = '\n' + rawCode;
-    }
-    const code = Prism.highlight(rawCode, Prism.languages.javascript, 'javascript');
-
-    const el = html`<code></code>`
-    el.innerHTML = code
 
     const functionName =   `${obj.name}( ${obj.inputs.map((input) => `${input.name}${input.default ? `: ${input.default}`: ''}`).join(', ')} )`
     functionEl = html`<pre class=""><code class=""></code></pre>`
-    codeExample = html`<div class="tabs">${tabs}</div><pre class="ma0">
-    </pre>`
+    codeExample = html`<div class="tabs">${tabs}</div>`
       // <ul>
       //   ${obj.inputs.map((input) => html`<li>
       //     ${input.name}:: ${input.type} ${input.default?`(default = ${input.default})`: ''}
@@ -4551,6 +4538,7 @@ function store (state, emitter) {
         code = d.example
       }
     }
+    code = code.replace(/^\n*/, "")
     view.dispatch({
       changes: {from: 0, to: view.state.doc.length, insert: code}
     })

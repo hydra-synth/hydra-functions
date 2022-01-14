@@ -14,8 +14,28 @@ app.route('/', mainView)
 app.route('/hydra-functions', mainView)
 app.mount('body')
 
+/* codemirror6 init */
+const editorContainer = document.createElement('div');
 
+const {EditorState} = require('@codemirror/state')
+const {EditorView, keymap, KeyBinding} = require('@codemirror/view')
+const {defaultKeymap} = require('@codemirror/commands')
+const {javascript} = require('@codemirror/lang-javascript')
 
+let startState = EditorState.create({
+  doc: 'Hello World',
+  extensions: [
+    keymap.of({key: 'Ctrl-Enter', run: evaluate, preventDefault: true}), 
+    keymap.of(defaultKeymap),
+    javascript()
+  ]
+})
+
+let view = new EditorView({
+  state: startState,
+  parent: editorContainer
+})
+/* codemirror6 end */
 
 function mainView (state, emit) {
   function selected (obj) {
@@ -53,7 +73,6 @@ function mainView (state, emit) {
     const functionName =   `${obj.name}( ${obj.inputs.map((input) => `${input.name}${input.default ? `: ${input.default}`: ''}`).join(', ')} )`
     functionEl = html`<pre class=""><code class=""></code></pre>`
     codeExample = html`<div class="tabs">${tabs}</div><pre class="ma0">
-      ${el}
     </pre>`
       // <ul>
       //   ${obj.inputs.map((input) => html`<li>
@@ -77,6 +96,7 @@ function mainView (state, emit) {
             ${state.cache(Hydra, 'hydra-canvas').render(state)}
             ${codeExample}
         </div>
+        ${ editorContainer }
       </div>
     </div>`
   }
@@ -116,6 +136,12 @@ function mainView (state, emit) {
   `
 }
 
+function evaluate() {
+  const code = view.state.doc.toString()
+  Function(code)()
+  return true // super important for CM not to add "\n"
+}
+
 function store (state, emitter) {
   //const functions = new HydraGen()
   state.selected = null
@@ -131,14 +157,19 @@ function store (state, emitter) {
     console.log(obj, typeIndex)
 
     const d = examples[obj.name]
+    let code = ''
     if(d && d.example) {
       if(Array.isArray(d.example)) {
-        eval(d.example[tabIndex])
+        code = d.example[tabIndex]
       }
       else {
-        eval(d.example)
+        code = d.example
       }
     }
+    view.dispatch({
+      changes: {from: 0, to: view.state.doc.length, insert: code}
+    })
+    evaluate();
     emitter.emit('render')
   })
 

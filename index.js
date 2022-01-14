@@ -4,8 +4,8 @@ var choo = require('choo')
 const hydraFunctions = require('hydra-synth/src/glsl/glsl-functions')
 const hydraTypes = require('./types.js')
 const examples = require('./examples.js')
-const Prism = require('prismjs')
-const Hydra = require('./hydra.js')
+const HydraComponent = require('./hydra.js')
+const CodeMirrorComponent = require('./codemirror.js')
 
 var app = choo()
 app.use(devtools())
@@ -14,63 +14,40 @@ app.route('/', mainView)
 app.route('/hydra-functions', mainView)
 app.mount('body')
 
-/* codemirror6 init */
-const editorContainer = document.createElement('div');
-
-const {EditorState} = require('@codemirror/state')
-const {defaultHighlightStyle} = require('@codemirror/highlight')
-const {EditorView, keymap, KeyBinding} = require('@codemirror/view')
-const {defaultKeymap} = require('@codemirror/commands')
-const {javascript} = require('@codemirror/lang-javascript')
-
-let startState = EditorState.create({
-  doc: 'Hello World',
-  extensions: [
-    keymap.of({key: 'Ctrl-Enter', run: evaluate, preventDefault: true}), 
-    keymap.of(defaultKeymap),
-    javascript(),
-    defaultHighlightStyle.fallback,
-  ]
-})
-
-let view = new EditorView({
-  state: startState,
-  parent: editorContainer
-})
-/* codemirror6 end */
+const hydraCanvas = new HydraComponent('hydra-canvas', app.state, app.emit)
+const cmEditor = new CodeMirrorComponent('cm-editor', app.state, app.emit)
+const cmUsage = new CodeMirrorComponent('cm-usage', app.state, app.emit, false)
 
 function mainView (state, emit) {
   function selected (obj) {
   //  if(obj === null) return ''
-    let functionEl = html`<pre></pre>`
     let codeExample = ''
 
     if(obj !== null) {
-    const d = examples[obj.name]
-    const typeIndex = Object.keys(hydraTypes).indexOf(obj.type);
+      const d = examples[obj.name]
+      const typeIndex = Object.keys(hydraTypes).indexOf(obj.type);
 
-    let tabs = [];
-    if(d && d.example) {
-      if(Array.isArray(d.example)) {
-        for(let i = 0; i < d.example.length; i++) {
-          const isSelected = i == state.tabIndex;
-          const hsl = `hsl(${20 + state.selectedIndex*60 }, ${isSelected?100:20}%, ${isSelected?90:60}%)`
-          tabs.push(html`<div class="tab courier pointer dib ma1 pa1 pv1" style="background-color:${hsl}" onclick=${()=>emit('show details', obj, typeIndex, i)}>Example ${i}</div>`);
+      let tabs = [];
+      if(d && d.example) {
+        if(Array.isArray(d.example)) {
+          for(let i = 0; i < d.example.length; i++) {
+            const isSelected = i == state.tabIndex;
+            const hsl = `hsl(${20 + state.selectedIndex*60 }, ${isSelected?100:20}%, ${isSelected?90:60}%)`
+            tabs.push(html`<div class="tab courier pointer dib ma1 pa1 pv1" style="background-color:${hsl}" onclick=${()=>emit('show details', obj, typeIndex, i)}>Example ${i}</div>`);
+          }
         }
       }
-    }
 
-    const functionName =   `${obj.name}( ${obj.inputs.map((input) => `${input.name}${input.default ? `: ${input.default}`: ''}`).join(', ')} )`
-    functionEl = html`<pre class=""><code class=""></code></pre>`
-    codeExample = html`<div class="tabs">${tabs}</div>`
-      // <ul>
-      //   ${obj.inputs.map((input) => html`<li>
-      //     ${input.name}:: ${input.type} ${input.default?`(default = ${input.default})`: ''}
-      //   </li>`)}
-      // </ul>
-      //   ${d.description}
-   functionEl.innerHTML = Prism.highlight(functionName, Prism.languages.javascript, 'javascript')
- }
+      const functionName =   `${obj.name}( ${obj.inputs.map((input) => `${input.name}${input.default ? `: ${input.default}`: ''}`).join(', ')} )`
+      codeExample = html`<div class="tabs">${tabs}</div>`
+        // <ul>
+        //   ${obj.inputs.map((input) => html`<li>
+        //     ${input.name}:: ${input.type} ${input.default?`(default = ${input.default})`: ''}
+        //   </li>`)}
+        // </ul>
+        //   ${d.description}
+      cmUsage.setCode(functionName)
+    }
 
 
     return html`<div class="pa2 overflow-y-auto w-50-ns w-100 w-100-m" style="
@@ -78,14 +55,14 @@ function mainView (state, emit) {
       ">
       <div class="pa3" style="background-color:hsl(${20 + state.selectedIndex*60 }, 100%, 80%)">
         <div class="pv2 f5">Usage</div>
-        ${functionEl}
+        ${ cmUsage.render(state) }
         <div class="pv2 f5">Example</div>
         <div class="pa4 w-100" style="width:400px;">
 
-            ${state.cache(Hydra, 'hydra-canvas').render(state)}
+            ${ hydraCanvas.render(state) }
             ${codeExample}
         </div>
-        ${ editorContainer }
+        ${ cmEditor.render(state) }
       </div>
     </div>`
   }
@@ -125,12 +102,6 @@ function mainView (state, emit) {
   `
 }
 
-function evaluate() {
-  const code = view.state.doc.toString()
-  Function(code)()
-  return true // super important for CM not to add "\n"
-}
-
 function store (state, emitter) {
   //const functions = new HydraGen()
   state.selected = null
@@ -156,10 +127,7 @@ function store (state, emitter) {
       }
     }
     code = code.replace(/^\n*/, "")
-    view.dispatch({
-      changes: {from: 0, to: view.state.doc.length, insert: code}
-    })
-    evaluate();
+    cmEditor.setCode(code)
     emitter.emit('render')
   })
 

@@ -5,11 +5,11 @@ const HydraSynth = require('hydra-synth')
 module.exports = class Hydra extends Component {
   constructor (id, state, emit) {
     super(id)
-    //this.local = state.components[id] = {}
+    this.local = state.components[id] = {}
   }
 
   load (element) {
-    const hydra = new HydraSynth({ detectAudio: false, canvas: this.canvas})
+    const hydra = new HydraSynth({ detectAudio: false, canvas: element.querySelector("canvas")})
     console.log(hydra)
   //  osc().out()
   }
@@ -19,7 +19,6 @@ module.exports = class Hydra extends Component {
   }
 
   createElement () {
-    this.canvas = html`<canvas width="300" height="200"></canvas>`
-    return html`<div>${this.canvas}</div>`
+    return html`<div><canvas width="300" height="200"></canvas></div>`
   }
 }

@@ -3930,6 +3930,70 @@ process.chdir = function (dir) {
 process.umask = function() { return 0; };
 
 },{}],12:[function(require,module,exports){
+const html = require('choo/html')
+const Component = require('choo/component')
+
+const {EditorState} = require('@codemirror/state')
+const {defaultHighlightStyle} = require('@codemirror/highlight')
+const {EditorView, keymap, KeyBinding} = require('@codemirror/view')
+const {defaultKeymap} = require('@codemirror/commands')
+const {javascript} = require('@codemirror/lang-javascript')
+
+module.exports = class CodeMirror extends Component {
+  constructor (id, state, emit, editable = true) {
+    super(id)
+    this.local = state.components[id] = {}
+    this.editable = editable
+  }
+
+  evaluate () {
+    const code = this.view.state.doc.toString()
+    Function(code)()
+    return true // super important for CM not to add "\n"
+  }
+
+  load (element) {
+    const keymaps = []
+    if (this.editable) {
+      keymaps.push(keymap.of({key: 'Ctrl-Enter', run: () => this.evaluate(), preventDefault: true}))
+      keymaps.push(keymap.of(defaultKeymap))
+    }
+    const editorState = EditorState.create({
+      doc: 'Hello World',
+      extensions: [
+        keymaps,
+        javascript(),
+        defaultHighlightStyle.fallback,
+      ],
+    })
+    
+    this.view = new EditorView({
+      state: editorState,
+      parent: element,
+      editable: this.editable,
+    })
+  
+  }
+
+  setCode (code) {
+    this.view.dispatch({
+      changes: {from: 0, to: this.view.state.doc.length, insert: code}
+    })
+    if (this.editable) {
+      this.evaluate()
+    }
+  }
+
+  update () {
+    return false
+  }
+
+  createElement () {
+    return html`<div></div>`
+  }
+}
+
+},{"@codemirror/commands":17,"@codemirror/highlight":18,"@codemirror/lang-javascript":19,"@codemirror/state":23,"@codemirror/view":26,"choo/component":41,"choo/html":42}],13:[function(require,module,exports){
 module.exports = {
    noise: {
       description: "Generate [Perlin noise](https://en.wikipedia.org/wiki/Perlin_noise).",
@@ -4353,7 +4417,7 @@ osc(30,0.1,1).colorama(-0.1).out(o0)`]
    }
 }
 
-},{}],13:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 var html = require('choo/html')
 var Component = require('choo/component')
 const HydraSynth = require('hydra-synth')
@@ -4361,11 +4425,11 @@ const HydraSynth = require('hydra-synth')
 module.exports = class Hydra extends Component {
   constructor (id, state, emit) {
     super(id)
-    //this.local = state.components[id] = {}
+    this.local = state.components[id] = {}
   }
 
   load (element) {
-    const hydra = new HydraSynth({ detectAudio: false, canvas: this.canvas})
+    const hydra = new HydraSynth({ detectAudio: false, canvas: element.querySelector("canvas")})
     console.log(hydra)
   //  osc().out()
   }
@@ -4375,20 +4439,19 @@ module.exports = class Hydra extends Component {
   }
 
   createElement () {
-    this.canvas = html`<canvas width="300" height="200"></canvas>`
-    return html`<div>${this.canvas}</div>`
+    return html`<div><canvas width="300" height="200"></canvas></div>`
   }
 }
 
-},{"choo/component":40,"choo/html":41,"hydra-synth":50}],14:[function(require,module,exports){
+},{"choo/component":41,"choo/html":42,"hydra-synth":51}],15:[function(require,module,exports){
 var html = require('choo/html')
 var devtools = require('choo-devtools')
 var choo = require('choo')
 const hydraFunctions = require('hydra-synth/src/glsl/glsl-functions')
 const hydraTypes = require('./types.js')
 const examples = require('./examples.js')
-const Prism = require('prismjs')
-const Hydra = require('./hydra.js')
+const HydraComponent = require('./hydra.js')
+const CodeMirrorComponent = require('./codemirror.js')
 
 var app = choo()
 app.use(devtools())
@@ -4397,63 +4460,40 @@ app.route('/', mainView)
 app.route('/hydra-functions', mainView)
 app.mount('body')
 
-/* codemirror6 init */
-const editorContainer = document.createElement('div');
-
-const {EditorState} = require('@codemirror/state')
-const {defaultHighlightStyle} = require('@codemirror/highlight')
-const {EditorView, keymap, KeyBinding} = require('@codemirror/view')
-const {defaultKeymap} = require('@codemirror/commands')
-const {javascript} = require('@codemirror/lang-javascript')
-
-let startState = EditorState.create({
-  doc: 'Hello World',
-  extensions: [
-    keymap.of({key: 'Ctrl-Enter', run: evaluate, preventDefault: true}), 
-    keymap.of(defaultKeymap),
-    javascript(),
-    defaultHighlightStyle.fallback,
-  ]
-})
-
-let view = new EditorView({
-  state: startState,
-  parent: editorContainer
-})
-/* codemirror6 end */
+const hydraCanvas = new HydraComponent('hydra-canvas', app.state, app.emit)
+const cmEditor = new CodeMirrorComponent('cm-editor', app.state, app.emit)
+const cmUsage = new CodeMirrorComponent('cm-usage', app.state, app.emit, false)
 
 function mainView (state, emit) {
   function selected (obj) {
   //  if(obj === null) return ''
-    let functionEl = html`<pre></pre>`
     let codeExample = ''
 
     if(obj !== null) {
-    const d = examples[obj.name]
-    const typeIndex = Object.keys(hydraTypes).indexOf(obj.type);
+      const d = examples[obj.name]
+      const typeIndex = Object.keys(hydraTypes).indexOf(obj.type);
 
-    let tabs = [];
-    if(d && d.example) {
-      if(Array.isArray(d.example)) {
-        for(let i = 0; i < d.example.length; i++) {
-          const isSelected = i == state.tabIndex;
-          const hsl = `hsl(${20 + state.selectedIndex*60 }, ${isSelected?100:20}%, ${isSelected?90:60}%)`
-          tabs.push(html`<div class="tab courier pointer dib ma1 pa1 pv1" style="background-color:${hsl}" onclick=${()=>emit('show details', obj, typeIndex, i)}>Example ${i}</div>`);
+      let tabs = [];
+      if(d && d.example) {
+        if(Array.isArray(d.example)) {
+          for(let i = 0; i < d.example.length; i++) {
+            const isSelected = i == state.tabIndex;
+            const hsl = `hsl(${20 + state.selectedIndex*60 }, ${isSelected?100:20}%, ${isSelected?90:60}%)`
+            tabs.push(html`<div class="tab courier pointer dib ma1 pa1 pv1" style="background-color:${hsl}" onclick=${()=>emit('show details', obj, typeIndex, i)}>Example ${i}</div>`);
+          }
         }
       }
-    }
 
-    const functionName =   `${obj.name}( ${obj.inputs.map((input) => `${input.name}${input.default ? `: ${input.default}`: ''}`).join(', ')} )`
-    functionEl = html`<pre class=""><code class=""></code></pre>`
-    codeExample = html`<div class="tabs">${tabs}</div>`
-      // <ul>
-      //   ${obj.inputs.map((input) => html`<li>
-      //     ${input.name}:: ${input.type} ${input.default?`(default = ${input.default})`: ''}
-      //   </li>`)}
-      // </ul>
-      //   ${d.description}
-   functionEl.innerHTML = Prism.highlight(functionName, Prism.languages.javascript, 'javascript')
- }
+      const functionName =   `${obj.name}( ${obj.inputs.map((input) => `${input.name}${input.default ? `: ${input.default}`: ''}`).join(', ')} )`
+      codeExample = html`<div class="tabs">${tabs}</div>`
+        // <ul>
+        //   ${obj.inputs.map((input) => html`<li>
+        //     ${input.name}:: ${input.type} ${input.default?`(default = ${input.default})`: ''}
+        //   </li>`)}
+        // </ul>
+        //   ${d.description}
+      cmUsage.setCode(functionName)
+    }
 
 
     return html`<div class="pa2 overflow-y-auto w-50-ns w-100 w-100-m" style="
@@ -4461,14 +4501,14 @@ function mainView (state, emit) {
       ">
       <div class="pa3" style="background-color:hsl(${20 + state.selectedIndex*60 }, 100%, 80%)">
         <div class="pv2 f5">Usage</div>
-        ${functionEl}
+        ${ cmUsage.render(state) }
         <div class="pv2 f5">Example</div>
         <div class="pa4 w-100" style="width:400px;">
 
-            ${state.cache(Hydra, 'hydra-canvas').render(state)}
+            ${ hydraCanvas.render(state) }
             ${codeExample}
         </div>
-        ${ editorContainer }
+        ${ cmEditor.render(state) }
       </div>
     </div>`
   }
@@ -4508,12 +4548,6 @@ function mainView (state, emit) {
   `
 }
 
-function evaluate() {
-  const code = view.state.doc.toString()
-  Function(code)()
-  return true // super important for CM not to add "\n"
-}
-
 function store (state, emitter) {
   //const functions = new HydraGen()
   state.selected = null
@@ -4539,10 +4573,7 @@ function store (state, emitter) {
       }
     }
     code = code.replace(/^\n*/, "")
-    view.dispatch({
-      changes: {from: 0, to: view.state.doc.length, insert: code}
-    })
-    evaluate();
+    cmEditor.setCode(code)
     emitter.emit('render')
   })
 
@@ -4552,7 +4583,7 @@ function store (state, emitter) {
   // })
 }
 
-},{"./examples.js":12,"./hydra.js":13,"./types.js":111,"@codemirror/commands":16,"@codemirror/highlight":17,"@codemirror/lang-javascript":18,"@codemirror/state":22,"@codemirror/view":25,"choo":42,"choo-devtools":29,"choo/html":41,"hydra-synth/src/glsl/glsl-functions":55,"prismjs":98}],15:[function(require,module,exports){
+},{"./codemirror.js":12,"./examples.js":13,"./hydra.js":14,"./types.js":111,"choo":43,"choo-devtools":30,"choo/html":42,"hydra-synth/src/glsl/glsl-functions":56}],16:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', { value: true });
@@ -6018,7 +6049,7 @@ exports.snippetCompletion = snippetCompletion;
 exports.snippetKeymap = snippetKeymap;
 exports.startCompletion = startCompletion;
 
-},{"@codemirror/language":19,"@codemirror/state":22,"@codemirror/text":23,"@codemirror/tooltip":24,"@codemirror/view":25}],16:[function(require,module,exports){
+},{"@codemirror/language":20,"@codemirror/state":23,"@codemirror/text":24,"@codemirror/tooltip":25,"@codemirror/view":26}],17:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', { value: true });
@@ -7079,7 +7110,7 @@ exports.splitLine = splitLine;
 exports.standardKeymap = standardKeymap;
 exports.transposeChars = transposeChars;
 
-},{"@codemirror/language":19,"@codemirror/matchbrackets":20,"@codemirror/state":22,"@codemirror/text":23,"@codemirror/view":25,"@lezer/common":26}],17:[function(require,module,exports){
+},{"@codemirror/language":20,"@codemirror/matchbrackets":21,"@codemirror/state":23,"@codemirror/text":24,"@codemirror/view":26,"@lezer/common":27}],18:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', { value: true });
@@ -8118,7 +8149,7 @@ exports.highlightTree = highlightTree;
 exports.styleTags = styleTags;
 exports.tags = tags;
 
-},{"@codemirror/language":19,"@codemirror/rangeset":21,"@codemirror/state":22,"@codemirror/view":25,"@lezer/common":26,"style-mod":106}],18:[function(require,module,exports){
+},{"@codemirror/language":20,"@codemirror/rangeset":22,"@codemirror/state":23,"@codemirror/view":26,"@lezer/common":27,"style-mod":106}],19:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', { value: true });
@@ -8359,7 +8390,7 @@ exports.snippets = snippets;
 exports.tsxLanguage = tsxLanguage;
 exports.typescriptLanguage = typescriptLanguage;
 
-},{"@codemirror/autocomplete":15,"@codemirror/highlight":17,"@codemirror/language":19,"@lezer/javascript":27}],19:[function(require,module,exports){
+},{"@codemirror/autocomplete":16,"@codemirror/highlight":18,"@codemirror/language":20,"@lezer/javascript":28}],20:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', { value: true });
@@ -9537,7 +9568,7 @@ exports.syntaxParserRunning = syntaxParserRunning;
 exports.syntaxTree = syntaxTree;
 exports.syntaxTreeAvailable = syntaxTreeAvailable;
 
-},{"@codemirror/state":22,"@codemirror/text":23,"@codemirror/view":25,"@lezer/common":26}],20:[function(require,module,exports){
+},{"@codemirror/state":23,"@codemirror/text":24,"@codemirror/view":26,"@lezer/common":27}],21:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', { value: true });
@@ -9688,7 +9719,7 @@ function matchPlainBrackets(state, pos, dir, tree, tokenType, maxScanDistance, b
 exports.bracketMatching = bracketMatching;
 exports.matchBrackets = matchBrackets;
 
-},{"@codemirror/language":19,"@codemirror/state":22,"@codemirror/view":25,"@lezer/common":26}],21:[function(require,module,exports){
+},{"@codemirror/language":20,"@codemirror/state":23,"@codemirror/view":26,"@lezer/common":27}],22:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', { value: true });
@@ -10532,7 +10563,7 @@ exports.RangeSet = RangeSet;
 exports.RangeSetBuilder = RangeSetBuilder;
 exports.RangeValue = RangeValue;
 
-},{"@codemirror/state":22}],22:[function(require,module,exports){
+},{"@codemirror/state":23}],23:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', { value: true });
@@ -12840,7 +12871,7 @@ exports.StateField = StateField;
 exports.Transaction = Transaction;
 exports.combineConfig = combineConfig;
 
-},{"@codemirror/text":23}],23:[function(require,module,exports){
+},{"@codemirror/text":24}],24:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', { value: true });
@@ -13545,7 +13576,7 @@ exports.findClusterBreak = findClusterBreak;
 exports.findColumn = findColumn;
 exports.fromCodePoint = fromCodePoint;
 
-},{}],24:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', { value: true });
@@ -14114,7 +14145,7 @@ exports.repositionTooltips = repositionTooltips;
 exports.showTooltip = showTooltip;
 exports.tooltips = tooltips;
 
-},{"@codemirror/state":22,"@codemirror/view":25}],25:[function(require,module,exports){
+},{"@codemirror/state":23,"@codemirror/view":26}],26:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', { value: true });
@@ -21663,7 +21694,7 @@ exports.placeholder = placeholder;
 exports.runScopeHandlers = runScopeHandlers;
 exports.scrollPastEnd = scrollPastEnd;
 
-},{"@codemirror/rangeset":21,"@codemirror/state":22,"@codemirror/text":23,"style-mod":106,"w3c-keyname":107}],26:[function(require,module,exports){
+},{"@codemirror/rangeset":22,"@codemirror/state":23,"@codemirror/text":24,"style-mod":106,"w3c-keyname":107}],27:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', { value: true });
@@ -23366,7 +23397,7 @@ exports.TreeCursor = TreeCursor;
 exports.TreeFragment = TreeFragment;
 exports.parseMixed = parseMixed;
 
-},{}],27:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', { value: true });
@@ -23493,7 +23524,7 @@ const parser = lr.LRParser.deserialize({
 
 exports.parser = parser;
 
-},{"@lezer/common":26,"@lezer/lr":28}],28:[function(require,module,exports){
+},{"@lezer/common":27,"@lezer/lr":29}],29:[function(require,module,exports){
 (function (process){(function (){
 'use strict';
 
@@ -25083,7 +25114,7 @@ exports.LRParser = LRParser;
 exports.Stack = Stack;
 
 }).call(this)}).call(this,require('_process'))
-},{"@lezer/common":26,"_process":11}],29:[function(require,module,exports){
+},{"@lezer/common":27,"_process":11}],30:[function(require,module,exports){
 var EventEmitter = require('events').EventEmitter
 
 var storage = require('./lib/storage')
@@ -25135,7 +25166,7 @@ function expose (opts) {
   }
 }
 
-},{"./lib/copy":30,"./lib/debug":31,"./lib/help":32,"./lib/log":33,"./lib/logger":34,"./lib/perf":35,"./lib/storage":36,"events":8,"wayfarer/get-all-routes":108}],30:[function(require,module,exports){
+},{"./lib/copy":31,"./lib/debug":32,"./lib/help":33,"./lib/log":34,"./lib/logger":35,"./lib/perf":36,"./lib/storage":37,"events":8,"wayfarer/get-all-routes":108}],31:[function(require,module,exports){
 var stateCopy = require('state-copy')
 var pluck = require('plucker')
 
@@ -25151,7 +25182,7 @@ function copy (state) {
   stateCopy(isStateString ? pluck.apply(this, arguments) : state)
 }
 
-},{"plucker":96,"state-copy":105}],31:[function(require,module,exports){
+},{"plucker":97,"state-copy":105}],32:[function(require,module,exports){
 /* eslint-disable node/no-deprecated-api */
 var onChange = require('object-change-callsite')
 var nanologger = require('nanologger')
@@ -25193,7 +25224,7 @@ function debug (state, emitter, app, localEmitter) {
   })
 }
 
-},{"assert":1,"nanologger":82,"object-change-callsite":92}],32:[function(require,module,exports){
+},{"assert":1,"nanologger":83,"object-change-callsite":93}],33:[function(require,module,exports){
 module.exports = help
 
 function help () {
@@ -25226,7 +25257,7 @@ function print (cmd, desc) {
 
 function noop () {}
 
-},{}],33:[function(require,module,exports){
+},{}],34:[function(require,module,exports){
 var removeItems = require('remove-array-items')
 var scheduler = require('nanoscheduler')()
 var nanologger = require('nanologger')
@@ -25304,7 +25335,7 @@ function log (state, emitter, app, localEmitter) {
 
 function noop () {}
 
-},{"clone":44,"nanologger":82,"nanoscheduler":90,"remove-array-items":37}],34:[function(require,module,exports){
+},{"clone":45,"nanologger":83,"nanoscheduler":91,"remove-array-items":38}],35:[function(require,module,exports){
 var scheduler = require('nanoscheduler')()
 var nanologger = require('nanologger')
 var Hooks = require('choo-hooks')
@@ -25389,7 +25420,7 @@ function logger (state, emitter, opts) {
   }
 }
 
-},{"choo-hooks":38,"nanologger":82,"nanoscheduler":90}],35:[function(require,module,exports){
+},{"choo-hooks":39,"nanologger":83,"nanoscheduler":91}],36:[function(require,module,exports){
 var onPerformance = require('on-performance')
 
 var BAR = '█'
@@ -25530,7 +25561,7 @@ function getMedian (args) {
 // Do nothing.
 function noop () {}
 
-},{"on-performance":94}],36:[function(require,module,exports){
+},{"on-performance":95}],37:[function(require,module,exports){
 var pretty = require('prettier-bytes')
 
 module.exports = storage
@@ -25573,7 +25604,7 @@ function fmt (num) {
 
 function noop () {}
 
-},{"prettier-bytes":97}],37:[function(require,module,exports){
+},{"prettier-bytes":98}],38:[function(require,module,exports){
 'use strict';
 
 /**
@@ -25604,7 +25635,7 @@ function removeItems (arr, startIdx, removeCount) {
 
 module.exports = removeItems;
 
-},{}],38:[function(require,module,exports){
+},{}],39:[function(require,module,exports){
 var onPerformance = require('on-performance')
 var scheduler = require('nanoscheduler')()
 var assert = require('assert')
@@ -25733,7 +25764,7 @@ ChooHooks.prototype._emitLoaded = function () {
   })
 }
 
-},{"assert":1,"nanoscheduler":90,"on-performance":94}],39:[function(require,module,exports){
+},{"assert":1,"nanoscheduler":91,"on-performance":95}],40:[function(require,module,exports){
 var assert = require('assert')
 var LRU = require('nanolru')
 
@@ -25776,13 +25807,13 @@ function newCall (Cls) {
   return new (Cls.bind.apply(Cls, arguments)) // eslint-disable-line
 }
 
-},{"assert":72,"nanolru":83}],40:[function(require,module,exports){
+},{"assert":73,"nanolru":84}],41:[function(require,module,exports){
 module.exports = require('nanocomponent')
 
-},{"nanocomponent":74}],41:[function(require,module,exports){
+},{"nanocomponent":75}],42:[function(require,module,exports){
 module.exports = require('nanohtml')
 
-},{"nanohtml":78}],42:[function(require,module,exports){
+},{"nanohtml":79}],43:[function(require,module,exports){
 var scrollToAnchor = require('scroll-to-anchor')
 var documentReady = require('document-ready')
 var nanotiming = require('nanotiming')
@@ -26066,7 +26097,7 @@ Choo.prototype._setCache = function (state) {
   }
 }
 
-},{"./component/cache":39,"assert":72,"document-ready":45,"nanobus":73,"nanohref":75,"nanomorph":84,"nanoquery":87,"nanoraf":88,"nanorouter":89,"nanotiming":91,"scroll-to-anchor":104}],43:[function(require,module,exports){
+},{"./component/cache":40,"assert":73,"document-ready":46,"nanobus":74,"nanohref":76,"nanomorph":85,"nanoquery":88,"nanoraf":89,"nanorouter":90,"nanotiming":92,"scroll-to-anchor":104}],44:[function(require,module,exports){
 /*! clipboard-copy. MIT License. Feross Aboukhadijeh <https://feross.org/opensource> */
 /* global DOMException */
 
@@ -26119,7 +26150,7 @@ function clipboardCopy (text) {
     : Promise.reject(new DOMException('The request is not allowed', 'NotAllowedError'))
 }
 
-},{}],44:[function(require,module,exports){
+},{}],45:[function(require,module,exports){
 (function (Buffer){(function (){
 var clone = (function() {
 'use strict';
@@ -26380,7 +26411,7 @@ if (typeof module === 'object' && module.exports) {
 }
 
 }).call(this)}).call(this,require("buffer").Buffer)
-},{"buffer":7}],45:[function(require,module,exports){
+},{"buffer":7}],46:[function(require,module,exports){
 'use strict'
 
 module.exports = ready
@@ -26399,7 +26430,7 @@ function ready (callback) {
   })
 }
 
-},{}],46:[function(require,module,exports){
+},{}],47:[function(require,module,exports){
 module.exports = stringify
 stringify.default = stringify
 stringify.stable = deterministicStringify
@@ -26562,7 +26593,7 @@ function replaceGetterValues (replacer) {
   }
 }
 
-},{}],47:[function(require,module,exports){
+},{}],48:[function(require,module,exports){
 (function (global){(function (){
 var topLevel = typeof global !== 'undefined' ? global :
     typeof window !== 'undefined' ? window : {}
@@ -26583,7 +26614,7 @@ if (typeof document !== 'undefined') {
 module.exports = doccy;
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"min-document":6}],48:[function(require,module,exports){
+},{"min-document":6}],49:[function(require,module,exports){
 (function (global){(function (){
 var win;
 
@@ -26600,7 +26631,7 @@ if (typeof window !== "undefined") {
 module.exports = win;
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],49:[function(require,module,exports){
+},{}],50:[function(require,module,exports){
 const Output = require('./src/output.js')
 const loop = require('raf-loop')
 const Source = require('./src/hydra-source.js')
@@ -27032,13 +27063,13 @@ class HydraRenderer {
 
 module.exports = HydraRenderer
 
-},{"./src/eval-sandbox.js":51,"./src/generator-factory.js":52,"./src/hydra-source.js":57,"./src/lib/array-utils.js":58,"./src/lib/audio.js":59,"./src/lib/video-recorder.js":63,"./src/output.js":65,"mouse-change":70,"raf-loop":99,"regl":101}],50:[function(require,module,exports){
+},{"./src/eval-sandbox.js":52,"./src/generator-factory.js":53,"./src/hydra-source.js":58,"./src/lib/array-utils.js":59,"./src/lib/audio.js":60,"./src/lib/video-recorder.js":64,"./src/output.js":66,"mouse-change":71,"raf-loop":99,"regl":101}],51:[function(require,module,exports){
 const Synth = require('./hydra-synth.js')
 //const ShaderGenerator = require('./shader-generator.js')
 
 module.exports = Synth
 
-},{"./hydra-synth.js":49}],51:[function(require,module,exports){
+},{"./hydra-synth.js":50}],52:[function(require,module,exports){
 // handles code evaluation and attaching relevant objects to global and evaluation contexts
 
 const Sandbox = require('./lib/sandbox.js')
@@ -27086,7 +27117,7 @@ class EvalSandbox {
 
 module.exports = EvalSandbox
 
-},{"./lib/array-utils.js":58,"./lib/sandbox.js":61}],52:[function(require,module,exports){
+},{"./lib/array-utils.js":59,"./lib/sandbox.js":62}],53:[function(require,module,exports){
 const glslTransforms = require('./glsl/glsl-functions.js')
 const GlslSource = require('./glsl-source.js')
 
@@ -27249,7 +27280,7 @@ function processGlsl(obj) {
 
 module.exports = GeneratorFactory
 
-},{"./glsl-source.js":53,"./glsl/glsl-functions.js":55}],53:[function(require,module,exports){
+},{"./glsl-source.js":54,"./glsl/glsl-functions.js":56}],54:[function(require,module,exports){
 const generateGlsl = require('./glsl-utils.js').generateGlsl
 const formatArguments = require('./glsl-utils.js').formatArguments
 
@@ -27366,7 +27397,7 @@ GlslSource.prototype.compile = function (transforms) {
 
 module.exports = GlslSource
 
-},{"./glsl-utils.js":54,"./glsl/utility-functions.js":56}],54:[function(require,module,exports){
+},{"./glsl-utils.js":55,"./glsl/utility-functions.js":57}],55:[function(require,module,exports){
 // converts a tree of javascript functions to a shader
 
 // Add extra functionality to Array.prototype for generating sequences in time
@@ -27598,7 +27629,7 @@ function formatArguments (transform, startIndex) {
   })
 }
 
-},{"./lib/array-utils.js":58}],55:[function(require,module,exports){
+},{"./lib/array-utils.js":59}],56:[function(require,module,exports){
 /*
 Format for adding functions to hydra. For each entry in this file, hydra automatically generates a glsl function and javascript function with the same name. You can also ass functions dynamically using setFunction(object).
 
@@ -28699,7 +28730,7 @@ module.exports = [
 }
 ]
 
-},{}],56:[function(require,module,exports){
+},{}],57:[function(require,module,exports){
 // functions that are only used within other functions
 
 module.exports = {
@@ -28812,7 +28843,7 @@ module.exports = {
   }
 }
 
-},{}],57:[function(require,module,exports){
+},{}],58:[function(require,module,exports){
 const Webcam = require('./lib/webcam.js')
 const Screen = require('./lib/screenmedia.js')
 
@@ -28948,7 +28979,7 @@ class HydraSource {
 
 module.exports = HydraSource
 
-},{"./lib/screenmedia.js":62,"./lib/webcam.js":64}],58:[function(require,module,exports){
+},{"./lib/screenmedia.js":63,"./lib/webcam.js":65}],59:[function(require,module,exports){
 // WIP utils for working with arrays
 // Possibly should be integrated with lfo extension, etc.
 // to do: transform time rather than array values, similar to working with coordinates in hydra
@@ -29024,7 +29055,7 @@ module.exports = {
   }
 }
 
-},{"./easing-functions.js":60}],59:[function(require,module,exports){
+},{"./easing-functions.js":61}],60:[function(require,module,exports){
 const Meyda = require('meyda')
 
 class Audio {
@@ -29241,7 +29272,7 @@ class Audio {
 
 module.exports = Audio
 
-},{"meyda":69}],60:[function(require,module,exports){
+},{"meyda":70}],61:[function(require,module,exports){
 // from https://gist.github.com/gre/1650294
 
 module.exports = {
@@ -29275,7 +29306,7 @@ module.exports = {
   sin: function (t) { return (1 + Math.sin(Math.PI*t-Math.PI/2))/2 }
 }
 
-},{}],61:[function(require,module,exports){
+},{}],62:[function(require,module,exports){
 // attempt custom evaluation sandbox for hydra functions
 // for now, just avoids polluting the global namespace
 // should probably be replaced with an abstract syntax tree
@@ -29312,7 +29343,7 @@ module.exports = (parent) => {
   }
 }
 
-},{}],62:[function(require,module,exports){
+},{}],63:[function(require,module,exports){
 
 module.exports = function (options) {
   return new Promise(function(resolve, reject) {
@@ -29328,7 +29359,7 @@ module.exports = function (options) {
   })
 }
 
-},{}],63:[function(require,module,exports){
+},{}],64:[function(require,module,exports){
 class VideoRecorder {
   constructor(stream) {
     this.mediaSource = new MediaSource()
@@ -29416,7 +29447,7 @@ class VideoRecorder {
 
 module.exports = VideoRecorder
 
-},{}],64:[function(require,module,exports){
+},{}],65:[function(require,module,exports){
 //const enumerateDevices = require('enumerate-devices')
 
 module.exports = function (deviceId) {
@@ -29445,7 +29476,7 @@ module.exports = function (deviceId) {
     .catch(console.log.bind(console))
 }
 
-},{}],65:[function(require,module,exports){
+},{}],66:[function(require,module,exports){
 //const transforms = require('./glsl-transforms.js')
 
 var Output = function ({ regl, precision, label = "", width, height}) {
@@ -29570,7 +29601,7 @@ Output.prototype.tick = function (props) {
 
 module.exports = Output
 
-},{}],66:[function(require,module,exports){
+},{}],67:[function(require,module,exports){
 module.exports = attributeToProperty
 
 var transform = {
@@ -29591,7 +29622,7 @@ function attributeToProperty (h) {
   }
 }
 
-},{}],67:[function(require,module,exports){
+},{}],68:[function(require,module,exports){
 var attrToProp = require('hyperscript-attribute-to-property')
 
 var VAR = 0, TEXT = 1, OPEN = 2, CLOSE = 3, ATTR = 4
@@ -29888,7 +29919,7 @@ var closeRE = RegExp('^(' + [
 ].join('|') + ')(?:[\.#][a-zA-Z0-9\u007F-\uFFFF_:-]+)*$')
 function selfClosing (tag) { return closeRE.test(tag) }
 
-},{"hyperscript-attribute-to-property":66}],68:[function(require,module,exports){
+},{"hyperscript-attribute-to-property":67}],69:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -29917,7 +29948,7 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],69:[function(require,module,exports){
+},{}],70:[function(require,module,exports){
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
@@ -33379,7 +33410,7 @@ function hamming(size) {
 /******/ });
 });
 
-},{}],70:[function(require,module,exports){
+},{}],71:[function(require,module,exports){
 'use strict'
 
 module.exports = mouseListen
@@ -33586,7 +33617,7 @@ function mouseListen (element, callback) {
   return result
 }
 
-},{"mouse-event":71}],71:[function(require,module,exports){
+},{"mouse-event":72}],72:[function(require,module,exports){
 'use strict'
 
 function mouseButtons(ev) {
@@ -33648,7 +33679,7 @@ function mouseRelativeY(ev) {
 }
 exports.y = mouseRelativeY
 
-},{}],72:[function(require,module,exports){
+},{}],73:[function(require,module,exports){
 assert.notEqual = notEqual
 assert.notOk = notOk
 assert.equal = equal
@@ -33672,7 +33703,7 @@ function assert (t, m) {
   if (!t) throw new Error(m || 'AssertionError')
 }
 
-},{}],73:[function(require,module,exports){
+},{}],74:[function(require,module,exports){
 var splice = require('remove-array-items')
 var nanotiming = require('nanotiming')
 var assert = require('assert')
@@ -33836,7 +33867,7 @@ Nanobus.prototype._emit = function (arr, eventName, data, uuid) {
   }
 }
 
-},{"assert":72,"nanotiming":91,"remove-array-items":102}],74:[function(require,module,exports){
+},{"assert":73,"nanotiming":92,"remove-array-items":102}],75:[function(require,module,exports){
 var document = require('global/document')
 var nanotiming = require('nanotiming')
 var morph = require('nanomorph')
@@ -33992,7 +34023,7 @@ Nanocomponent.prototype.update = function () {
   throw new Error('nanocomponent: update should be implemented!')
 }
 
-},{"assert":72,"global/document":47,"nanomorph":84,"nanotiming":91,"on-load":93}],75:[function(require,module,exports){
+},{"assert":73,"global/document":48,"nanomorph":85,"nanotiming":92,"on-load":94}],76:[function(require,module,exports){
 var assert = require('assert')
 
 var safeExternalLink = /(noopener|noreferrer) (noopener|noreferrer)/
@@ -34037,7 +34068,7 @@ function href (cb, root) {
   })
 }
 
-},{"assert":72}],76:[function(require,module,exports){
+},{"assert":73}],77:[function(require,module,exports){
 'use strict'
 
 var trailingNewlineRegex = /\n[\s]+$/
@@ -34171,7 +34202,7 @@ module.exports = function appendChild (el, childs) {
   }
 }
 
-},{}],77:[function(require,module,exports){
+},{}],78:[function(require,module,exports){
 'use strict'
 
 module.exports = [
@@ -34181,17 +34212,17 @@ module.exports = [
   'readonly', 'required', 'reversed', 'selected'
 ]
 
-},{}],78:[function(require,module,exports){
+},{}],79:[function(require,module,exports){
 module.exports = require('./dom')(document)
 
-},{"./dom":80}],79:[function(require,module,exports){
+},{"./dom":81}],80:[function(require,module,exports){
 'use strict'
 
 module.exports = [
   'indeterminate'
 ]
 
-},{}],80:[function(require,module,exports){
+},{}],81:[function(require,module,exports){
 'use strict'
 
 var hyperx = require('hyperx')
@@ -34309,7 +34340,7 @@ module.exports = function (document) {
   return exports
 }
 
-},{"./append-child":76,"./bool-props":77,"./direct-props":79,"./svg-tags":81,"hyperx":67}],81:[function(require,module,exports){
+},{"./append-child":77,"./bool-props":78,"./direct-props":80,"./svg-tags":82,"hyperx":68}],82:[function(require,module,exports){
 'use strict'
 
 module.exports = [
@@ -34329,7 +34360,7 @@ module.exports = [
   'tspan', 'use', 'view', 'vkern'
 ]
 
-},{}],82:[function(require,module,exports){
+},{}],83:[function(require,module,exports){
 var assert = require('assert')
 
 var emojis = {
@@ -34494,7 +34525,7 @@ function pad (str) {
   return str.length !== 2 ? 0 + str : str
 }
 
-},{"assert":1}],83:[function(require,module,exports){
+},{"assert":1}],84:[function(require,module,exports){
 module.exports = LRU
 
 function LRU (opts) {
@@ -34632,7 +34663,7 @@ LRU.prototype.evict = function () {
   this.remove(this.tail)
 }
 
-},{}],84:[function(require,module,exports){
+},{}],85:[function(require,module,exports){
 var assert = require('nanoassert')
 var morph = require('./lib/morph')
 
@@ -34797,7 +34828,7 @@ function same (a, b) {
   return false
 }
 
-},{"./lib/morph":86,"nanoassert":72}],85:[function(require,module,exports){
+},{"./lib/morph":87,"nanoassert":73}],86:[function(require,module,exports){
 module.exports = [
   // attribute events (can be set with attributes)
   'onclick',
@@ -34841,7 +34872,7 @@ module.exports = [
   'onfocusout'
 ]
 
-},{}],86:[function(require,module,exports){
+},{}],87:[function(require,module,exports){
 var events = require('./events')
 var eventsLength = events.length
 
@@ -35016,7 +35047,7 @@ function updateAttribute (newNode, oldNode, name) {
   }
 }
 
-},{"./events":85}],87:[function(require,module,exports){
+},{"./events":86}],88:[function(require,module,exports){
 var reg = /([^?=&]+)(=([^&]*))?/g
 var assert = require('assert')
 
@@ -35040,7 +35071,7 @@ function qs (url) {
   return obj
 }
 
-},{"assert":72}],88:[function(require,module,exports){
+},{"assert":73}],89:[function(require,module,exports){
 'use strict'
 
 var assert = require('assert')
@@ -35077,7 +35108,7 @@ function nanoraf (render, raf) {
   }
 }
 
-},{"assert":72}],89:[function(require,module,exports){
+},{"assert":73}],90:[function(require,module,exports){
 var assert = require('assert')
 var wayfarer = require('wayfarer')
 
@@ -35133,7 +35164,7 @@ function pathname (routename, isElectron) {
   return decodeURI(routename.replace(suffix, '').replace(normalize, '/'))
 }
 
-},{"assert":72,"wayfarer":109}],90:[function(require,module,exports){
+},{"assert":73,"wayfarer":109}],91:[function(require,module,exports){
 var assert = require('assert')
 
 var hasWindow = typeof window !== 'undefined'
@@ -35190,7 +35221,7 @@ NanoScheduler.prototype.setTimeout = function (cb) {
 
 module.exports = createScheduler
 
-},{"assert":72}],91:[function(require,module,exports){
+},{"assert":73}],92:[function(require,module,exports){
 var scheduler = require('nanoscheduler')()
 var assert = require('assert')
 
@@ -35240,7 +35271,7 @@ function noop (cb) {
   }
 }
 
-},{"assert":72,"nanoscheduler":90}],92:[function(require,module,exports){
+},{"assert":73,"nanoscheduler":91}],93:[function(require,module,exports){
 var assert = require('assert')
 
 module.exports = objectChangeCallsite
@@ -35277,7 +35308,7 @@ function strip (str) {
   return '\n' + arr.join('\n')
 }
 
-},{"assert":1}],93:[function(require,module,exports){
+},{"assert":1}],94:[function(require,module,exports){
 /* global MutationObserver */
 var document = require('global/document')
 var window = require('global/window')
@@ -35381,7 +35412,7 @@ function eachMutation (nodes, fn) {
   }
 }
 
-},{"assert":72,"global/document":47,"global/window":48}],94:[function(require,module,exports){
+},{"assert":73,"global/document":48,"global/window":49}],95:[function(require,module,exports){
 var scheduler = require('nanoscheduler')()
 var assert = require('assert')
 
@@ -35441,7 +35472,7 @@ function onPerformance (cb) {
   }
 }
 
-},{"assert":72,"nanoscheduler":90}],95:[function(require,module,exports){
+},{"assert":73,"nanoscheduler":91}],96:[function(require,module,exports){
 (function (process){(function (){
 // Generated by CoffeeScript 1.12.2
 (function() {
@@ -35481,7 +35512,7 @@ function onPerformance (cb) {
 
 
 }).call(this)}).call(this,require('_process'))
-},{"_process":11}],96:[function(require,module,exports){
+},{"_process":11}],97:[function(require,module,exports){
 module.exports = plucker
 
 function plucker(path, object) {
@@ -35518,7 +35549,7 @@ function pluck(path) {
   }
 }
 
-},{}],97:[function(require,module,exports){
+},{}],98:[function(require,module,exports){
 module.exports = prettierBytes
 
 function prettierBytes (num) {
@@ -35550,1704 +35581,6 @@ function prettierBytes (num) {
   }
 }
 
-},{}],98:[function(require,module,exports){
-(function (global){(function (){
-
-/* **********************************************
-     Begin prism-core.js
-********************************************** */
-
-/// <reference lib="WebWorker"/>
-
-var _self = (typeof window !== 'undefined')
-	? window   // if in browser
-	: (
-		(typeof WorkerGlobalScope !== 'undefined' && self instanceof WorkerGlobalScope)
-		? self // if in worker
-		: {}   // if in node js
-	);
-
-/**
- * Prism: Lightweight, robust, elegant syntax highlighting
- *
- * @license MIT <https://opensource.org/licenses/MIT>
- * @author Lea Verou <https://lea.verou.me>
- * @namespace
- * @public
- */
-var Prism = (function (_self){
-
-// Private helper vars
-var lang = /\blang(?:uage)?-([\w-]+)\b/i;
-var uniqueId = 0;
-
-
-var _ = {
-	/**
-	 * By default, Prism will attempt to highlight all code elements (by calling {@link Prism.highlightAll}) on the
-	 * current page after the page finished loading. This might be a problem if e.g. you wanted to asynchronously load
-	 * additional languages or plugins yourself.
-	 *
-	 * By setting this value to `true`, Prism will not automatically highlight all code elements on the page.
-	 *
-	 * You obviously have to change this value before the automatic highlighting started. To do this, you can add an
-	 * empty Prism object into the global scope before loading the Prism script like this:
-	 *
-	 * ```js
-	 * window.Prism = window.Prism || {};
-	 * Prism.manual = true;
-	 * // add a new <script> to load Prism's script
-	 * ```
-	 *
-	 * @default false
-	 * @type {boolean}
-	 * @memberof Prism
-	 * @public
-	 */
-	manual: _self.Prism && _self.Prism.manual,
-	disableWorkerMessageHandler: _self.Prism && _self.Prism.disableWorkerMessageHandler,
-
-	/**
-	 * A namespace for utility methods.
-	 *
-	 * All function in this namespace that are not explicitly marked as _public_ are for __internal use only__ and may
-	 * change or disappear at any time.
-	 *
-	 * @namespace
-	 * @memberof Prism
-	 */
-	util: {
-		encode: function encode(tokens) {
-			if (tokens instanceof Token) {
-				return new Token(tokens.type, encode(tokens.content), tokens.alias);
-			} else if (Array.isArray(tokens)) {
-				return tokens.map(encode);
-			} else {
-				return tokens.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/\u00a0/g, ' ');
-			}
-		},
-
-		/**
-		 * Returns the name of the type of the given value.
-		 *
-		 * @param {any} o
-		 * @returns {string}
-		 * @example
-		 * type(null)      === 'Null'
-		 * type(undefined) === 'Undefined'
-		 * type(123)       === 'Number'
-		 * type('foo')     === 'String'
-		 * type(true)      === 'Boolean'
-		 * type([1, 2])    === 'Array'
-		 * type({})        === 'Object'
-		 * type(String)    === 'Function'
-		 * type(/abc+/)    === 'RegExp'
-		 */
-		type: function (o) {
-			return Object.prototype.toString.call(o).slice(8, -1);
-		},
-
-		/**
-		 * Returns a unique number for the given object. Later calls will still return the same number.
-		 *
-		 * @param {Object} obj
-		 * @returns {number}
-		 */
-		objId: function (obj) {
-			if (!obj['__id']) {
-				Object.defineProperty(obj, '__id', { value: ++uniqueId });
-			}
-			return obj['__id'];
-		},
-
-		/**
-		 * Creates a deep clone of the given object.
-		 *
-		 * The main intended use of this function is to clone language definitions.
-		 *
-		 * @param {T} o
-		 * @param {Record<number, any>} [visited]
-		 * @returns {T}
-		 * @template T
-		 */
-		clone: function deepClone(o, visited) {
-			visited = visited || {};
-
-			var clone, id;
-			switch (_.util.type(o)) {
-				case 'Object':
-					id = _.util.objId(o);
-					if (visited[id]) {
-						return visited[id];
-					}
-					clone = /** @type {Record<string, any>} */ ({});
-					visited[id] = clone;
-
-					for (var key in o) {
-						if (o.hasOwnProperty(key)) {
-							clone[key] = deepClone(o[key], visited);
-						}
-					}
-
-					return /** @type {any} */ (clone);
-
-				case 'Array':
-					id = _.util.objId(o);
-					if (visited[id]) {
-						return visited[id];
-					}
-					clone = [];
-					visited[id] = clone;
-
-					(/** @type {Array} */(/** @type {any} */(o))).forEach(function (v, i) {
-						clone[i] = deepClone(v, visited);
-					});
-
-					return /** @type {any} */ (clone);
-
-				default:
-					return o;
-			}
-		},
-
-		/**
-		 * Returns the Prism language of the given element set by a `language-xxxx` or `lang-xxxx` class.
-		 *
-		 * If no language is set for the element or the element is `null` or `undefined`, `none` will be returned.
-		 *
-		 * @param {Element} element
-		 * @returns {string}
-		 */
-		getLanguage: function (element) {
-			while (element && !lang.test(element.className)) {
-				element = element.parentElement;
-			}
-			if (element) {
-				return (element.className.match(lang) || [, 'none'])[1].toLowerCase();
-			}
-			return 'none';
-		},
-
-		/**
-		 * Returns the script element that is currently executing.
-		 *
-		 * This does __not__ work for line script element.
-		 *
-		 * @returns {HTMLScriptElement | null}
-		 */
-		currentScript: function () {
-			if (typeof document === 'undefined') {
-				return null;
-			}
-			if ('currentScript' in document && 1 < 2 /* hack to trip TS' flow analysis */) {
-				return /** @type {any} */ (document.currentScript);
-			}
-
-			// IE11 workaround
-			// we'll get the src of the current script by parsing IE11's error stack trace
-			// this will not work for inline scripts
-
-			try {
-				throw new Error();
-			} catch (err) {
-				// Get file src url from stack. Specifically works with the format of stack traces in IE.
-				// A stack will look like this:
-				//
-				// Error
-				//    at _.util.currentScript (http://localhost/components/prism-core.js:119:5)
-				//    at Global code (http://localhost/components/prism-core.js:606:1)
-
-				var src = (/at [^(\r\n]*\((.*):.+:.+\)$/i.exec(err.stack) || [])[1];
-				if (src) {
-					var scripts = document.getElementsByTagName('script');
-					for (var i in scripts) {
-						if (scripts[i].src == src) {
-							return scripts[i];
-						}
-					}
-				}
-				return null;
-			}
-		},
-
-		/**
-		 * Returns whether a given class is active for `element`.
-		 *
-		 * The class can be activated if `element` or one of its ancestors has the given class and it can be deactivated
-		 * if `element` or one of its ancestors has the negated version of the given class. The _negated version_ of the
-		 * given class is just the given class with a `no-` prefix.
-		 *
-		 * Whether the class is active is determined by the closest ancestor of `element` (where `element` itself is
-		 * closest ancestor) that has the given class or the negated version of it. If neither `element` nor any of its
-		 * ancestors have the given class or the negated version of it, then the default activation will be returned.
-		 *
-		 * In the paradoxical situation where the closest ancestor contains __both__ the given class and the negated
-		 * version of it, the class is considered active.
-		 *
-		 * @param {Element} element
-		 * @param {string} className
-		 * @param {boolean} [defaultActivation=false]
-		 * @returns {boolean}
-		 */
-		isActive: function (element, className, defaultActivation) {
-			var no = 'no-' + className;
-
-			while (element) {
-				var classList = element.classList;
-				if (classList.contains(className)) {
-					return true;
-				}
-				if (classList.contains(no)) {
-					return false;
-				}
-				element = element.parentElement;
-			}
-			return !!defaultActivation;
-		}
-	},
-
-	/**
-	 * This namespace contains all currently loaded languages and the some helper functions to create and modify languages.
-	 *
-	 * @namespace
-	 * @memberof Prism
-	 * @public
-	 */
-	languages: {
-		/**
-		 * Creates a deep copy of the language with the given id and appends the given tokens.
-		 *
-		 * If a token in `redef` also appears in the copied language, then the existing token in the copied language
-		 * will be overwritten at its original position.
-		 *
-		 * ## Best practices
-		 *
-		 * Since the position of overwriting tokens (token in `redef` that overwrite tokens in the copied language)
-		 * doesn't matter, they can technically be in any order. However, this can be confusing to others that trying to
-		 * understand the language definition because, normally, the order of tokens matters in Prism grammars.
-		 *
-		 * Therefore, it is encouraged to order overwriting tokens according to the positions of the overwritten tokens.
-		 * Furthermore, all non-overwriting tokens should be placed after the overwriting ones.
-		 *
-		 * @param {string} id The id of the language to extend. This has to be a key in `Prism.languages`.
-		 * @param {Grammar} redef The new tokens to append.
-		 * @returns {Grammar} The new language created.
-		 * @public
-		 * @example
-		 * Prism.languages['css-with-colors'] = Prism.languages.extend('css', {
-		 *     // Prism.languages.css already has a 'comment' token, so this token will overwrite CSS' 'comment' token
-		 *     // at its original position
-		 *     'comment': { ... },
-		 *     // CSS doesn't have a 'color' token, so this token will be appended
-		 *     'color': /\b(?:red|green|blue)\b/
-		 * });
-		 */
-		extend: function (id, redef) {
-			var lang = _.util.clone(_.languages[id]);
-
-			for (var key in redef) {
-				lang[key] = redef[key];
-			}
-
-			return lang;
-		},
-
-		/**
-		 * Inserts tokens _before_ another token in a language definition or any other grammar.
-		 *
-		 * ## Usage
-		 *
-		 * This helper method makes it easy to modify existing languages. For example, the CSS language definition
-		 * not only defines CSS highlighting for CSS documents, but also needs to define highlighting for CSS embedded
-		 * in HTML through `<style>` elements. To do this, it needs to modify `Prism.languages.markup` and add the
-		 * appropriate tokens. However, `Prism.languages.markup` is a regular JavaScript object literal, so if you do
-		 * this:
-		 *
-		 * ```js
-		 * Prism.languages.markup.style = {
-		 *     // token
-		 * };
-		 * ```
-		 *
-		 * then the `style` token will be added (and processed) at the end. `insertBefore` allows you to insert tokens
-		 * before existing tokens. For the CSS example above, you would use it like this:
-		 *
-		 * ```js
-		 * Prism.languages.insertBefore('markup', 'cdata', {
-		 *     'style': {
-		 *         // token
-		 *     }
-		 * });
-		 * ```
-		 *
-		 * ## Special cases
-		 *
-		 * If the grammars of `inside` and `insert` have tokens with the same name, the tokens in `inside`'s grammar
-		 * will be ignored.
-		 *
-		 * This behavior can be used to insert tokens after `before`:
-		 *
-		 * ```js
-		 * Prism.languages.insertBefore('markup', 'comment', {
-		 *     'comment': Prism.languages.markup.comment,
-		 *     // tokens after 'comment'
-		 * });
-		 * ```
-		 *
-		 * ## Limitations
-		 *
-		 * The main problem `insertBefore` has to solve is iteration order. Since ES2015, the iteration order for object
-		 * properties is guaranteed to be the insertion order (except for integer keys) but some browsers behave
-		 * differently when keys are deleted and re-inserted. So `insertBefore` can't be implemented by temporarily
-		 * deleting properties which is necessary to insert at arbitrary positions.
-		 *
-		 * To solve this problem, `insertBefore` doesn't actually insert the given tokens into the target object.
-		 * Instead, it will create a new object and replace all references to the target object with the new one. This
-		 * can be done without temporarily deleting properties, so the iteration order is well-defined.
-		 *
-		 * However, only references that can be reached from `Prism.languages` or `insert` will be replaced. I.e. if
-		 * you hold the target object in a variable, then the value of the variable will not change.
-		 *
-		 * ```js
-		 * var oldMarkup = Prism.languages.markup;
-		 * var newMarkup = Prism.languages.insertBefore('markup', 'comment', { ... });
-		 *
-		 * assert(oldMarkup !== Prism.languages.markup);
-		 * assert(newMarkup === Prism.languages.markup);
-		 * ```
-		 *
-		 * @param {string} inside The property of `root` (e.g. a language id in `Prism.languages`) that contains the
-		 * object to be modified.
-		 * @param {string} before The key to insert before.
-		 * @param {Grammar} insert An object containing the key-value pairs to be inserted.
-		 * @param {Object<string, any>} [root] The object containing `inside`, i.e. the object that contains the
-		 * object to be modified.
-		 *
-		 * Defaults to `Prism.languages`.
-		 * @returns {Grammar} The new grammar object.
-		 * @public
-		 */
-		insertBefore: function (inside, before, insert, root) {
-			root = root || /** @type {any} */ (_.languages);
-			var grammar = root[inside];
-			/** @type {Grammar} */
-			var ret = {};
-
-			for (var token in grammar) {
-				if (grammar.hasOwnProperty(token)) {
-
-					if (token == before) {
-						for (var newToken in insert) {
-							if (insert.hasOwnProperty(newToken)) {
-								ret[newToken] = insert[newToken];
-							}
-						}
-					}
-
-					// Do not insert token which also occur in insert. See #1525
-					if (!insert.hasOwnProperty(token)) {
-						ret[token] = grammar[token];
-					}
-				}
-			}
-
-			var old = root[inside];
-			root[inside] = ret;
-
-			// Update references in other language definitions
-			_.languages.DFS(_.languages, function(key, value) {
-				if (value === old && key != inside) {
-					this[key] = ret;
-				}
-			});
-
-			return ret;
-		},
-
-		// Traverse a language definition with Depth First Search
-		DFS: function DFS(o, callback, type, visited) {
-			visited = visited || {};
-
-			var objId = _.util.objId;
-
-			for (var i in o) {
-				if (o.hasOwnProperty(i)) {
-					callback.call(o, i, o[i], type || i);
-
-					var property = o[i],
-					    propertyType = _.util.type(property);
-
-					if (propertyType === 'Object' && !visited[objId(property)]) {
-						visited[objId(property)] = true;
-						DFS(property, callback, null, visited);
-					}
-					else if (propertyType === 'Array' && !visited[objId(property)]) {
-						visited[objId(property)] = true;
-						DFS(property, callback, i, visited);
-					}
-				}
-			}
-		}
-	},
-
-	plugins: {},
-
-	/**
-	 * This is the most high-level function in Prism’s API.
-	 * It fetches all the elements that have a `.language-xxxx` class and then calls {@link Prism.highlightElement} on
-	 * each one of them.
-	 *
-	 * This is equivalent to `Prism.highlightAllUnder(document, async, callback)`.
-	 *
-	 * @param {boolean} [async=false] Same as in {@link Prism.highlightAllUnder}.
-	 * @param {HighlightCallback} [callback] Same as in {@link Prism.highlightAllUnder}.
-	 * @memberof Prism
-	 * @public
-	 */
-	highlightAll: function(async, callback) {
-		_.highlightAllUnder(document, async, callback);
-	},
-
-	/**
-	 * Fetches all the descendants of `container` that have a `.language-xxxx` class and then calls
-	 * {@link Prism.highlightElement} on each one of them.
-	 *
-	 * The following hooks will be run:
-	 * 1. `before-highlightall`
-	 * 2. `before-all-elements-highlight`
-	 * 3. All hooks of {@link Prism.highlightElement} for each element.
-	 *
-	 * @param {ParentNode} container The root element, whose descendants that have a `.language-xxxx` class will be highlighted.
-	 * @param {boolean} [async=false] Whether each element is to be highlighted asynchronously using Web Workers.
-	 * @param {HighlightCallback} [callback] An optional callback to be invoked on each element after its highlighting is done.
-	 * @memberof Prism
-	 * @public
-	 */
-	highlightAllUnder: function(container, async, callback) {
-		var env = {
-			callback: callback,
-			container: container,
-			selector: 'code[class*="language-"], [class*="language-"] code, code[class*="lang-"], [class*="lang-"] code'
-		};
-
-		_.hooks.run('before-highlightall', env);
-
-		env.elements = Array.prototype.slice.apply(env.container.querySelectorAll(env.selector));
-
-		_.hooks.run('before-all-elements-highlight', env);
-
-		for (var i = 0, element; element = env.elements[i++];) {
-			_.highlightElement(element, async === true, env.callback);
-		}
-	},
-
-	/**
-	 * Highlights the code inside a single element.
-	 *
-	 * The following hooks will be run:
-	 * 1. `before-sanity-check`
-	 * 2. `before-highlight`
-	 * 3. All hooks of {@link Prism.highlight}. These hooks will be run by an asynchronous worker if `async` is `true`.
-	 * 4. `before-insert`
-	 * 5. `after-highlight`
-	 * 6. `complete`
-	 *
-	 * Some the above hooks will be skipped if the element doesn't contain any text or there is no grammar loaded for
-	 * the element's language.
-	 *
-	 * @param {Element} element The element containing the code.
-	 * It must have a class of `language-xxxx` to be processed, where `xxxx` is a valid language identifier.
-	 * @param {boolean} [async=false] Whether the element is to be highlighted asynchronously using Web Workers
-	 * to improve performance and avoid blocking the UI when highlighting very large chunks of code. This option is
-	 * [disabled by default](https://prismjs.com/faq.html#why-is-asynchronous-highlighting-disabled-by-default).
-	 *
-	 * Note: All language definitions required to highlight the code must be included in the main `prism.js` file for
-	 * asynchronous highlighting to work. You can build your own bundle on the
-	 * [Download page](https://prismjs.com/download.html).
-	 * @param {HighlightCallback} [callback] An optional callback to be invoked after the highlighting is done.
-	 * Mostly useful when `async` is `true`, since in that case, the highlighting is done asynchronously.
-	 * @memberof Prism
-	 * @public
-	 */
-	highlightElement: function(element, async, callback) {
-		// Find language
-		var language = _.util.getLanguage(element);
-		var grammar = _.languages[language];
-
-		// Set language on the element, if not present
-		element.className = element.className.replace(lang, '').replace(/\s+/g, ' ') + ' language-' + language;
-
-		// Set language on the parent, for styling
-		var parent = element.parentElement;
-		if (parent && parent.nodeName.toLowerCase() === 'pre') {
-			parent.className = parent.className.replace(lang, '').replace(/\s+/g, ' ') + ' language-' + language;
-		}
-
-		var code = element.textContent;
-
-		var env = {
-			element: element,
-			language: language,
-			grammar: grammar,
-			code: code
-		};
-
-		function insertHighlightedCode(highlightedCode) {
-			env.highlightedCode = highlightedCode;
-
-			_.hooks.run('before-insert', env);
-
-			env.element.innerHTML = env.highlightedCode;
-
-			_.hooks.run('after-highlight', env);
-			_.hooks.run('complete', env);
-			callback && callback.call(env.element);
-		}
-
-		_.hooks.run('before-sanity-check', env);
-
-		if (!env.code) {
-			_.hooks.run('complete', env);
-			callback && callback.call(env.element);
-			return;
-		}
-
-		_.hooks.run('before-highlight', env);
-
-		if (!env.grammar) {
-			insertHighlightedCode(_.util.encode(env.code));
-			return;
-		}
-
-		if (async && _self.Worker) {
-			var worker = new Worker(_.filename);
-
-			worker.onmessage = function(evt) {
-				insertHighlightedCode(evt.data);
-			};
-
-			worker.postMessage(JSON.stringify({
-				language: env.language,
-				code: env.code,
-				immediateClose: true
-			}));
-		}
-		else {
-			insertHighlightedCode(_.highlight(env.code, env.grammar, env.language));
-		}
-	},
-
-	/**
-	 * Low-level function, only use if you know what you’re doing. It accepts a string of text as input
-	 * and the language definitions to use, and returns a string with the HTML produced.
-	 *
-	 * The following hooks will be run:
-	 * 1. `before-tokenize`
-	 * 2. `after-tokenize`
-	 * 3. `wrap`: On each {@link Token}.
-	 *
-	 * @param {string} text A string with the code to be highlighted.
-	 * @param {Grammar} grammar An object containing the tokens to use.
-	 *
-	 * Usually a language definition like `Prism.languages.markup`.
-	 * @param {string} language The name of the language definition passed to `grammar`.
-	 * @returns {string} The highlighted HTML.
-	 * @memberof Prism
-	 * @public
-	 * @example
-	 * Prism.highlight('var foo = true;', Prism.languages.javascript, 'javascript');
-	 */
-	highlight: function (text, grammar, language) {
-		var env = {
-			code: text,
-			grammar: grammar,
-			language: language
-		};
-		_.hooks.run('before-tokenize', env);
-		env.tokens = _.tokenize(env.code, env.grammar);
-		_.hooks.run('after-tokenize', env);
-		return Token.stringify(_.util.encode(env.tokens), env.language);
-	},
-
-	/**
-	 * This is the heart of Prism, and the most low-level function you can use. It accepts a string of text as input
-	 * and the language definitions to use, and returns an array with the tokenized code.
-	 *
-	 * When the language definition includes nested tokens, the function is called recursively on each of these tokens.
-	 *
-	 * This method could be useful in other contexts as well, as a very crude parser.
-	 *
-	 * @param {string} text A string with the code to be highlighted.
-	 * @param {Grammar} grammar An object containing the tokens to use.
-	 *
-	 * Usually a language definition like `Prism.languages.markup`.
-	 * @returns {TokenStream} An array of strings and tokens, a token stream.
-	 * @memberof Prism
-	 * @public
-	 * @example
-	 * let code = `var foo = 0;`;
-	 * let tokens = Prism.tokenize(code, Prism.languages.javascript);
-	 * tokens.forEach(token => {
-	 *     if (token instanceof Prism.Token && token.type === 'number') {
-	 *         console.log(`Found numeric literal: ${token.content}`);
-	 *     }
-	 * });
-	 */
-	tokenize: function(text, grammar) {
-		var rest = grammar.rest;
-		if (rest) {
-			for (var token in rest) {
-				grammar[token] = rest[token];
-			}
-
-			delete grammar.rest;
-		}
-
-		var tokenList = new LinkedList();
-		addAfter(tokenList, tokenList.head, text);
-
-		matchGrammar(text, tokenList, grammar, tokenList.head, 0);
-
-		return toArray(tokenList);
-	},
-
-	/**
-	 * @namespace
-	 * @memberof Prism
-	 * @public
-	 */
-	hooks: {
-		all: {},
-
-		/**
-		 * Adds the given callback to the list of callbacks for the given hook.
-		 *
-		 * The callback will be invoked when the hook it is registered for is run.
-		 * Hooks are usually directly run by a highlight function but you can also run hooks yourself.
-		 *
-		 * One callback function can be registered to multiple hooks and the same hook multiple times.
-		 *
-		 * @param {string} name The name of the hook.
-		 * @param {HookCallback} callback The callback function which is given environment variables.
-		 * @public
-		 */
-		add: function (name, callback) {
-			var hooks = _.hooks.all;
-
-			hooks[name] = hooks[name] || [];
-
-			hooks[name].push(callback);
-		},
-
-		/**
-		 * Runs a hook invoking all registered callbacks with the given environment variables.
-		 *
-		 * Callbacks will be invoked synchronously and in the order in which they were registered.
-		 *
-		 * @param {string} name The name of the hook.
-		 * @param {Object<string, any>} env The environment variables of the hook passed to all callbacks registered.
-		 * @public
-		 */
-		run: function (name, env) {
-			var callbacks = _.hooks.all[name];
-
-			if (!callbacks || !callbacks.length) {
-				return;
-			}
-
-			for (var i=0, callback; callback = callbacks[i++];) {
-				callback(env);
-			}
-		}
-	},
-
-	Token: Token
-};
-_self.Prism = _;
-
-
-// Typescript note:
-// The following can be used to import the Token type in JSDoc:
-//
-//   @typedef {InstanceType<import("./prism-core")["Token"]>} Token
-
-/**
- * Creates a new token.
- *
- * @param {string} type See {@link Token#type type}
- * @param {string | TokenStream} content See {@link Token#content content}
- * @param {string|string[]} [alias] The alias(es) of the token.
- * @param {string} [matchedStr=""] A copy of the full string this token was created from.
- * @class
- * @global
- * @public
- */
-function Token(type, content, alias, matchedStr) {
-	/**
-	 * The type of the token.
-	 *
-	 * This is usually the key of a pattern in a {@link Grammar}.
-	 *
-	 * @type {string}
-	 * @see GrammarToken
-	 * @public
-	 */
-	this.type = type;
-	/**
-	 * The strings or tokens contained by this token.
-	 *
-	 * This will be a token stream if the pattern matched also defined an `inside` grammar.
-	 *
-	 * @type {string | TokenStream}
-	 * @public
-	 */
-	this.content = content;
-	/**
-	 * The alias(es) of the token.
-	 *
-	 * @type {string|string[]}
-	 * @see GrammarToken
-	 * @public
-	 */
-	this.alias = alias;
-	// Copy of the full string this token was created from
-	this.length = (matchedStr || '').length | 0;
-}
-
-/**
- * A token stream is an array of strings and {@link Token Token} objects.
- *
- * Token streams have to fulfill a few properties that are assumed by most functions (mostly internal ones) that process
- * them.
- *
- * 1. No adjacent strings.
- * 2. No empty strings.
- *
- *    The only exception here is the token stream that only contains the empty string and nothing else.
- *
- * @typedef {Array<string | Token>} TokenStream
- * @global
- * @public
- */
-
-/**
- * Converts the given token or token stream to an HTML representation.
- *
- * The following hooks will be run:
- * 1. `wrap`: On each {@link Token}.
- *
- * @param {string | Token | TokenStream} o The token or token stream to be converted.
- * @param {string} language The name of current language.
- * @returns {string} The HTML representation of the token or token stream.
- * @memberof Token
- * @static
- */
-Token.stringify = function stringify(o, language) {
-	if (typeof o == 'string') {
-		return o;
-	}
-	if (Array.isArray(o)) {
-		var s = '';
-		o.forEach(function (e) {
-			s += stringify(e, language);
-		});
-		return s;
-	}
-
-	var env = {
-		type: o.type,
-		content: stringify(o.content, language),
-		tag: 'span',
-		classes: ['token', o.type],
-		attributes: {},
-		language: language
-	};
-
-	var aliases = o.alias;
-	if (aliases) {
-		if (Array.isArray(aliases)) {
-			Array.prototype.push.apply(env.classes, aliases);
-		} else {
-			env.classes.push(aliases);
-		}
-	}
-
-	_.hooks.run('wrap', env);
-
-	var attributes = '';
-	for (var name in env.attributes) {
-		attributes += ' ' + name + '="' + (env.attributes[name] || '').replace(/"/g, '&quot;') + '"';
-	}
-
-	return '<' + env.tag + ' class="' + env.classes.join(' ') + '"' + attributes + '>' + env.content + '</' + env.tag + '>';
-};
-
-/**
- * @param {string} text
- * @param {LinkedList<string | Token>} tokenList
- * @param {any} grammar
- * @param {LinkedListNode<string | Token>} startNode
- * @param {number} startPos
- * @param {RematchOptions} [rematch]
- * @returns {void}
- * @private
- *
- * @typedef RematchOptions
- * @property {string} cause
- * @property {number} reach
- */
-function matchGrammar(text, tokenList, grammar, startNode, startPos, rematch) {
-	for (var token in grammar) {
-		if (!grammar.hasOwnProperty(token) || !grammar[token]) {
-			continue;
-		}
-
-		var patterns = grammar[token];
-		patterns = Array.isArray(patterns) ? patterns : [patterns];
-
-		for (var j = 0; j < patterns.length; ++j) {
-			if (rematch && rematch.cause == token + ',' + j) {
-				return;
-			}
-
-			var patternObj = patterns[j],
-				inside = patternObj.inside,
-				lookbehind = !!patternObj.lookbehind,
-				greedy = !!patternObj.greedy,
-				lookbehindLength = 0,
-				alias = patternObj.alias;
-
-			if (greedy && !patternObj.pattern.global) {
-				// Without the global flag, lastIndex won't work
-				var flags = patternObj.pattern.toString().match(/[imsuy]*$/)[0];
-				patternObj.pattern = RegExp(patternObj.pattern.source, flags + 'g');
-			}
-
-			/** @type {RegExp} */
-			var pattern = patternObj.pattern || patternObj;
-
-			for ( // iterate the token list and keep track of the current token/string position
-				var currentNode = startNode.next, pos = startPos;
-				currentNode !== tokenList.tail;
-				pos += currentNode.value.length, currentNode = currentNode.next
-			) {
-
-				if (rematch && pos >= rematch.reach) {
-					break;
-				}
-
-				var str = currentNode.value;
-
-				if (tokenList.length > text.length) {
-					// Something went terribly wrong, ABORT, ABORT!
-					return;
-				}
-
-				if (str instanceof Token) {
-					continue;
-				}
-
-				var removeCount = 1; // this is the to parameter of removeBetween
-
-				if (greedy && currentNode != tokenList.tail.prev) {
-					pattern.lastIndex = pos;
-					var match = pattern.exec(text);
-					if (!match) {
-						break;
-					}
-
-					var from = match.index + (lookbehind && match[1] ? match[1].length : 0);
-					var to = match.index + match[0].length;
-					var p = pos;
-
-					// find the node that contains the match
-					p += currentNode.value.length;
-					while (from >= p) {
-						currentNode = currentNode.next;
-						p += currentNode.value.length;
-					}
-					// adjust pos (and p)
-					p -= currentNode.value.length;
-					pos = p;
-
-					// the current node is a Token, then the match starts inside another Token, which is invalid
-					if (currentNode.value instanceof Token) {
-						continue;
-					}
-
-					// find the last node which is affected by this match
-					for (
-						var k = currentNode;
-						k !== tokenList.tail && (p < to || typeof k.value === 'string');
-						k = k.next
-					) {
-						removeCount++;
-						p += k.value.length;
-					}
-					removeCount--;
-
-					// replace with the new match
-					str = text.slice(pos, p);
-					match.index -= pos;
-				} else {
-					pattern.lastIndex = 0;
-
-					var match = pattern.exec(str);
-				}
-
-				if (!match) {
-					continue;
-				}
-
-				if (lookbehind) {
-					lookbehindLength = match[1] ? match[1].length : 0;
-				}
-
-				var from = match.index + lookbehindLength,
-					matchStr = match[0].slice(lookbehindLength),
-					to = from + matchStr.length,
-					before = str.slice(0, from),
-					after = str.slice(to);
-
-				var reach = pos + str.length;
-				if (rematch && reach > rematch.reach) {
-					rematch.reach = reach;
-				}
-
-				var removeFrom = currentNode.prev;
-
-				if (before) {
-					removeFrom = addAfter(tokenList, removeFrom, before);
-					pos += before.length;
-				}
-
-				removeRange(tokenList, removeFrom, removeCount);
-
-				var wrapped = new Token(token, inside ? _.tokenize(matchStr, inside) : matchStr, alias, matchStr);
-				currentNode = addAfter(tokenList, removeFrom, wrapped);
-
-				if (after) {
-					addAfter(tokenList, currentNode, after);
-				}
-
-				if (removeCount > 1) {
-					// at least one Token object was removed, so we have to do some rematching
-					// this can only happen if the current pattern is greedy
-					matchGrammar(text, tokenList, grammar, currentNode.prev, pos, {
-						cause: token + ',' + j,
-						reach: reach
-					});
-				}
-			}
-		}
-	}
-}
-
-/**
- * @typedef LinkedListNode
- * @property {T} value
- * @property {LinkedListNode<T> | null} prev The previous node.
- * @property {LinkedListNode<T> | null} next The next node.
- * @template T
- * @private
- */
-
-/**
- * @template T
- * @private
- */
-function LinkedList() {
-	/** @type {LinkedListNode<T>} */
-	var head = { value: null, prev: null, next: null };
-	/** @type {LinkedListNode<T>} */
-	var tail = { value: null, prev: head, next: null };
-	head.next = tail;
-
-	/** @type {LinkedListNode<T>} */
-	this.head = head;
-	/** @type {LinkedListNode<T>} */
-	this.tail = tail;
-	this.length = 0;
-}
-
-/**
- * Adds a new node with the given value to the list.
- * @param {LinkedList<T>} list
- * @param {LinkedListNode<T>} node
- * @param {T} value
- * @returns {LinkedListNode<T>} The added node.
- * @template T
- */
-function addAfter(list, node, value) {
-	// assumes that node != list.tail && values.length >= 0
-	var next = node.next;
-
-	var newNode = { value: value, prev: node, next: next };
-	node.next = newNode;
-	next.prev = newNode;
-	list.length++;
-
-	return newNode;
-}
-/**
- * Removes `count` nodes after the given node. The given node will not be removed.
- * @param {LinkedList<T>} list
- * @param {LinkedListNode<T>} node
- * @param {number} count
- * @template T
- */
-function removeRange(list, node, count) {
-	var next = node.next;
-	for (var i = 0; i < count && next !== list.tail; i++) {
-		next = next.next;
-	}
-	node.next = next;
-	next.prev = node;
-	list.length -= i;
-}
-/**
- * @param {LinkedList<T>} list
- * @returns {T[]}
- * @template T
- */
-function toArray(list) {
-	var array = [];
-	var node = list.head.next;
-	while (node !== list.tail) {
-		array.push(node.value);
-		node = node.next;
-	}
-	return array;
-}
-
-
-if (!_self.document) {
-	if (!_self.addEventListener) {
-		// in Node.js
-		return _;
-	}
-
-	if (!_.disableWorkerMessageHandler) {
-		// In worker
-		_self.addEventListener('message', function (evt) {
-			var message = JSON.parse(evt.data),
-				lang = message.language,
-				code = message.code,
-				immediateClose = message.immediateClose;
-
-			_self.postMessage(_.highlight(code, _.languages[lang], lang));
-			if (immediateClose) {
-				_self.close();
-			}
-		}, false);
-	}
-
-	return _;
-}
-
-// Get current script and highlight
-var script = _.util.currentScript();
-
-if (script) {
-	_.filename = script.src;
-
-	if (script.hasAttribute('data-manual')) {
-		_.manual = true;
-	}
-}
-
-function highlightAutomaticallyCallback() {
-	if (!_.manual) {
-		_.highlightAll();
-	}
-}
-
-if (!_.manual) {
-	// If the document state is "loading", then we'll use DOMContentLoaded.
-	// If the document state is "interactive" and the prism.js script is deferred, then we'll also use the
-	// DOMContentLoaded event because there might be some plugins or languages which have also been deferred and they
-	// might take longer one animation frame to execute which can create a race condition where only some plugins have
-	// been loaded when Prism.highlightAll() is executed, depending on how fast resources are loaded.
-	// See https://github.com/PrismJS/prism/issues/2102
-	var readyState = document.readyState;
-	if (readyState === 'loading' || readyState === 'interactive' && script && script.defer) {
-		document.addEventListener('DOMContentLoaded', highlightAutomaticallyCallback);
-	} else {
-		if (window.requestAnimationFrame) {
-			window.requestAnimationFrame(highlightAutomaticallyCallback);
-		} else {
-			window.setTimeout(highlightAutomaticallyCallback, 16);
-		}
-	}
-}
-
-return _;
-
-})(_self);
-
-if (typeof module !== 'undefined' && module.exports) {
-	module.exports = Prism;
-}
-
-// hack for components to work correctly in node.js
-if (typeof global !== 'undefined') {
-	global.Prism = Prism;
-}
-
-// some additional documentation/types
-
-/**
- * The expansion of a simple `RegExp` literal to support additional properties.
- *
- * @typedef GrammarToken
- * @property {RegExp} pattern The regular expression of the token.
- * @property {boolean} [lookbehind=false] If `true`, then the first capturing group of `pattern` will (effectively)
- * behave as a lookbehind group meaning that the captured text will not be part of the matched text of the new token.
- * @property {boolean} [greedy=false] Whether the token is greedy.
- * @property {string|string[]} [alias] An optional alias or list of aliases.
- * @property {Grammar} [inside] The nested grammar of this token.
- *
- * The `inside` grammar will be used to tokenize the text value of each token of this kind.
- *
- * This can be used to make nested and even recursive language definitions.
- *
- * Note: This can cause infinite recursion. Be careful when you embed different languages or even the same language into
- * each another.
- * @global
- * @public
-*/
-
-/**
- * @typedef Grammar
- * @type {Object<string, RegExp | GrammarToken | Array<RegExp | GrammarToken>>}
- * @property {Grammar} [rest] An optional grammar object that will be appended to this grammar.
- * @global
- * @public
- */
-
-/**
- * A function which will invoked after an element was successfully highlighted.
- *
- * @callback HighlightCallback
- * @param {Element} element The element successfully highlighted.
- * @returns {void}
- * @global
- * @public
-*/
-
-/**
- * @callback HookCallback
- * @param {Object<string, any>} env The environment variables of the hook.
- * @returns {void}
- * @global
- * @public
- */
-
-
-/* **********************************************
-     Begin prism-markup.js
-********************************************** */
-
-Prism.languages.markup = {
-	'comment': /<!--[\s\S]*?-->/,
-	'prolog': /<\?[\s\S]+?\?>/,
-	'doctype': {
-		// https://www.w3.org/TR/xml/#NT-doctypedecl
-		pattern: /<!DOCTYPE(?:[^>"'[\]]|"[^"]*"|'[^']*')+(?:\[(?:[^<"'\]]|"[^"]*"|'[^']*'|<(?!!--)|<!--(?:[^-]|-(?!->))*-->)*\]\s*)?>/i,
-		greedy: true,
-		inside: {
-			'internal-subset': {
-				pattern: /(\[)[\s\S]+(?=\]>$)/,
-				lookbehind: true,
-				greedy: true,
-				inside: null // see below
-			},
-			'string': {
-				pattern: /"[^"]*"|'[^']*'/,
-				greedy: true
-			},
-			'punctuation': /^<!|>$|[[\]]/,
-			'doctype-tag': /^DOCTYPE/,
-			'name': /[^\s<>'"]+/
-		}
-	},
-	'cdata': /<!\[CDATA\[[\s\S]*?]]>/i,
-	'tag': {
-		pattern: /<\/?(?!\d)[^\s>\/=$<%]+(?:\s(?:\s*[^\s>\/=]+(?:\s*=\s*(?:"[^"]*"|'[^']*'|[^\s'">=]+(?=[\s>]))|(?=[\s/>])))+)?\s*\/?>/,
-		greedy: true,
-		inside: {
-			'tag': {
-				pattern: /^<\/?[^\s>\/]+/,
-				inside: {
-					'punctuation': /^<\/?/,
-					'namespace': /^[^\s>\/:]+:/
-				}
-			},
-			'attr-value': {
-				pattern: /=\s*(?:"[^"]*"|'[^']*'|[^\s'">=]+)/,
-				inside: {
-					'punctuation': [
-						{
-							pattern: /^=/,
-							alias: 'attr-equals'
-						},
-						/"|'/
-					]
-				}
-			},
-			'punctuation': /\/?>/,
-			'attr-name': {
-				pattern: /[^\s>\/]+/,
-				inside: {
-					'namespace': /^[^\s>\/:]+:/
-				}
-			}
-
-		}
-	},
-	'entity': [
-		{
-			pattern: /&[\da-z]{1,8};/i,
-			alias: 'named-entity'
-		},
-		/&#x?[\da-f]{1,8};/i
-	]
-};
-
-Prism.languages.markup['tag'].inside['attr-value'].inside['entity'] =
-	Prism.languages.markup['entity'];
-Prism.languages.markup['doctype'].inside['internal-subset'].inside = Prism.languages.markup;
-
-// Plugin to make entity title show the real entity, idea by Roman Komarov
-Prism.hooks.add('wrap', function (env) {
-
-	if (env.type === 'entity') {
-		env.attributes['title'] = env.content.replace(/&amp;/, '&');
-	}
-});
-
-Object.defineProperty(Prism.languages.markup.tag, 'addInlined', {
-	/**
-	 * Adds an inlined language to markup.
-	 *
-	 * An example of an inlined language is CSS with `<style>` tags.
-	 *
-	 * @param {string} tagName The name of the tag that contains the inlined language. This name will be treated as
-	 * case insensitive.
-	 * @param {string} lang The language key.
-	 * @example
-	 * addInlined('style', 'css');
-	 */
-	value: function addInlined(tagName, lang) {
-		var includedCdataInside = {};
-		includedCdataInside['language-' + lang] = {
-			pattern: /(^<!\[CDATA\[)[\s\S]+?(?=\]\]>$)/i,
-			lookbehind: true,
-			inside: Prism.languages[lang]
-		};
-		includedCdataInside['cdata'] = /^<!\[CDATA\[|\]\]>$/i;
-
-		var inside = {
-			'included-cdata': {
-				pattern: /<!\[CDATA\[[\s\S]*?\]\]>/i,
-				inside: includedCdataInside
-			}
-		};
-		inside['language-' + lang] = {
-			pattern: /[\s\S]+/,
-			inside: Prism.languages[lang]
-		};
-
-		var def = {};
-		def[tagName] = {
-			pattern: RegExp(/(<__[\s\S]*?>)(?:<!\[CDATA\[(?:[^\]]|\](?!\]>))*\]\]>|(?!<!\[CDATA\[)[\s\S])*?(?=<\/__>)/.source.replace(/__/g, function () { return tagName; }), 'i'),
-			lookbehind: true,
-			greedy: true,
-			inside: inside
-		};
-
-		Prism.languages.insertBefore('markup', 'cdata', def);
-	}
-});
-
-Prism.languages.html = Prism.languages.markup;
-Prism.languages.mathml = Prism.languages.markup;
-Prism.languages.svg = Prism.languages.markup;
-
-Prism.languages.xml = Prism.languages.extend('markup', {});
-Prism.languages.ssml = Prism.languages.xml;
-Prism.languages.atom = Prism.languages.xml;
-Prism.languages.rss = Prism.languages.xml;
-
-
-/* **********************************************
-     Begin prism-css.js
-********************************************** */
-
-(function (Prism) {
-
-	var string = /("|')(?:\\(?:\r\n|[\s\S])|(?!\1)[^\\\r\n])*\1/;
-
-	Prism.languages.css = {
-		'comment': /\/\*[\s\S]*?\*\//,
-		'atrule': {
-			pattern: /@[\w-]+[\s\S]*?(?:;|(?=\s*\{))/,
-			inside: {
-				'rule': /^@[\w-]+/,
-				'selector-function-argument': {
-					pattern: /(\bselector\s*\((?!\s*\))\s*)(?:[^()]|\((?:[^()]|\([^()]*\))*\))+?(?=\s*\))/,
-					lookbehind: true,
-					alias: 'selector'
-				},
-				'keyword': {
-					pattern: /(^|[^\w-])(?:and|not|only|or)(?![\w-])/,
-					lookbehind: true
-				}
-				// See rest below
-			}
-		},
-		'url': {
-			// https://drafts.csswg.org/css-values-3/#urls
-			pattern: RegExp('\\burl\\((?:' + string.source + '|' + /(?:[^\\\r\n()"']|\\[\s\S])*/.source + ')\\)', 'i'),
-			greedy: true,
-			inside: {
-				'function': /^url/i,
-				'punctuation': /^\(|\)$/,
-				'string': {
-					pattern: RegExp('^' + string.source + '$'),
-					alias: 'url'
-				}
-			}
-		},
-		'selector': RegExp('[^{}\\s](?:[^{};"\']|' + string.source + ')*?(?=\\s*\\{)'),
-		'string': {
-			pattern: string,
-			greedy: true
-		},
-		'property': /[-_a-z\xA0-\uFFFF][-\w\xA0-\uFFFF]*(?=\s*:)/i,
-		'important': /!important\b/i,
-		'function': /[-a-z0-9]+(?=\()/i,
-		'punctuation': /[(){};:,]/
-	};
-
-	Prism.languages.css['atrule'].inside.rest = Prism.languages.css;
-
-	var markup = Prism.languages.markup;
-	if (markup) {
-		markup.tag.addInlined('style', 'css');
-
-		Prism.languages.insertBefore('inside', 'attr-value', {
-			'style-attr': {
-				pattern: /\s*style=("|')(?:\\[\s\S]|(?!\1)[^\\])*\1/i,
-				inside: {
-					'attr-name': {
-						pattern: /^\s*style/i,
-						inside: markup.tag.inside
-					},
-					'punctuation': /^\s*=\s*['"]|['"]\s*$/,
-					'attr-value': {
-						pattern: /.+/i,
-						inside: Prism.languages.css
-					}
-				},
-				alias: 'language-css'
-			}
-		}, markup.tag);
-	}
-
-}(Prism));
-
-
-/* **********************************************
-     Begin prism-clike.js
-********************************************** */
-
-Prism.languages.clike = {
-	'comment': [
-		{
-			pattern: /(^|[^\\])\/\*[\s\S]*?(?:\*\/|$)/,
-			lookbehind: true
-		},
-		{
-			pattern: /(^|[^\\:])\/\/.*/,
-			lookbehind: true,
-			greedy: true
-		}
-	],
-	'string': {
-		pattern: /(["'])(?:\\(?:\r\n|[\s\S])|(?!\1)[^\\\r\n])*\1/,
-		greedy: true
-	},
-	'class-name': {
-		pattern: /(\b(?:class|interface|extends|implements|trait|instanceof|new)\s+|\bcatch\s+\()[\w.\\]+/i,
-		lookbehind: true,
-		inside: {
-			'punctuation': /[.\\]/
-		}
-	},
-	'keyword': /\b(?:if|else|while|do|for|return|in|instanceof|function|new|try|throw|catch|finally|null|break|continue)\b/,
-	'boolean': /\b(?:true|false)\b/,
-	'function': /\w+(?=\()/,
-	'number': /\b0x[\da-f]+\b|(?:\b\d+\.?\d*|\B\.\d+)(?:e[+-]?\d+)?/i,
-	'operator': /[<>]=?|[!=]=?=?|--?|\+\+?|&&?|\|\|?|[?*/~^%]/,
-	'punctuation': /[{}[\];(),.:]/
-};
-
-
-/* **********************************************
-     Begin prism-javascript.js
-********************************************** */
-
-Prism.languages.javascript = Prism.languages.extend('clike', {
-	'class-name': [
-		Prism.languages.clike['class-name'],
-		{
-			pattern: /(^|[^$\w\xA0-\uFFFF])[_$A-Z\xA0-\uFFFF][$\w\xA0-\uFFFF]*(?=\.(?:prototype|constructor))/,
-			lookbehind: true
-		}
-	],
-	'keyword': [
-		{
-			pattern: /((?:^|})\s*)(?:catch|finally)\b/,
-			lookbehind: true
-		},
-		{
-			pattern: /(^|[^.]|\.\.\.\s*)\b(?:as|async(?=\s*(?:function\b|\(|[$\w\xA0-\uFFFF]|$))|await|break|case|class|const|continue|debugger|default|delete|do|else|enum|export|extends|for|from|function|(?:get|set)(?=\s*[\[$\w\xA0-\uFFFF])|if|implements|import|in|instanceof|interface|let|new|null|of|package|private|protected|public|return|static|super|switch|this|throw|try|typeof|undefined|var|void|while|with|yield)\b/,
-			lookbehind: true
-		},
-	],
-	'number': /\b(?:(?:0[xX](?:[\dA-Fa-f](?:_[\dA-Fa-f])?)+|0[bB](?:[01](?:_[01])?)+|0[oO](?:[0-7](?:_[0-7])?)+)n?|(?:\d(?:_\d)?)+n|NaN|Infinity)\b|(?:\b(?:\d(?:_\d)?)+\.?(?:\d(?:_\d)?)*|\B\.(?:\d(?:_\d)?)+)(?:[Ee][+-]?(?:\d(?:_\d)?)+)?/,
-	// Allow for all non-ASCII characters (See http://stackoverflow.com/a/2008444)
-	'function': /#?[_$a-zA-Z\xA0-\uFFFF][$\w\xA0-\uFFFF]*(?=\s*(?:\.\s*(?:apply|bind|call)\s*)?\()/,
-	'operator': /--|\+\+|\*\*=?|=>|&&=?|\|\|=?|[!=]==|<<=?|>>>?=?|[-+*/%&|^!=<>]=?|\.{3}|\?\?=?|\?\.?|[~:]/
-});
-
-Prism.languages.javascript['class-name'][0].pattern = /(\b(?:class|interface|extends|implements|instanceof|new)\s+)[\w.\\]+/;
-
-Prism.languages.insertBefore('javascript', 'keyword', {
-	'regex': {
-		pattern: /((?:^|[^$\w\xA0-\uFFFF."'\])\s]|\b(?:return|yield))\s*)\/(?:\[(?:[^\]\\\r\n]|\\.)*]|\\.|[^/\\\[\r\n])+\/[gimyus]{0,6}(?=(?:\s|\/\*(?:[^*]|\*(?!\/))*\*\/)*(?:$|[\r\n,.;:})\]]|\/\/))/,
-		lookbehind: true,
-		greedy: true,
-		inside: {
-			'regex-source': {
-				pattern: /^(\/)[\s\S]+(?=\/[a-z]*$)/,
-				lookbehind: true,
-				alias: 'language-regex',
-				inside: Prism.languages.regex
-			},
-			'regex-flags': /[a-z]+$/,
-			'regex-delimiter': /^\/|\/$/
-		}
-	},
-	// This must be declared before keyword because we use "function" inside the look-forward
-	'function-variable': {
-		pattern: /#?[_$a-zA-Z\xA0-\uFFFF][$\w\xA0-\uFFFF]*(?=\s*[=:]\s*(?:async\s*)?(?:\bfunction\b|(?:\((?:[^()]|\([^()]*\))*\)|[_$a-zA-Z\xA0-\uFFFF][$\w\xA0-\uFFFF]*)\s*=>))/,
-		alias: 'function'
-	},
-	'parameter': [
-		{
-			pattern: /(function(?:\s+[_$A-Za-z\xA0-\uFFFF][$\w\xA0-\uFFFF]*)?\s*\(\s*)(?!\s)(?:[^()]|\([^()]*\))+?(?=\s*\))/,
-			lookbehind: true,
-			inside: Prism.languages.javascript
-		},
-		{
-			pattern: /[_$a-z\xA0-\uFFFF][$\w\xA0-\uFFFF]*(?=\s*=>)/i,
-			inside: Prism.languages.javascript
-		},
-		{
-			pattern: /(\(\s*)(?!\s)(?:[^()]|\([^()]*\))+?(?=\s*\)\s*=>)/,
-			lookbehind: true,
-			inside: Prism.languages.javascript
-		},
-		{
-			pattern: /((?:\b|\s|^)(?!(?:as|async|await|break|case|catch|class|const|continue|debugger|default|delete|do|else|enum|export|extends|finally|for|from|function|get|if|implements|import|in|instanceof|interface|let|new|null|of|package|private|protected|public|return|set|static|super|switch|this|throw|try|typeof|undefined|var|void|while|with|yield)(?![$\w\xA0-\uFFFF]))(?:[_$A-Za-z\xA0-\uFFFF][$\w\xA0-\uFFFF]*\s*)\(\s*|\]\s*\(\s*)(?!\s)(?:[^()]|\([^()]*\))+?(?=\s*\)\s*\{)/,
-			lookbehind: true,
-			inside: Prism.languages.javascript
-		}
-	],
-	'constant': /\b[A-Z](?:[A-Z_]|\dx?)*\b/
-});
-
-Prism.languages.insertBefore('javascript', 'string', {
-	'template-string': {
-		pattern: /`(?:\\[\s\S]|\${(?:[^{}]|{(?:[^{}]|{[^}]*})*})+}|(?!\${)[^\\`])*`/,
-		greedy: true,
-		inside: {
-			'template-punctuation': {
-				pattern: /^`|`$/,
-				alias: 'string'
-			},
-			'interpolation': {
-				pattern: /((?:^|[^\\])(?:\\{2})*)\${(?:[^{}]|{(?:[^{}]|{[^}]*})*})+}/,
-				lookbehind: true,
-				inside: {
-					'interpolation-punctuation': {
-						pattern: /^\${|}$/,
-						alias: 'punctuation'
-					},
-					rest: Prism.languages.javascript
-				}
-			},
-			'string': /[\s\S]+/
-		}
-	}
-});
-
-if (Prism.languages.markup) {
-	Prism.languages.markup.tag.addInlined('script', 'javascript');
-}
-
-Prism.languages.js = Prism.languages.javascript;
-
-
-/* **********************************************
-     Begin prism-file-highlight.js
-********************************************** */
-
-(function () {
-	if (typeof self === 'undefined' || !self.Prism || !self.document) {
-		return;
-	}
-
-	var Prism = window.Prism;
-
-	var LOADING_MESSAGE = 'Loading…';
-	var FAILURE_MESSAGE = function (status, message) {
-		return '✖ Error ' + status + ' while fetching file: ' + message;
-	};
-	var FAILURE_EMPTY_MESSAGE = '✖ Error: File does not exist or is empty';
-
-	var EXTENSIONS = {
-		'js': 'javascript',
-		'py': 'python',
-		'rb': 'ruby',
-		'ps1': 'powershell',
-		'psm1': 'powershell',
-		'sh': 'bash',
-		'bat': 'batch',
-		'h': 'c',
-		'tex': 'latex'
-	};
-
-	var STATUS_ATTR = 'data-src-status';
-	var STATUS_LOADING = 'loading';
-	var STATUS_LOADED = 'loaded';
-	var STATUS_FAILED = 'failed';
-
-	var SELECTOR = 'pre[data-src]:not([' + STATUS_ATTR + '="' + STATUS_LOADED + '"])'
-		+ ':not([' + STATUS_ATTR + '="' + STATUS_LOADING + '"])';
-
-	var lang = /\blang(?:uage)?-([\w-]+)\b/i;
-
-	/**
-	 * Sets the Prism `language-xxxx` or `lang-xxxx` class to the given language.
-	 *
-	 * @param {HTMLElement} element
-	 * @param {string} language
-	 * @returns {void}
-	 */
-	function setLanguageClass(element, language) {
-		var className = element.className;
-		className = className.replace(lang, ' ') + ' language-' + language;
-		element.className = className.replace(/\s+/g, ' ').trim();
-	}
-
-
-	Prism.hooks.add('before-highlightall', function (env) {
-		env.selector += ', ' + SELECTOR;
-	});
-
-	Prism.hooks.add('before-sanity-check', function (env) {
-		var pre = /** @type {HTMLPreElement} */ (env.element);
-		if (pre.matches(SELECTOR)) {
-			env.code = ''; // fast-path the whole thing and go to complete
-
-			pre.setAttribute(STATUS_ATTR, STATUS_LOADING); // mark as loading
-
-			// add code element with loading message
-			var code = pre.appendChild(document.createElement('CODE'));
-			code.textContent = LOADING_MESSAGE;
-
-			var src = pre.getAttribute('data-src');
-
-			var language = env.language;
-			if (language === 'none') {
-				// the language might be 'none' because there is no language set;
-				// in this case, we want to use the extension as the language
-				var extension = (/\.(\w+)$/.exec(src) || [, 'none'])[1];
-				language = EXTENSIONS[extension] || extension;
-			}
-
-			// set language classes
-			setLanguageClass(code, language);
-			setLanguageClass(pre, language);
-
-			// preload the language
-			var autoloader = Prism.plugins.autoloader;
-			if (autoloader) {
-				autoloader.loadLanguages(language);
-			}
-
-			// load file
-			var xhr = new XMLHttpRequest();
-			xhr.open('GET', src, true);
-			xhr.onreadystatechange = function () {
-				if (xhr.readyState == 4) {
-					if (xhr.status < 400 && xhr.responseText) {
-						// mark as loaded
-						pre.setAttribute(STATUS_ATTR, STATUS_LOADED);
-
-						// highlight code
-						code.textContent = xhr.responseText;
-						Prism.highlightElement(code);
-
-					} else {
-						// mark as failed
-						pre.setAttribute(STATUS_ATTR, STATUS_FAILED);
-
-						if (xhr.status >= 400) {
-							code.textContent = FAILURE_MESSAGE(xhr.status, xhr.statusText);
-						} else {
-							code.textContent = FAILURE_EMPTY_MESSAGE;
-						}
-					}
-				}
-			};
-			xhr.send(null);
-		}
-	});
-
-	Prism.plugins.fileHighlight = {
-		/**
-		 * Executes the File Highlight plugin for all matching `pre` elements under the given container.
-		 *
-		 * Note: Elements which are already loaded or currently loading will not be touched by this method.
-		 *
-		 * @param {ParentNode} [container=document]
-		 */
-		highlight: function highlight(container) {
-			var elements = (container || document).querySelectorAll(SELECTOR);
-
-			for (var i = 0, element; element = elements[i++];) {
-				Prism.highlightElement(element);
-			}
-		}
-	};
-
-	var logged = false;
-	/** @deprecated Use `Prism.plugins.fileHighlight.highlight` instead. */
-	Prism.fileHighlight = function () {
-		if (!logged) {
-			console.warn('Prism.fileHighlight is deprecated. Use `Prism.plugins.fileHighlight.highlight` instead.');
-			logged = true;
-		}
-		Prism.plugins.fileHighlight.highlight.apply(this, arguments);
-	}
-
-})();
-
-}).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
 },{}],99:[function(require,module,exports){
 var inherits = require('inherits')
 var EventEmitter = require('events').EventEmitter
@@ -37293,7 +35626,7 @@ Engine.prototype.tick = function() {
     this.emit('tick', dt)
     this.last = time
 }
-},{"events":8,"inherits":68,"raf":100,"right-now":103}],100:[function(require,module,exports){
+},{"events":8,"inherits":69,"raf":100,"right-now":103}],100:[function(require,module,exports){
 (function (global){(function (){
 var now = require('performance-now')
   , root = typeof window === 'undefined' ? global : window
@@ -37372,7 +35705,7 @@ module.exports.polyfill = function(object) {
 }
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"performance-now":95}],101:[function(require,module,exports){
+},{"performance-now":96}],101:[function(require,module,exports){
 (function(U,X){"object"===typeof exports&&"undefined"!==typeof module?module.exports=X():"function"===typeof define&&define.amd?define(X):U.createREGL=X()})(this,function(){function U(a,b){this.id=Eb++;this.type=a;this.data=b}function X(a){if(0===a.length)return[];var b=a.charAt(0),c=a.charAt(a.length-1);if(1<a.length&&b===c&&('"'===b||"'"===b))return['"'+a.substr(1,a.length-2).replace(/\\/g,"\\\\").replace(/"/g,'\\"')+'"'];if(b=/\[(false|true|null|\d+|'[^']*'|"[^"]*")\]/.exec(a))return X(a.substr(0,
 b.index)).concat(X(b[1])).concat(X(a.substr(b.index+b[0].length)));b=a.split(".");if(1===b.length)return['"'+a.replace(/\\/g,"\\\\").replace(/"/g,'\\"')+'"'];a=[];for(c=0;c<b.length;++c)a=a.concat(X(b[c]));return a}function cb(a){return"["+X(a).join("][")+"]"}function db(a,b){if("function"===typeof a)return new U(0,a);if("number"===typeof a||"boolean"===typeof a)return new U(5,a);if(Array.isArray(a))return new U(6,a.map(function(a,e){return db(a,b+"["+e+"]")}));if(a instanceof U)return a}function Fb(){var a=
 {"":0},b=[""];return{id:function(c){var e=a[c];if(e)return e;e=a[c]=b.length;b.push(c);return e},str:function(a){return b[a]}}}function Gb(a,b,c){function e(){var b=window.innerWidth,e=window.innerHeight;a!==document.body&&(e=a.getBoundingClientRect(),b=e.right-e.left,e=e.bottom-e.top);f.width=c*b;f.height=c*e;A(f.style,{width:b+"px",height:e+"px"})}var f=document.createElement("canvas");A(f.style,{border:0,margin:0,padding:0,top:0,left:0});a.appendChild(f);a===document.body&&(f.style.position="absolute",
@@ -37607,7 +35940,7 @@ function stateCopy (obj) {
 
 module.exports = stateCopy
 
-},{"clipboard-copy":43,"fast-safe-stringify":46}],106:[function(require,module,exports){
+},{"clipboard-copy":44,"fast-safe-stringify":47}],106:[function(require,module,exports){
 var C = "\u037c"
 var COUNT = typeof Symbol == "undefined" ? "__" + C : Symbol.for(C)
 var SET = typeof Symbol == "undefined" ? "__styleSet" + Math.floor(Math.random() * 1e8) : Symbol("styleSet")
@@ -37932,7 +36265,7 @@ function getAllRoutes (router) {
   return transform(tree)
 }
 
-},{"assert":72}],109:[function(require,module,exports){
+},{"assert":73}],109:[function(require,module,exports){
 /* eslint-disable node/no-deprecated-api */
 var assert = require('assert')
 var trie = require('./trie')
@@ -38007,7 +36340,7 @@ function Wayfarer (dft) {
   }
 }
 
-},{"./trie":110,"assert":72}],110:[function(require,module,exports){
+},{"./trie":110,"assert":73}],110:[function(require,module,exports){
 /* eslint-disable node/no-deprecated-api */
 var assert = require('assert')
 
@@ -38148,7 +36481,7 @@ function has (object, property) {
   return Object.prototype.hasOwnProperty.call(object, property)
 }
 
-},{"assert":72}],111:[function(require,module,exports){
+},{"assert":73}],111:[function(require,module,exports){
 module.exports = {
   src: {
     label: "source",
@@ -38172,4 +36505,4 @@ module.exports = {
   }
 }
 
-},{}]},{},[14]);
+},{}]},{},[15]);

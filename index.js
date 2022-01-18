@@ -46,16 +46,27 @@ function mainView (state, emit) {
     state.tabIndex = state.params.tab
     console.log(obj)
 
-    const d = examples[obj.name]
-    let code = ''
-    if(d && d.example) {
-      if(Array.isArray(d.example)) {
-        code = d.example[state.tabIndex]
+    function getExampleCode(name, index) {
+      const d = examples[name]
+      let code = ''
+      if(d && d.example) {
+        if(Array.isArray(d.example)) {
+          code = d.example[index]
+        }
+        else {
+          code = d.example
+        }
       }
-      else {
-        code = d.example
-      }
+      return code
     }
+    let code = getExampleCode(obj.name, state.tabIndex)
+    if (code === undefined) {
+      // illegal index
+      state.tabIndex = 0
+      code = getExampleCode(obj.name, state.tabIndex)
+      emit('pushState', `#functions/${ obj.name }/${ state.tabIndex }`)
+    }
+
     code = code.replace(/^\n*/, '')
     // cmEditor.setCode(code)
     state.cm.editor = code

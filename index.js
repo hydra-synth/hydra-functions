@@ -13,6 +13,7 @@ app.use(store)
 app.route('/', mainView)
 app.route('/hydra-functions', mainView)
 app.route('#functions/:function/:tab', mainView)
+app.route('/hydra-functions/#functions/:function/:tab', mainView)
 app.mount('body')
 
 const formattedFunctionGroups = []

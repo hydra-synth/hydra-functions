@@ -3933,7 +3933,7 @@ process.umask = function() { return 0; };
 const html = require('choo/html')
 const Component = require('choo/component')
 
-const {EditorState} = require('@codemirror/state')
+const {EditorState, Compartment} = require('@codemirror/state')
 const {defaultHighlightStyle} = require('@codemirror/highlight')
 const {EditorView, keymap, KeyBinding} = require('@codemirror/view')
 const {defaultKeymap} = require('@codemirror/commands')
@@ -3944,12 +3944,36 @@ module.exports = class CodeMirror extends Component {
     super(id)
     this.local = state.components[id] = {}
     this.editable = editable
+    this.emit = emit
   }
 
   evaluate () {
     const code = this.view.state.doc.toString()
-    Function(code)()
-    return true // super important for CM not to add "\n"
+    try {
+      Function(code)()
+      this.view.dispatch({
+        effects: this.theme.reconfigure(EditorView.theme({
+          '&': {
+            border: 'solid rgba(0,0,0,0)',
+            backgroundColor: 'rgba(255,255,255,0.5)',
+            minHeight: this.editable ? '8rem' : '1rem',
+          },
+        }))
+      })  
+      this.errorMessage.innerHTML = ''
+    } catch (e) {
+      this.errorMessage.innerHTML = e
+      this.view.dispatch({
+        effects: this.theme.reconfigure(EditorView.theme({
+          '&': {
+            border: 'solid red',
+            backgroundColor: 'rgba(255,255,255,0.5)',
+            minHeight: this.editable ? '8rem' : '1rem',
+          },
+        }))
+      })  
+    }
+    return true // super important for CM not to add '\n'
   }
 
   load (element) {
@@ -3959,18 +3983,20 @@ module.exports = class CodeMirror extends Component {
       keymaps.push(keymap.of(defaultKeymap))
     }
 
+    this.theme = new Compartment
     let theme = EditorView.theme({
-      "&": {
-        backgroundColor: "rgba(255,255,255,0.5)",
-        minHeight: this.editable ? "8rem" : "1rem",
+      '&': {
+        border: 'solid rgba(0,0,0,0)',
+        backgroundColor: 'rgba(255,255,255,0.5)',
+        minHeight: this.editable ? '8rem' : '1rem',
       },
-    });
+    })
     
     const editorState = EditorState.create({
       doc: 'Hello World',
       extensions: [
         keymaps,
-        theme,
+        this.theme.of(theme),
         javascript(),
         defaultHighlightStyle.fallback,
         EditorView.editable.of(this.editable),
@@ -3980,14 +4006,14 @@ module.exports = class CodeMirror extends Component {
 
     this.view = new EditorView({
       state: editorState,
-      parent: element,
+      parent: element.querySelector('.editor'),
       extensions: [  ],
     })
   }
 
   setCode (code) {
     this.view.dispatch({
-      changes: {from: 0, to: this.view.state.doc.length, insert: code}
+      changes: {from: 0, to: this.view.state.doc.length, insert: code},
     })
     if (this.editable) {
       this.evaluate()
@@ -3999,11 +4025,17 @@ module.exports = class CodeMirror extends Component {
   }
 
   update () {
+    console.log('oi')
     return false
   }
 
   createElement () {
-    return html`<div class="w-100"></div>`
+    this.errorMessage = html`<p class="red h1 courier pa0 ma0" style="background-color:rgba(255,255,255,0.3)"></p>`
+    return html`
+    <div class="w-100">
+      <div class="editor"></div>
+      ${ this.errorMessage }
+    </div>`
   }
 }
 

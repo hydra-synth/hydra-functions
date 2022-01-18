@@ -4528,7 +4528,7 @@ function mainView (state, emit) {
           for(let i = 0; i < d.example.length; i++) {
             const isSelected = i == state.tabIndex;
             const hsl = `hsl(${20 + state.selectedIndex*60 }, ${isSelected?100:20}%, ${isSelected?90:60}%)`
-            tabs.push(html`<div class="tab courier pointer dib ma1 pa1 pv1" style="background-color:${hsl}" onclick=${()=>emit('show details', obj, i)}>Example ${i}</div>`);
+            tabs.push(html`<div class="tab courier pointer dib ma1 pa1 pv1" style="background-color:${hsl}"><a  class="black no-underline" href="#functions/${obj.name}/${i}">Example ${i}</a></div>`);
           }
         }
       }
@@ -4586,10 +4586,12 @@ function mainView (state, emit) {
             <div class="pv2">
               <div class="mb3 f5">${val.label.charAt(0).toUpperCase() + val.label.slice(1)}</div>
               ${funcs.map((obj, index) => html`
-              <div class="courier dib ma1 pointer dim token function pa1 pv1" onclick=${()=>emit('show details', obj, 0)}
+              <div class="courier dib ma1 pointer dim token function pa1 pv1"
                 title=${obj.name}
                 style="border-bottom: 4px solid hsl(${20 + obj.typeIndex*60 }, 100%, 70%);line-height:0.6"
-                >${obj.name}</div>
+                >
+                <a class="black no-underline" href="#functions/${obj.name}/0">${obj.name}</a>
+              </div>
             `)}
             </div>
           `) }
@@ -4608,10 +4610,10 @@ function store (state, emitter) {
   state.tabIndex = 0
   state.functions = Object.values(hydraFunctions)
 
-  emitter.on('show details', (obj, tabIndex) => {
-    emitter.emit('replaceState', `#functions/${ obj.name }/${ tabIndex }`)
-    emitter.emit('render')
-  })
+  // emitter.on('show details', (obj, tabIndex) => {
+  //   emitter.emit('replaceState', `#functions/${ obj.name }/${ tabIndex }`)
+  //   emitter.emit('render')
+  // })
 
   emitter.on('DOMContentLoaded', () => {
     cmUsage.setCode(state.cm.usage)

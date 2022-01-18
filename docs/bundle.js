@@ -4572,11 +4572,12 @@ function mainView (state, emit) {
         <div class="pv2 f5">Usage</div>
         ${ cmUsage.render(state) }
         <div class="pv2 f5">Example</div>
-        <div class="pa4 w-100" style="width:400px;">
-
-            ${ hydraCanvas.render(state) }
-            ${codeExample}
+        <div class="w-100 flex justify-center">
+          <div class="pa4">
+              ${ hydraCanvas.render(state) }
+          </div>
         </div>
+        ${ codeExample }
         <div class="flex justify-between">
           <div class="flex flex-column justify-around">
             <button class="courier br0 h-100" title="run" onclick=${ evaluate }>▶</button>

@@ -5,13 +5,13 @@
   "main": "index.js",
   "dependencies": {
     "@codemirror/commands": "^0.19.7",
+    "@codemirror/highlight": "^0.19.7",
     "@codemirror/lang-javascript": "^0.19.6",
     "@codemirror/state": "^0.19.6",
     "@codemirror/view": "^0.19.39",
     "choo": "^7.1.0",
     "choo-devtools": "^3.0.4",
-    "hydra-synth": "^1.3.2",
-    "prismjs": "^1.22.0"
+    "hydra-synth": "^1.3.2"
   },
   "devDependencies": {},
   "scripts": {

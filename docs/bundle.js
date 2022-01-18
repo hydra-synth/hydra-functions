@@ -4463,11 +4463,12 @@ const examples = require('./examples.js')
 const HydraComponent = require('./hydra.js')
 const CodeMirrorComponent = require('./codemirror.js')
 
-var app = choo()
+var app = choo({ hash: true })
 app.use(devtools())
 app.use(store)
 app.route('/', mainView)
 app.route('/hydra-functions', mainView)
+app.route("#functions/:function/:tab", mainView)
 app.mount('body')
 
 const hydraCanvas = new HydraComponent('hydra-canvas', app.state, app.emit)
@@ -4592,6 +4593,7 @@ function store (state, emitter) {
     }
     code = code.replace(/^\n*/, "")
     cmEditor.setCode(code)
+    emitter.emit("replaceState", `/#functions/${ obj.name }/${ tabIndex }`)
     emitter.emit('render')
   })
 

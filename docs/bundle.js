@@ -4543,6 +4543,9 @@ function mainView (state, emit) {
           <p>There are five types of functions in <a href="https://hydra.ojack.xyz/"> hydra</a>: source, geometry, blend, and modulate.
           Click on a function below to show its usage.  ( For more detailed documentation, see the <a href="https://hydra.ojack.xyz/">hydra website</a>,
             <a href="https://github.com/ojack/hydra#Getting-Started">getting started tutorial</a> or <a href="https://hydra-book.naotohieda.com/">hydra book.</a>)</p>
+          <p>
+            You can edit the code and press "Run" button or "ctrl+enter" to run the code!
+          </p>
 
             ${Object.entries(hydraTypes).map(([type, val], typeIndex) => html`
               <div class="pv2">

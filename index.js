@@ -152,7 +152,7 @@ function store (state, emitter) {
   state.functions = Object.values(hydraFunctions)
 
   emitter.on('show details', (obj, tabIndex) => {
-    emitter.emit('replaceState', `/#functions/${ obj.name }/${ tabIndex }`)
+    emitter.emit('replaceState', `#functions/${ obj.name }/${ tabIndex }`)
     emitter.emit('render')
   })
 

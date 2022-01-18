@@ -98,11 +98,37 @@ module.exports = class CodeMirror extends Component {
   }
 
   createElement () {
-    this.errorMessage = html`<p class="red h1 courier pa0 ma0" style="background-color:rgba(255,255,255,0.3)"></p>`
-    return html`
-    <div class="w-100">
-      <div class="editor"></div>
-      ${ this.errorMessage }
-    </div>`
+    if (this.editable) {
+      const evaluate = () => {
+        this.evaluate()
+      }
+      const reset = () => {
+        this.emit('rendered:editor')
+      }
+      const openin = () => {
+        window.open(`https://hydra.ojack.xyz/?code=${btoa(
+          encodeURIComponent(this.getLastCode())
+        )}`)
+      }
+      this.errorMessage = html`<p class="red h1 courier pa0 ma0" style="background-color:rgba(255,255,255,0.3)"></p>`
+      return html`
+      <div class="flex justify-between">
+        <div class="flex flex-column justify-around">
+          <button class="courier br0 h-100" title="run" onclick=${ evaluate }>▶</button>
+          <button class="courier br0 h-100" title="reset" onclick=${ reset }>💔</button>
+          <button class="courier br0 h-100" title="open in editor" onclick=${ openin }>🚀</button>
+        </div>
+        <div class="w-100">
+          <div class="editor"></div>
+          ${ this.errorMessage }
+        </div>
+      </div>`
+    }
+    else {
+      return html`
+      <div class="w-100">
+        <div class="editor"></div>
+      </div>`
+    }
   }
 }

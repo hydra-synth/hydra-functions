@@ -97,14 +97,6 @@ function mainView (state, emit) {
       emit('rendered:usage')
     }
 
-    function evaluate() {
-      cmEditor.evaluate();
-    }
-    function openin() {
-      window.open(`https://hydra.ojack.xyz/?code=${btoa(
-        encodeURIComponent(cmEditor.getLastCode())
-      )}`)
-    }
     return html`<div class="pa2 overflow-y-auto w-50-ns w-100 w-100-m" style="
       height:${obj===null?'0px':'100%'};display:${obj===null?'none':'block'}
       ">
@@ -118,14 +110,7 @@ function mainView (state, emit) {
           </div>
         </div>
         ${ codeExample }
-        <div class="flex justify-between">
-          <div class="flex flex-column justify-around">
-            <button class="courier br0 h-100" title="run" onclick=${ evaluate }>▶</button>
-            <button class="courier br0 h-100" title="reset" onclick=${ () => emit('rendered:editor') }>💔</button>
-            <button class="courier br0 h-100" title="open in editor" onclick=${ openin }>🚀</button>
-          </div>
-          ${ cmEditor.render(state) }
-        </div>
+        ${ cmEditor.render(state) }
       </div>
     </div>`
   }
@@ -146,7 +131,7 @@ function mainView (state, emit) {
           Click on a function below to show its usage.  ( For more detailed documentation, see the <a href="https://hydra.ojack.xyz/">hydra website</a>,
             <a href="https://github.com/ojack/hydra#Getting-Started">getting started tutorial</a> or <a href="https://hydra-book.naotohieda.com/">hydra book.</a>)</p>
           <p>
-            You can edit the code and press "▶" button or "ctrl+enter" to run the code!
+            You can directly edit the code and press "▶" button or "ctrl+enter" to run it!
           </p>
 
           ${ formattedFunctionGroups.map(({ type, val, funcs }) => html`

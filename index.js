@@ -49,7 +49,9 @@ function mainView (state, emit) {
       cmUsage.setCode(functionName)
     }
 
-
+    function evaluate() {
+      cmEditor.evaluate();
+    }
     return html`<div class="pa2 overflow-y-auto w-50-ns w-100 w-100-m" style="
       height:${obj===null?'0px':'100%'};display:${obj===null?'none':'block'}
       ">
@@ -62,7 +64,10 @@ function mainView (state, emit) {
             ${ hydraCanvas.render(state) }
             ${codeExample}
         </div>
-        ${ cmEditor.render(state) }
+        <div class="flex justify-between">
+          <button class="courier br0" onclick=${ evaluate }>Run</button>
+          ${ cmEditor.render(state) }
+        </div>
       </div>
     </div>`
   }

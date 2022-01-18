@@ -3961,7 +3961,8 @@ module.exports = class CodeMirror extends Component {
 
     let theme = EditorView.theme({
       "&": {
-        backgroundColor: "rgba(255,255,255,0.5)"
+        backgroundColor: "rgba(255,255,255,0.5)",
+        minHeight: this.editable ? "8rem" : "1rem",
       },
     });
     
@@ -3973,6 +3974,7 @@ module.exports = class CodeMirror extends Component {
         javascript(),
         defaultHighlightStyle.fallback,
         EditorView.editable.of(this.editable),
+        EditorView.lineWrapping,
       ],
     })
 
@@ -3997,7 +3999,7 @@ module.exports = class CodeMirror extends Component {
   }
 
   createElement () {
-    return html`<div></div>`
+    return html`<div class="w-100"></div>`
   }
 }
 
@@ -4503,7 +4505,9 @@ function mainView (state, emit) {
       cmUsage.setCode(functionName)
     }
 
-
+    function evaluate() {
+      cmEditor.evaluate();
+    }
     return html`<div class="pa2 overflow-y-auto w-50-ns w-100 w-100-m" style="
       height:${obj===null?'0px':'100%'};display:${obj===null?'none':'block'}
       ">
@@ -4516,7 +4520,10 @@ function mainView (state, emit) {
             ${ hydraCanvas.render(state) }
             ${codeExample}
         </div>
-        ${ cmEditor.render(state) }
+        <div class="flex justify-between">
+          <button class="courier br0" onclick=${ evaluate }>Run</button>
+          ${ cmEditor.render(state) }
+        </div>
       </div>
     </div>`
   }

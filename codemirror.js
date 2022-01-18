@@ -29,7 +29,8 @@ module.exports = class CodeMirror extends Component {
 
     let theme = EditorView.theme({
       "&": {
-        backgroundColor: "rgba(255,255,255,0.5)"
+        backgroundColor: "rgba(255,255,255,0.5)",
+        minHeight: this.editable ? "8rem" : "1rem",
       },
     });
     
@@ -41,6 +42,7 @@ module.exports = class CodeMirror extends Component {
         javascript(),
         defaultHighlightStyle.fallback,
         EditorView.editable.of(this.editable),
+        EditorView.lineWrapping,
       ],
     })
 
@@ -65,6 +67,6 @@ module.exports = class CodeMirror extends Component {
   }
 
   createElement () {
-    return html`<div></div>`
+    return html`<div class="w-100"></div>`
   }
 }

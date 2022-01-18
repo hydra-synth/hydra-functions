@@ -4468,7 +4468,7 @@ app.use(devtools())
 app.use(store)
 app.route('/', mainView)
 app.route('/hydra-functions', mainView)
-app.route("#functions/:function/:tab", mainView)
+app.route('#functions/:function/:tab', mainView)
 app.mount('body')
 
 const formattedFunctionGroups = []
@@ -4487,6 +4487,33 @@ const cmEditor = new CodeMirrorComponent('cm-editor', app.state, app.emit)
 const cmUsage = new CodeMirrorComponent('cm-usage', app.state, app.emit, false)
 
 function mainView (state, emit) {
+  state.cm = {}
+  const allFuncs = []
+  for (const group of formattedFunctionGroups) {
+    allFuncs.push(...group.funcs)
+  }
+  const obj = allFuncs.find(e => e.name === state.params.function)
+  if (obj !== undefined) {
+    state.selected = obj
+    state.selectedIndex = obj.typeIndex
+    state.tabIndex = state.params.tab
+    console.log(obj)
+
+    const d = examples[obj.name]
+    let code = ''
+    if(d && d.example) {
+      if(Array.isArray(d.example)) {
+        code = d.example[state.tabIndex]
+      }
+      else {
+        code = d.example
+      }
+    }
+    code = code.replace(/^\n*/, '')
+    // cmEditor.setCode(code)
+    state.cm.editor = code
+  }
+
   function selected (obj) {
   //  if(obj === null) return ''
     let codeExample = ''
@@ -4507,13 +4534,9 @@ function mainView (state, emit) {
 
       const functionName =   `${obj.name}( ${obj.inputs.map((input) => `${input.name}${input.default ? `: ${input.default}`: ''}`).join(', ')} )`
       codeExample = html`<div class="tabs">${tabs}</div>`
-        // <ul>
-        //   ${obj.inputs.map((input) => html`<li>
-        //     ${input.name}:: ${input.type} ${input.default?`(default = ${input.default})`: ''}
-        //   </li>`)}
-        // </ul>
-        //   ${d.description}
-      cmUsage.setCode(functionName)
+      // cmUsage.setCode(functionName)
+      state.cm.usage = functionName
+      emit('renderedUsage')
     }
 
     function evaluate() {
@@ -4542,7 +4565,7 @@ function mainView (state, emit) {
   //const inputs = obj.inputs.map((input))
   const color = state.selectedIndex === null ? 'white' : `hsl(${20 + state.selectedIndex*60 }, 100%, 90%)`
 
-
+  emit('renderedEditor')
 
   return html`
     <body class="pa2 f6 georgia w-100 h-100 flex justify-center" style="background-color:${color};transition: background-color 1s;">
@@ -4583,34 +4606,28 @@ function store (state, emitter) {
   state.selectedIndex = null
   state.tabIndex = 0
   state.functions = Object.values(hydraFunctions)
-  //console.log(functions.generator.glslTransforms)
 
   emitter.on('show details', (obj, tabIndex) => {
-    state.selected = obj
-    state.selectedIndex = obj.typeIndex
-    state.tabIndex = tabIndex
-    console.log(obj)
-
-    const d = examples[obj.name]
-    let code = ''
-    if(d && d.example) {
-      if(Array.isArray(d.example)) {
-        code = d.example[tabIndex]
-      }
-      else {
-        code = d.example
-      }
-    }
-    code = code.replace(/^\n*/, "")
-    cmEditor.setCode(code)
-    emitter.emit("replaceState", `/#functions/${ obj.name }/${ tabIndex }`)
+    emitter.emit('replaceState', `/#functions/${ obj.name }/${ tabIndex }`)
     emitter.emit('render')
   })
 
-  // emitter.on('increment', function (count) {
-  //   state.count += count
-  //   emitter.emit('render')
-  // })
+  emitter.on('DOMContentLoaded', () => {
+    cmUsage.setCode(state.cm.usage)
+    cmEditor.setCode(state.cm.editor)
+  })
+
+  emitter.on('renderedUsage', () => {
+    if (cmUsage.view !== undefined) {
+      cmUsage.setCode(state.cm.usage)
+    }
+  })
+
+  emitter.on('renderedEditor', () => {
+      if (cmEditor.view !== undefined) {
+      cmEditor.setCode(state.cm.editor)
+    }
+  })
 }
 
 },{"./codemirror.js":12,"./examples.js":13,"./hydra.js":14,"./types.js":111,"choo":43,"choo-devtools":30,"choo/html":42,"hydra-synth/src/glsl/glsl-functions":56}],16:[function(require,module,exports){

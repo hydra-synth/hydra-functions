@@ -62,6 +62,10 @@ module.exports = class CodeMirror extends Component {
     }
   }
 
+  getLastCode () {
+    return this.view.state.doc.toString()
+  }
+
   update () {
     return false
   }

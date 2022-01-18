@@ -3994,6 +3994,10 @@ module.exports = class CodeMirror extends Component {
     }
   }
 
+  getLastCode () {
+    return this.view.state.doc.toString()
+  }
+
   update () {
     return false
   }
@@ -4550,11 +4554,16 @@ function mainView (state, emit) {
       codeExample = html`<div class="tabs">${tabs}</div>`
       // cmUsage.setCode(functionName)
       state.cm.usage = functionName
-      emit('renderedUsage')
+      emit('rendered:usage')
     }
 
     function evaluate() {
       cmEditor.evaluate();
+    }
+    function openin() {
+      window.open(`https://hydra.ojack.xyz/?code=${btoa(
+        encodeURIComponent(cmEditor.getLastCode())
+      )}`)
     }
     return html`<div class="pa2 overflow-y-auto w-50-ns w-100 w-100-m" style="
       height:${obj===null?'0px':'100%'};display:${obj===null?'none':'block'}
@@ -4569,7 +4578,11 @@ function mainView (state, emit) {
             ${codeExample}
         </div>
         <div class="flex justify-between">
-          <button class="courier br0" onclick=${ evaluate }>Run</button>
+          <div class="flex flex-column justify-around">
+            <button class="courier br0 h-100" title="run" onclick=${ evaluate }>▶</button>
+            <button class="courier br0 h-100" title="reset" onclick=${ () => emit('rendered:editor') }>💔</button>
+            <button class="courier br0 h-100" title="open in editor" onclick=${ openin }>🚀</button>
+          </div>
           ${ cmEditor.render(state) }
         </div>
       </div>
@@ -4579,7 +4592,7 @@ function mainView (state, emit) {
   //const inputs = obj.inputs.map((input))
   const color = state.selectedIndex === null ? 'white' : `hsl(${20 + state.selectedIndex*60 }, 100%, 90%)`
 
-  emit('renderedEditor')
+  emit('rendered:editor')
 
   return html`
     <body class="pa2 f6 georgia w-100 h-100 flex justify-center" style="background-color:${color};transition: background-color 1s;">
@@ -4592,7 +4605,7 @@ function mainView (state, emit) {
           Click on a function below to show its usage.  ( For more detailed documentation, see the <a href="https://hydra.ojack.xyz/">hydra website</a>,
             <a href="https://github.com/ojack/hydra#Getting-Started">getting started tutorial</a> or <a href="https://hydra-book.naotohieda.com/">hydra book.</a>)</p>
           <p>
-            You can edit the code and press "Run" button or "ctrl+enter" to run the code!
+            You can edit the code and press "▶" button or "ctrl+enter" to run the code!
           </p>
 
           ${ formattedFunctionGroups.map(({ type, val, funcs }) => html`
@@ -4631,14 +4644,15 @@ function store (state, emitter) {
     cmEditor.setCode(state.cm.editor)
   })
 
-  emitter.on('renderedUsage', () => {
+  emitter.on('rendered:usage', () => {
     if (cmUsage.view !== undefined) {
       cmUsage.setCode(state.cm.usage)
     }
   })
 
-  emitter.on('renderedEditor', () => {
-      if (cmEditor.view !== undefined) {
+  emitter.on('rendered:editor', () => {
+    // by chance, this can be used for resetting too
+    if (cmEditor.view !== undefined) {
       cmEditor.setCode(state.cm.editor)
     }
   })

@@ -26,16 +26,24 @@ module.exports = class CodeMirror extends Component {
       keymaps.push(keymap.of({key: 'Ctrl-Enter', run: () => this.evaluate(), preventDefault: true}))
       keymaps.push(keymap.of(defaultKeymap))
     }
+
+    let theme = EditorView.theme({
+      "&": {
+        backgroundColor: "rgba(255,255,255,0.5)"
+      },
+    });
+    
     const editorState = EditorState.create({
       doc: 'Hello World',
       extensions: [
         keymaps,
+        theme,
         javascript(),
         defaultHighlightStyle.fallback,
         EditorView.editable.of(this.editable),
       ],
     })
-    
+
     this.view = new EditorView({
       state: editorState,
       parent: element,

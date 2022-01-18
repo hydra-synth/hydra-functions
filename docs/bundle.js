@@ -3954,12 +3954,25 @@ module.exports = class CodeMirror extends Component {
       this.view.dispatch({
         effects: this.theme.reconfigure(EditorView.theme({
           '&': {
-            border: 'solid rgba(0,0,0,0)',
+            border: 'solid lime',
             backgroundColor: 'rgba(255,255,255,0.5)',
             minHeight: this.editable ? '8rem' : '1rem',
+            transition: 'border 0s',
           },
         }))
-      })  
+      })
+      setTimeout(() => {
+        this.view.dispatch({
+          effects: this.theme.reconfigure(EditorView.theme({
+            '&': {
+              border: 'solid rgba(0,0,0,0)',
+              backgroundColor: 'rgba(255,255,255,0.5)',
+              minHeight: this.editable ? '8rem' : '1rem',
+              transition: 'border 1s',
+            },
+          }))
+        })
+      }, 500)
       this.errorMessage.innerHTML = ''
     } catch (e) {
       this.errorMessage.innerHTML = e
@@ -3969,6 +3982,7 @@ module.exports = class CodeMirror extends Component {
             border: 'solid red',
             backgroundColor: 'rgba(255,255,255,0.5)',
             minHeight: this.editable ? '8rem' : '1rem',
+            transition: 'border 0s',
           },
         }))
       })  
@@ -3989,6 +4003,7 @@ module.exports = class CodeMirror extends Component {
         border: 'solid rgba(0,0,0,0)',
         backgroundColor: 'rgba(255,255,255,0.5)',
         minHeight: this.editable ? '8rem' : '1rem',
+        transition: 'border 1s',
       },
     })
     

@@ -7,6 +7,55 @@ const examples = require('./examples.js')
 const HydraComponent = require('./hydra.js')
 const CodeMirrorComponent = require('./codemirror.js')
 
+const i18next = require('i18next')
+const i18nextBrowserLanguageDetector = require('i18next-browser-languagedetector')
+
+const languageResources = {
+  en: {
+    translation: {
+      'language-name': 'English',
+      'example': 'Example',
+      'usage': 'Usage',
+      'title': 'Hydra functions',
+      'intro1': () => html`There are five types of functions in <a href="https://hydra.ojack.xyz/"> hydra</a>: source, geometry, color, blend, and modulate.
+      Click on a function below to show its usage.  ( For more detailed documentation, see the <a href="https://hydra.ojack.xyz/">hydra website</a>,
+        <a href="https://github.com/ojack/hydra#Getting-Started">getting started tutorial</a> or <a href="https://hydra-book.glitch.me/">Hydra Book.</a>)`,
+      'intro2': 'You can directly edit the code and press "▶" button or "ctrl+enter" to run it!',
+      'source': 'Source',
+      'geometry': 'Geometry',
+      'color': 'Color',
+      'blend': 'Blend',
+      'modulate': 'Modulate',
+    }
+  },
+  ja: {
+    translation: {
+      'language-name': '日本語',
+      'example': 'サンプル',
+      'usage': '使い方',
+      'title': 'Hydra 関数',
+      'intro1': () => html`<a href="https://hydra.ojack.xyz/"> hydra</a> にはソース (source)、ジオメトリ (geometry)、カラー (color)、ブレンド (blend)、モジュレート (modulate) の五つのタイプの関数があります。
+      使い方を表示するには下の関数一覧をクリックしてください。（詳細は<a href="https://hydra.ojack.xyz/">hydra ウェブサイト</a>、
+        <a href="https://github.com/ojack/hydra#Getting-Started">チュートリアル</a>、<a href="https://hydra-book.glitch.me/">Hydra Book</a>を参照してください）`,
+      'intro2': '直接コードを編集して、「▶」ボタンか "ctrl+enter" を押せばコードを実行できます！',
+      'source': 'ソース (Source)',
+      'geometry': 'ジオメトリ (Geometry)',
+      'color': 'カラー (Color)',
+      'blend': 'ブレンド (Blend)',
+      'modulate': 'モジュレート (Modulate)',
+    }
+  }
+}
+
+i18next
+.use(i18nextBrowserLanguageDetector)
+.init({
+  debug: true,
+  returnObjects: true,
+  fallbackLng: 'en',
+  resources: languageResources,
+})
+
 var app = choo({ hash: true })
 app.use(devtools())
 app.use(store)
@@ -85,7 +134,7 @@ function mainView (state, emit) {
           for(let i = 0; i < d.example.length; i++) {
             const isSelected = i == state.tabIndex;
             const hsl = `hsl(${20 + state.selectedIndex*60 }, ${isSelected?100:20}%, ${isSelected?90:60}%)`
-            tabs.push(html`<div class="tab courier pointer dib ma1 pa1 pv1" style="background-color:${hsl}" onclick=${()=>emit('show details', obj, i)}>Example ${i}</div>`);
+            tabs.push(html`<div class="tab courier pointer dib ma1 pa1 pv1" style="background-color:${hsl}" onclick=${()=>emit('show details', obj, i)}>${i18next.t('example')} ${i}</div>`);
           }
         }
       }
@@ -101,9 +150,9 @@ function mainView (state, emit) {
       height:${obj===null?'0px':'100%'};display:${obj===null?'none':'block'}
       ">
       <div class="pa3" style="background-color:hsl(${20 + state.selectedIndex*60 }, 100%, 80%)">
-        <div class="pv2 f5">Usage</div>
+        <div class="pv2 f5">${i18next.t('usage')}</div>
         ${ cmUsage.render(state) }
-        <div class="pv2 f5">Example</div>
+        <div class="pv2 f5">${i18next.t('example')}</div>
         <div class="w-100 flex justify-center">
           <div class="pa4">
               ${ hydraCanvas.render(state) }
@@ -120,23 +169,40 @@ function mainView (state, emit) {
 
   emit('rendered:editor')
 
+  const languageButtons = []
+  const languages = Object.keys(languageResources)
+  for (let i = 0; i < languages.length; i++) {
+    const lang = languages[i]
+    languageButtons.push(html`
+      <div class="pointer dib underline" onclick=${ () => {
+        i18next.changeLanguage(lang, (err, t) => {
+          console.log(err, t)
+          emit('render')
+        })
+      } }>${ i18next.getFixedT(lang)('language-name') }</div>
+    `)
+    if (i < languages.length - 1) {
+      languageButtons.push(' | ')
+    }
+  }
   return html`
     <body class="pa2 f6 georgia w-100 h-100 flex justify-center" style="background-color:${color};transition: background-color 1s;">
       <div style = "max-width: 1000px">
-        <div class="pt2 f3"> Hydra functions${state.selected === null ? '' : `::: ${state.selected.name}`} </div>
+        <div class="flex justify-between items-end">
+          <div class="pt2 f3"> ${i18next.t('title')}${state.selected === null ? '' : `::: ${state.selected.name}`} </div>
+          <div class="pv1"> ${ languageButtons } </div>
+        </div>
         <div class="flex flex-column-reverse flex-row-ns flex-column-reverse-m w-100" style="max-width:1000px">
 
           <div style="" class="overflow-y-auto w-50-ns w-100 w-100-m ">
-          <p>There are five types of functions in <a href="https://hydra.ojack.xyz/"> hydra</a>: source, geometry, blend, and modulate.
-          Click on a function below to show its usage.  ( For more detailed documentation, see the <a href="https://hydra.ojack.xyz/">hydra website</a>,
-            <a href="https://github.com/ojack/hydra#Getting-Started">getting started tutorial</a> or <a href="https://hydra-book.naotohieda.com/">hydra book.</a>)</p>
+          <p>${i18next.t('intro1')()}</p>
           <p>
-            You can directly edit the code and press "▶" button or "ctrl+enter" to run it!
+            ${i18next.t('intro2')}
           </p>
 
           ${ formattedFunctionGroups.map(({ type, val, funcs }) => html`
             <div class="pv2">
-              <div class="mb3 f5">${val.label.charAt(0).toUpperCase() + val.label.slice(1)}</div>
+              <div class="mb3 f5">${i18next.t(val.label)}</div>
               ${funcs.map((obj, index) => html`
               <div class="courier dib ma1 pointer dim token function pa1 pv1" onclick=${()=>emit('show details', obj, 0)}
                 title=${obj.name}

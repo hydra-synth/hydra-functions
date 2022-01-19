@@ -108,7 +108,6 @@ module.exports = class CodeMirror extends Component {
   }
 
   update () {
-    console.log('oi')
     return false
   }
 

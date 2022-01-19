@@ -36,7 +36,12 @@ const formattedFunctionGroups = []
 
 Object.entries(hydraTypes).map(([type, val], typeIndex) => {
   const formattedFunctionGroup = { type, val, typeIndex, funcs: [] }
-  hydraFunctions.filter((obj) => obj.type === type).sort((a, b) => a.name - b.name).map((obj, index) => {
+  const sortedObjList = hydraFunctions.filter((obj) => obj.type === type).sort((a, b) => a.name - b.name)
+  sortedObjList.map((obj, index) => {
+    if (examples[obj.name] === undefined) {
+      // functions that are not documented
+      obj.undocumented = true
+    }
     obj.typeIndex = typeIndex
     formattedFunctionGroup.funcs.push(obj)
   })
@@ -169,7 +174,7 @@ function mainView (state, emit) {
             <div class="pv2">
               <div class="mb3 f5">${i18next.t(val.label)}</div>
               ${funcs.map((obj, index) => html`
-              <div class="courier dib ma1 pointer dim token function pa1 pv1" onclick=${()=>emit('show details', obj, 0)}
+              <div class="courier dib ma1 pointer dim token function pa1 pv1 ${ obj.undocumented ? 'gray' : '' }" onclick=${()=>emit('show details', obj, 0)}
                 title=${obj.name}
                 style="border-bottom: 4px solid hsl(${20 + obj.typeIndex*60 }, 100%, 70%);line-height:0.6"
                 >${obj.name}</div>

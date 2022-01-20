@@ -4508,37 +4508,54 @@ const hydraFunctions = require('hydra-synth/src/glsl/glsl-functions')
 const hydraTypes = require('./types.js')
 const examples = require('./examples.js')
 
-const formattedFunctionGroups = []
+class HydraReference {
+  constructor () {
+    this.formattedFunctionGroups = []
 
-Object.entries(hydraTypes).map(([type, val], typeIndex) => {
-  const formattedFunctionGroup = { type, val, typeIndex, funcs: [] }
-  const sortedObjList = hydraFunctions.filter((obj) => obj.type === type).sort((a, b) => a.name - b.name)
-  sortedObjList.map((obj, index) => {
-    if (examples[obj.name] === undefined) {
-      // functions that are not documented
-      obj.undocumented = true
+    Object.entries(hydraTypes).map(([type, val], typeIndex) => {
+      const formattedFunctionGroup = { type, val, typeIndex, funcs: [] }
+      const sortedObjList = hydraFunctions.filter((obj) => obj.type === type).sort((a, b) => a.name - b.name)
+      sortedObjList.map((obj, index) => {
+        if (examples[obj.name] === undefined) {
+          // functions that are not documented
+          obj.undocumented = true
+        }
+        obj.typeIndex = typeIndex
+        formattedFunctionGroup.funcs.push(obj)
+      })
+      this.formattedFunctionGroups.push(formattedFunctionGroup)
+    })
+
+    this.allFuncs = []
+    for (const group of this.formattedFunctionGroups) {
+      this.allFuncs.push(...group.funcs)
     }
-    obj.typeIndex = typeIndex
-    formattedFunctionGroup.funcs.push(obj)
-  })
-  formattedFunctionGroups.push(formattedFunctionGroup)
-})
+  }
 
-function getExamples(name) {
-  let ref = examples[name]
-  if (ref === undefined) {
-    return []
+  getGroups () {
+    return this.formattedFunctionGroups
   }
-  if (ref.example === undefined) {
-    return []
+
+  getPage (name) {
+    return this.allFuncs.find(e => e.name === name)
   }
-  if (Array.isArray(ref.example) === false) {
-    return [ref.example]
+
+  getExamples (name) {
+    let ref = examples[name]
+    if (ref === undefined) {
+      return []
+    }
+    if (ref.example === undefined) {
+      return []
+    }
+    if (Array.isArray(ref.example) === false) {
+      return [ref.example]
+    }
+    return ref.example
   }
-  return ref.example
 }
 
-module.exports = { formattedFunctionGroups, getExamples }
+module.exports = () => new HydraReference
 
 },{"./examples.js":13,"./types.js":130,"hydra-synth/src/glsl/glsl-functions":73}],15:[function(require,module,exports){
 var html = require('choo/html')
@@ -4573,7 +4590,7 @@ var choo = require('choo')
 const HydraComponent = require('./hydra.js')
 const CodeMirrorComponent = require('./codemirror.js')
 
-const { formattedFunctionGroups, getExamples, getExample } = require('./hydra-reference.js')
+const HydraReference = require('./hydra-reference.js')
 
 const i18next = require('i18next')
 const i18nextBrowserLanguageDetector = require('i18next-browser-languagedetector')
@@ -4605,18 +4622,21 @@ const cmEditor = new CodeMirrorComponent('cm-editor', app.state, app.emit)
 const cmUsage = new CodeMirrorComponent('cm-usage', app.state, app.emit, false)
 
 function indexToHsl (index, s, l) {
-  return `hsl(${ 20 + index * 60 }, ${ s }%, ${ l }%)`
+  if (index !== undefined) {
+    return `hsl(${ 20 + index * 60 }, ${ s }%, ${ l }%)`
+  }
+  return 'white'
 }
 
 function exampleTabView (state, emit) {
-  let obj = state.selected
+  let obj = state.page.selected
   if (obj !== null) {
-    const examples = getExamples(obj.name)
+    const examples = state.hydraReference.getExamples(obj.name)
 
     let tabs = [];
     for(let i = 0; i < examples.length; i++) {
-      const isSelected = i == state.tabIndex;
-      const hsl = indexToHsl(state.selectedIndex, isSelected?100:20, isSelected?90:60)
+      const isSelected = i == state.page.tabIndex;
+      const hsl = indexToHsl(state.page.selected.typeIndex, isSelected?100:20, isSelected?90:60)
       tabs.push(html`
         <div class="tab courier pointer dib ma1 pa1 pv1" style="background-color:${hsl}" onclick=${()=>emit('show details', obj, i)}>
           ${i18next.t('example')} ${i}
@@ -4632,11 +4652,11 @@ function exampleTabView (state, emit) {
 }
 
 function editorView (state, emit) {
-  obj = state.selected
+  obj = state.page.selected
   //  if(obj === null) return ''
 
   return html`<div class="pa2 overflow-y-auto w-50-ns w-100 w-100-m h-100 ${obj===null?'dn':'db'}">
-    <div class="pa3" style="background-color:${ indexToHsl(state.selectedIndex, 100, 80) }">
+    <div class="pa3" style="background-color:${ indexToHsl(state.page.selected?.typeIndex, 100, 80) }">
       <div class="pv2 f5">
         ${ i18next.t('usage') }
       </div>
@@ -4678,7 +4698,7 @@ function languageView (state, emit) {
 
 function functionListView (state, emit) {
   const groups = []
-  for (const group of formattedFunctionGroups) {
+  for (const group of state.hydraReference.getGroups()) {
     const { type, val, funcs } = group
     const functions = []
     for (const obj of funcs) {
@@ -4706,13 +4726,13 @@ function functionListView (state, emit) {
 
 function mainView (state, emit) {
   //const inputs = obj.inputs.map((input))
-  const color = state.selectedIndex === null ? 'white' : indexToHsl(state.selectedIndex, 100, 90)
+  const color = indexToHsl(state.page.selected?.typeIndex, 100, 90)
 
   return html`
     <body class="pa2 f6 georgia w-100 h-100 flex justify-center" style="background-color:${color};transition: background-color 1s;">
       <div style = "max-width: 1000px">
         <div class="flex justify-between items-end">
-          <div class="pt2 f3"> ${i18next.t('title')}${state.selected === null ? '' : `::: ${state.selected.name}`} </div>
+          <div class="pt2 f3"> ${i18next.t('title')}${state.page.selected === null ? '' : `::: ${state.page.selected.name}`} </div>
           <div class="pv1"> ${ languageView(state, emit) } </div>
         </div>
         <div class="flex flex-column-reverse flex-row-ns flex-column-reverse-m w-100" style="max-width:1000px">
@@ -4734,10 +4754,12 @@ function mainView (state, emit) {
 
 function store (state, emitter) {
   //const functions = new HydraGen()
+  state.hydraReference = HydraReference()
   state.cm = { editor: '' }
-  state.selected = null
-  state.selectedIndex = null
-  state.tabIndex = 0
+  state.page = {
+    selected: null,
+    tabIndex: 0,
+  }
 
   emitter.on('show details', (obj, tabIndex) => {
     emitter.emit('pushState', `#functions/${ obj.name }/${ tabIndex }`)
@@ -4763,27 +4785,22 @@ function store (state, emitter) {
   })
 
   emitter.on('editor:update', () => {
-    const allFuncs = []
-    for (const group of formattedFunctionGroups) {
-      allFuncs.push(...group.funcs)
-    }
-    const obj = allFuncs.find(e => e.name === state.params.function)
+    const obj = state.hydraReference.getPage(state.params.function)
     if (obj !== undefined) {
-      state.selected = obj
-      state.selectedIndex = obj.typeIndex
-      state.tabIndex = state.params.tab
+      state.page.selected = obj
+      state.page.tabIndex = state.params.tab
       console.log(obj)
   
       function getExampleCode(name, index) {
-        const examples = getExamples(name)
+        const examples = state.hydraReference.getExamples(name)
         return examples[index]
       }
-      let code = getExampleCode(obj.name, state.tabIndex)
+      let code = getExampleCode(obj.name, state.page.tabIndex)
       if (code === undefined) {
         // illegal index
-        state.tabIndex = 0
-        code = getExampleCode(obj.name, state.tabIndex)
-        emitter.emit('pushState', `#functions/${ obj.name }/${ state.tabIndex }`)
+        state.page.tabIndex = 0
+        code = getExampleCode(obj.name, state.page.tabIndex)
+        emitter.emit('pushState', `#functions/${ obj.name }/${ state.page.tabIndex }`)
       }
   
       code = code.replace(/^\n*/, '')

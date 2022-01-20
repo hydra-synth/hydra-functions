@@ -52,6 +52,85 @@ const hydraCanvas = new HydraComponent('hydra-canvas', app.state, app.emit)
 const cmEditor = new CodeMirrorComponent('cm-editor', app.state, app.emit)
 const cmUsage = new CodeMirrorComponent('cm-usage', app.state, app.emit, false)
 
+function indexToHsl (index, s, l) {
+  return `hsl(${ 20 + index * 60 }, ${ s }%, ${ l }%)`
+}
+
+function tabView (state, emit) {
+  let obj = state.selected
+  if (obj !== null) {
+    const d = examples[obj.name]
+
+    let tabs = [];
+    if(d && d.example) {
+      if(Array.isArray(d.example)) {
+        for(let i = 0; i < d.example.length; i++) {
+          const isSelected = i == state.tabIndex;
+          const hsl = indexToHsl(state.selectedIndex, isSelected?100:20, isSelected?90:60)
+          tabs.push(html`
+            <div class="tab courier pointer dib ma1 pa1 pv1" style="background-color:${hsl}" onclick=${()=>emit('show details', obj, i)}>
+              ${i18next.t('example')} ${i}
+            </div>
+          `)
+        }
+      }
+    }
+
+    const functionName =   `${obj.name}( ${obj.inputs.map((input) => `${input.name}${input.default ? `: ${input.default}`: ''}`).join(', ')} )`
+    // cmUsage.setCode(functionName)
+    state.cm.usage = functionName
+    emit('rendered:usage')
+    return tabs = html`<div class="tabs">${tabs}</div>`
+  }
+  return ''
+}
+
+function editorView (state, emit) {
+  obj = state.selected
+  //  if(obj === null) return ''
+  let tabs = tabView(state, emit)
+
+  return html`<div class="pa2 overflow-y-auto w-50-ns w-100 w-100-m h-100 ${obj===null?'dn':'db'}">
+    <div class="pa3" style="background-color:${ indexToHsl(state.selectedIndex, 100, 80) }">
+      <div class="pv2 f5">
+        ${ i18next.t('usage') }
+      </div>
+      ${ cmUsage.render(state) }
+      <div class="pv2 f5">
+        ${ i18next.t('example') }
+      </div>
+      <div class="w-100 flex justify-center">
+        <div class="pa4">
+            ${ hydraCanvas.render(state) }
+        </div>
+      </div>
+      ${ tabs }
+      ${ cmEditor.render(state) }
+    </div>
+  </div>`
+}
+
+function languageView (state, emit) {
+  const languageButtons = []
+  const languages = Object.keys(languageResources)
+  for (let i = 0; i < languages.length; i++) {
+    const lang = languages[i]
+    const onclick = () => {
+      i18next.changeLanguage(lang, (err, t) => {
+        console.log(err, t)
+        emit('render')
+      })
+    }
+    languageButtons.push(html`
+      <div class="pointer dib underline" onclick=${ onclick }>${ i18next.getFixedT(lang)('language-name') }</div>
+    `)
+    if (i < languages.length - 1) {
+      languageButtons.push(' | ')
+    }
+  }
+  return languageButtons
+}
+
 function mainView (state, emit) {
   state.cm = {}
   const allFuncs = []
@@ -91,76 +170,17 @@ function mainView (state, emit) {
     state.cm.editor = code
   }
 
-  function selected (obj) {
-  //  if(obj === null) return ''
-    let codeExample = ''
-
-    if(obj !== null) {
-      const d = examples[obj.name]
-
-      let tabs = [];
-      if(d && d.example) {
-        if(Array.isArray(d.example)) {
-          for(let i = 0; i < d.example.length; i++) {
-            const isSelected = i == state.tabIndex;
-            const hsl = `hsl(${20 + state.selectedIndex*60 }, ${isSelected?100:20}%, ${isSelected?90:60}%)`
-            tabs.push(html`<div class="tab courier pointer dib ma1 pa1 pv1" style="background-color:${hsl}" onclick=${()=>emit('show details', obj, i)}>${i18next.t('example')} ${i}</div>`);
-          }
-        }
-      }
-
-      const functionName =   `${obj.name}( ${obj.inputs.map((input) => `${input.name}${input.default ? `: ${input.default}`: ''}`).join(', ')} )`
-      codeExample = html`<div class="tabs">${tabs}</div>`
-      // cmUsage.setCode(functionName)
-      state.cm.usage = functionName
-      emit('rendered:usage')
-    }
-
-    return html`<div class="pa2 overflow-y-auto w-50-ns w-100 w-100-m" style="
-      height:${obj===null?'0px':'100%'};display:${obj===null?'none':'block'}
-      ">
-      <div class="pa3" style="background-color:hsl(${20 + state.selectedIndex*60 }, 100%, 80%)">
-        <div class="pv2 f5">${i18next.t('usage')}</div>
-        ${ cmUsage.render(state) }
-        <div class="pv2 f5">${i18next.t('example')}</div>
-        <div class="w-100 flex justify-center">
-          <div class="pa4">
-              ${ hydraCanvas.render(state) }
-          </div>
-        </div>
-        ${ codeExample }
-        ${ cmEditor.render(state) }
-      </div>
-    </div>`
-  }
-
   //const inputs = obj.inputs.map((input))
-  const color = state.selectedIndex === null ? 'white' : `hsl(${20 + state.selectedIndex*60 }, 100%, 90%)`
+  const color = state.selectedIndex === null ? 'white' : indexToHsl(state.selectedIndex, 100, 90)
 
   emit('rendered:editor')
 
-  const languageButtons = []
-  const languages = Object.keys(languageResources)
-  for (let i = 0; i < languages.length; i++) {
-    const lang = languages[i]
-    languageButtons.push(html`
-      <div class="pointer dib underline" onclick=${ () => {
-        i18next.changeLanguage(lang, (err, t) => {
-          console.log(err, t)
-          emit('render')
-        })
-      } }>${ i18next.getFixedT(lang)('language-name') }</div>
-    `)
-    if (i < languages.length - 1) {
-      languageButtons.push(' | ')
-    }
-  }
   return html`
     <body class="pa2 f6 georgia w-100 h-100 flex justify-center" style="background-color:${color};transition: background-color 1s;">
       <div style = "max-width: 1000px">
         <div class="flex justify-between items-end">
           <div class="pt2 f3"> ${i18next.t('title')}${state.selected === null ? '' : `::: ${state.selected.name}`} </div>
-          <div class="pv1"> ${ languageButtons } </div>
+          <div class="pv1"> ${ languageView(state, emit) } </div>
         </div>
         <div class="flex flex-column-reverse flex-row-ns flex-column-reverse-m w-100" style="max-width:1000px">
 
@@ -174,15 +194,18 @@ function mainView (state, emit) {
             <div class="pv2">
               <div class="mb3 f5">${i18next.t(val.label)}</div>
               ${funcs.map((obj, index) => html`
-              <div class="courier dib ma1 pointer dim token function pa1 pv1 ${ obj.undocumented ? 'gray' : '' }" onclick=${()=>emit('show details', obj, 0)}
+              <div class="courier dib ma1 pointer dim token function pa1 pv1 ${ obj.undocumented ? 'gray' : '' }" onclick=${ () => {
+                console.log(obj)
+                emit('show details', obj, 0)
+              } }
                 title=${obj.name}
-                style="border-bottom: 4px solid hsl(${20 + obj.typeIndex*60 }, 100%, 70%);line-height:0.6"
+                style="border-bottom: 4px solid ${ indexToHsl(obj.typeIndex, 100, 70) };line-height:0.6"
                 >${obj.name}</div>
             `)}
             </div>
           `) }
           </div>
-        ${selected(state.selected)}
+        ${ editorView(state, emit) }
         </div>
       </div>
     </body>
@@ -217,5 +240,9 @@ function store (state, emitter) {
     if (cmEditor.view !== undefined) {
       cmEditor.setCode(state.cm.editor)
     }
+  })
+
+  emitter.on('navigate', () => {
+    console.log(state.params)
   })
 }

@@ -53,8 +53,9 @@ function exampleTabView (state, emit) {
       const isSelected = i == state.page.tabIndex;
       const hsl = indexToHsl(state.page.selected.typeIndex, isSelected?100:20, isSelected?90:60)
       tabs.push(html`
-        <div class="tab courier pointer dib ma1 pa1 pv1" style="background-color:${hsl}" onclick=${()=>emit('show details', obj, i)}>
-          ${i18next.t('example')} ${i}
+        <div class="tab courier pointer dib mh1 pa2 pv1" style="background-color:${hsl}" onclick=${()=>emit('show details', obj, i)}>
+          <!--${i18next.t('example')}-->
+          ${i}
         </div>
       `)
     }
@@ -69,6 +70,17 @@ function exampleTabView (state, emit) {
 function editorView (state, emit) {
   obj = state.page.selected
   //  if(obj === null) return ''
+  const evaluate = () => {
+    cmEditor.evaluate()
+  }
+  const reset = () => {
+    emit('rendered:editor')
+  }
+  const openin = () => {
+    window.open(`https://hydra.ojack.xyz/?code=${btoa(
+      encodeURIComponent(cmEditor.getLastCode())
+    )}`)
+  }
 
   return html`<div class="pa2 overflow-y-auto w-50-ns w-100 w-100-m h-100 ${obj===null?'dn':'db'}">
     <div class="pa3" style="background-color:${ indexToHsl(state.page.selected?.typeIndex, 100, 80) }">
@@ -84,8 +96,17 @@ function editorView (state, emit) {
             ${ hydraCanvas.render(state) }
         </div>
       </div>
-      ${ exampleTabView(state, emit) }
-      ${ cmEditor.render(state) }
+      <div class="flex justify-between">
+        ${ exampleTabView(state, emit) }
+        <div class="">
+          <button class="courier br0 h-100" title="${ i18next.t('run') }" onclick=${ evaluate }>▶</button>
+          <button class="courier br0 h-100" title="${ i18next.t('reset') }" onclick=${ reset }>💔</button>
+          <button class="courier br0 h-100" title="${ i18next.t('openin') }" onclick=${ openin }>🚀</button>
+        </div>
+      </div>
+      <div class="w-100">
+        ${ cmEditor.render(state) }
+      </div>
       <p>
       ${i18next.t('editor-info')}
       </p>

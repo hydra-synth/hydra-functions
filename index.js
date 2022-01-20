@@ -53,7 +53,7 @@ function exampleTabView (state, emit) {
       const isSelected = i == state.page.tabIndex;
       const hsl = indexToHsl(state.page.selected.typeIndex, isSelected?100:20, isSelected?90:60)
       tabs.push(html`
-        <div class="tab courier pointer dib mh1 pa2 pv1" style="background-color:${hsl}" onclick=${()=>emit('show details', obj, i)}>
+        <div class="tab courier pointer dib mr2 pa2 pv1" style="background-color:${hsl}" onclick=${()=>emit('show details', obj, i)}>
           <!--${i18next.t('example')}-->
           ${i}
         </div>

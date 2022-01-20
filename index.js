@@ -1,6 +1,8 @@
-var html = require('choo/html')
-var devtools = require('choo-devtools')
-var choo = require('choo')
+const html = require('choo/html')
+const raw = require('choo/html/raw')
+const devtools = require('choo-devtools')
+const choo = require('choo')
+
 const HydraComponent = require('./hydra.js')
 const CodeMirrorComponent = require('./codemirror.js')
 
@@ -15,7 +17,6 @@ i18next
 .use(i18nextBrowserLanguageDetector)
 .init({
   debug: true,
-  returnObjects: true,
   fallbackLng: 'en',
   resources: languageResources,
 })
@@ -32,8 +33,8 @@ app.route('/hydra-functions/functions/:function/:tab', mainView)
 app.mount('body')
 
 const hydraCanvas = new HydraComponent('hydra-canvas', app.state, app.emit)
-const cmEditor = new CodeMirrorComponent('cm-editor', app.state, app.emit)
-const cmUsage = new CodeMirrorComponent('cm-usage', app.state, app.emit, false)
+const cmEditor = new CodeMirrorComponent('cm-editor', app.state, app.emit, true, i18next)
+const cmUsage = new CodeMirrorComponent('cm-usage', app.state, app.emit, false, i18next)
 
 function indexToHsl (index, s, l) {
   if (index !== undefined) {
@@ -155,7 +156,12 @@ function mainView (state, emit) {
         <div class="flex flex-column-reverse flex-row-ns flex-column-reverse-m w-100" style="max-width:1000px">
 
           <div style="" class="overflow-y-auto w-50-ns w-100 w-100-m ">
-          <p>${i18next.t('intro')()}</p>
+          <p>${ raw(i18next.t('intro', {
+            hydra: 'https://hydra.ojack.xyz/',
+            gettingStarted: 'https://github.com/ojack/hydra#Getting-Started',
+            hydraBook: 'https://hydra-book.glitch.me/',
+            tb: 'target="_blank"'
+          })) }</p>
 
           ${ functionListView(state, emit) }
           </div>

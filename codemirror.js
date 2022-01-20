@@ -6,13 +6,15 @@ const {defaultHighlightStyle} = require('@codemirror/highlight')
 const {EditorView, keymap, KeyBinding} = require('@codemirror/view')
 const {defaultKeymap} = require('@codemirror/commands')
 const {javascript} = require('@codemirror/lang-javascript')
+const { default: i18next } = require('i18next')
 
 module.exports = class CodeMirror extends Component {
-  constructor (id, state, emit, editable = true) {
+  constructor (id, state, emit, editable = true, i18next) {
     super(id)
     this.local = state.components[id] = {}
     this.editable = editable
     this.emit = emit
+    this.i18next = i18next
   }
 
   evaluate () {
@@ -125,12 +127,13 @@ module.exports = class CodeMirror extends Component {
         )}`)
       }
       this.errorMessage = html`<p class="red h1 courier pa0 ma0" style="background-color:rgba(255,255,255,0.3)"></p>`
+      const i18next = this.i18next
       return html`
       <div class="flex flex-column">
         <div class="flex justify-end">
-          <button class="courier br0 h-100" title="run" onclick=${ evaluate }>▶</button>
-          <button class="courier br0 h-100" title="reset" onclick=${ reset }>💔</button>
-          <button class="courier br0 h-100" title="open in editor" onclick=${ openin }>🚀</button>
+          <button class="courier br0 h-100" title="${ i18next.t('run') }" onclick=${ evaluate }>▶</button>
+          <button class="courier br0 h-100" title="${ i18next.t('reset') }" onclick=${ reset }>💔</button>
+          <button class="courier br0 h-100" title="${ i18next.t('openin') }" onclick=${ openin }>🚀</button>
         </div>
         <div class="w-100">
           <div class="editor"></div>

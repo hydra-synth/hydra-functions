@@ -126,8 +126,8 @@ module.exports = class CodeMirror extends Component {
       }
       this.errorMessage = html`<p class="red h1 courier pa0 ma0" style="background-color:rgba(255,255,255,0.3)"></p>`
       return html`
-      <div class="flex justify-between">
-        <div class="flex flex-column justify-around">
+      <div class="flex flex-column">
+        <div class="flex justify-end">
           <button class="courier br0 h-100" title="run" onclick=${ evaluate }>▶</button>
           <button class="courier br0 h-100" title="reset" onclick=${ reset }>💔</button>
           <button class="courier br0 h-100" title="open in editor" onclick=${ openin }>🚀</button>

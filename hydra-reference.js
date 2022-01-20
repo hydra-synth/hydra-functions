@@ -1,4 +1,4 @@
-const hydraFunctions = require('hydra-synth/src/glsl/glsl-functions')
+const hydraFunctions = require('hydra-synth/src/glsl/glsl-functions')()
 const hydraTypes = require('./types.js')
 const examples = require('./examples.js')
 

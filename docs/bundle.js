@@ -4058,8 +4058,8 @@ module.exports = class CodeMirror extends Component {
       }
       this.errorMessage = html`<p class="red h1 courier pa0 ma0" style="background-color:rgba(255,255,255,0.3)"></p>`
       return html`
-      <div class="flex justify-between">
-        <div class="flex flex-column justify-around">
+      <div class="flex flex-column">
+        <div class="flex justify-end">
           <button class="courier br0 h-100" title="run" onclick=${ evaluate }>▶</button>
           <button class="courier br0 h-100" title="reset" onclick=${ reset }>💔</button>
           <button class="courier br0 h-100" title="open in editor" onclick=${ openin }>🚀</button>
@@ -4504,7 +4504,7 @@ osc(30,0.1,1).colorama(-0.1).out(o0)`]
 }
 
 },{}],14:[function(require,module,exports){
-const hydraFunctions = require('hydra-synth/src/glsl/glsl-functions')
+const hydraFunctions = require('hydra-synth/src/glsl/glsl-functions')()
 const hydraTypes = require('./types.js')
 const examples = require('./examples.js')
 
@@ -4557,7 +4557,7 @@ class HydraReference {
 
 module.exports = () => new HydraReference
 
-},{"./examples.js":13,"./types.js":130,"hydra-synth/src/glsl/glsl-functions":73}],15:[function(require,module,exports){
+},{"./examples.js":13,"./types.js":131,"hydra-synth/src/glsl/glsl-functions":74}],15:[function(require,module,exports){
 var html = require('choo/html')
 var Component = require('choo/component')
 const HydraSynth = require('hydra-synth')
@@ -4671,6 +4671,9 @@ function editorView (state, emit) {
       </div>
       ${ exampleTabView(state, emit) }
       ${ cmEditor.render(state) }
+      <p>
+      ${i18next.t('editor-info')}
+      </p>
     </div>
   </div>`
 }
@@ -4738,10 +4741,7 @@ function mainView (state, emit) {
         <div class="flex flex-column-reverse flex-row-ns flex-column-reverse-m w-100" style="max-width:1000px">
 
           <div style="" class="overflow-y-auto w-50-ns w-100 w-100-m ">
-          <p>${i18next.t('intro1')()}</p>
-          <p>
-            ${i18next.t('intro2')}
-          </p>
+          <p>${i18next.t('intro')()}</p>
 
           ${ functionListView(state, emit) }
           </div>
@@ -4810,7 +4810,7 @@ function store (state, emitter) {
   })
 }
 
-},{"./codemirror.js":12,"./hydra-reference.js":14,"./hydra.js":15,"./locales.js":17,"choo":60,"choo-devtools":47,"choo/html":59,"i18next":87,"i18next-browser-languagedetector":86}],17:[function(require,module,exports){
+},{"./codemirror.js":12,"./hydra-reference.js":14,"./hydra.js":15,"./locales.js":17,"choo":60,"choo-devtools":47,"choo/html":59,"i18next":90,"i18next-browser-languagedetector":89}],17:[function(require,module,exports){
 const html = require('choo/html')
 module.exports = {
   en: {
@@ -4819,10 +4819,10 @@ module.exports = {
       'example': 'Example',
       'usage': 'Usage',
       'title': 'Hydra functions',
-      'intro1': () => html`There are five types of functions in <a href="https://hydra.ojack.xyz/"> hydra</a>: source, geometry, color, blend, and modulate.
+      'intro': () => html`There are five types of functions in <a href="https://hydra.ojack.xyz/"> hydra</a>: source, geometry, color, blend, and modulate.
       Click on a function below to show its usage.  ( For more detailed documentation, see the <a href="https://hydra.ojack.xyz/">hydra website</a>,
         <a href="https://github.com/ojack/hydra#Getting-Started">getting started tutorial</a> or <a href="https://hydra-book.glitch.me/">Hydra Book.</a>)`,
-      'intro2': 'You can directly edit the code and press "▶" button or "ctrl+enter" to run it!',
+      'editor-info': 'You can directly edit the code and press "▶" button or "ctrl+enter" to run it!',
       'source': 'Source',
       'geometry': 'Geometry',
       'color': 'Color',
@@ -4836,10 +4836,10 @@ module.exports = {
       'example': 'サンプル',
       'usage': '使い方',
       'title': 'Hydra 関数',
-      'intro1': () => html`<a href="https://hydra.ojack.xyz/"> hydra</a> にはソース (source)、ジオメトリ (geometry)、カラー (color)、ブレンド (blend)、モジュレート (modulate) の五つのタイプの関数があります。
+      'intro': () => html`<a href="https://hydra.ojack.xyz/"> hydra</a> にはソース (source)、ジオメトリ (geometry)、カラー (color)、ブレンド (blend)、モジュレート (modulate) の五つのタイプの関数があります。
       使い方を表示するには下の関数一覧をクリックしてください。（詳細は<a href="https://hydra.ojack.xyz/">hydra ウェブサイト</a>、
         <a href="https://github.com/ojack/hydra#Getting-Started">チュートリアル</a>、<a href="https://hydra-book.glitch.me/">Hydra Book</a>を参照してください）`,
-      'intro2': '直接コードを編集して、「▶」ボタンか "ctrl+enter" を押せばコードを実行できます！',
+      'editor-info': '直接コードを編集して、「▶」ボタンか "ctrl+enter" を押せばコードを実行できます！',
       'source': 'ソース (Source)',
       'geometry': 'ジオメトリ (Geometry)',
       'color': 'カラー (Color)',
@@ -8597,7 +8597,7 @@ exports.highlightTree = highlightTree;
 exports.styleTags = styleTags;
 exports.tags = tags;
 
-},{"@codemirror/language":37,"@codemirror/rangeset":39,"@codemirror/state":40,"@codemirror/view":43,"@lezer/common":44,"style-mod":125}],36:[function(require,module,exports){
+},{"@codemirror/language":37,"@codemirror/rangeset":39,"@codemirror/state":40,"@codemirror/view":43,"@lezer/common":44,"style-mod":126}],36:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', { value: true });
@@ -22142,7 +22142,7 @@ exports.placeholder = placeholder;
 exports.runScopeHandlers = runScopeHandlers;
 exports.scrollPastEnd = scrollPastEnd;
 
-},{"@codemirror/rangeset":39,"@codemirror/state":40,"@codemirror/text":41,"style-mod":125,"w3c-keyname":126}],44:[function(require,module,exports){
+},{"@codemirror/rangeset":39,"@codemirror/state":40,"@codemirror/text":41,"style-mod":126,"w3c-keyname":127}],44:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', { value: true });
@@ -25614,7 +25614,7 @@ function expose (opts) {
   }
 }
 
-},{"./lib/copy":48,"./lib/debug":49,"./lib/help":50,"./lib/log":51,"./lib/logger":52,"./lib/perf":53,"./lib/storage":54,"events":8,"wayfarer/get-all-routes":127}],48:[function(require,module,exports){
+},{"./lib/copy":48,"./lib/debug":49,"./lib/help":50,"./lib/log":51,"./lib/logger":52,"./lib/perf":53,"./lib/storage":54,"events":8,"wayfarer/get-all-routes":128}],48:[function(require,module,exports){
 var stateCopy = require('state-copy')
 var pluck = require('plucker')
 
@@ -25630,7 +25630,7 @@ function copy (state) {
   stateCopy(isStateString ? pluck.apply(this, arguments) : state)
 }
 
-},{"plucker":116,"state-copy":124}],49:[function(require,module,exports){
+},{"plucker":117,"state-copy":125}],49:[function(require,module,exports){
 /* eslint-disable node/no-deprecated-api */
 var onChange = require('object-change-callsite')
 var nanologger = require('nanologger')
@@ -25672,7 +25672,7 @@ function debug (state, emitter, app, localEmitter) {
   })
 }
 
-},{"assert":1,"nanologger":102,"object-change-callsite":112}],50:[function(require,module,exports){
+},{"assert":1,"nanologger":103,"object-change-callsite":113}],50:[function(require,module,exports){
 module.exports = help
 
 function help () {
@@ -25783,7 +25783,7 @@ function log (state, emitter, app, localEmitter) {
 
 function noop () {}
 
-},{"clone":62,"nanologger":102,"nanoscheduler":110,"remove-array-items":55}],52:[function(require,module,exports){
+},{"clone":62,"nanologger":103,"nanoscheduler":111,"remove-array-items":55}],52:[function(require,module,exports){
 var scheduler = require('nanoscheduler')()
 var nanologger = require('nanologger')
 var Hooks = require('choo-hooks')
@@ -25868,7 +25868,7 @@ function logger (state, emitter, opts) {
   }
 }
 
-},{"choo-hooks":56,"nanologger":102,"nanoscheduler":110}],53:[function(require,module,exports){
+},{"choo-hooks":56,"nanologger":103,"nanoscheduler":111}],53:[function(require,module,exports){
 var onPerformance = require('on-performance')
 
 var BAR = '█'
@@ -26009,7 +26009,7 @@ function getMedian (args) {
 // Do nothing.
 function noop () {}
 
-},{"on-performance":114}],54:[function(require,module,exports){
+},{"on-performance":115}],54:[function(require,module,exports){
 var pretty = require('prettier-bytes')
 
 module.exports = storage
@@ -26052,7 +26052,7 @@ function fmt (num) {
 
 function noop () {}
 
-},{"prettier-bytes":117}],55:[function(require,module,exports){
+},{"prettier-bytes":118}],55:[function(require,module,exports){
 'use strict';
 
 /**
@@ -26212,7 +26212,7 @@ ChooHooks.prototype._emitLoaded = function () {
   })
 }
 
-},{"assert":1,"nanoscheduler":110,"on-performance":114}],57:[function(require,module,exports){
+},{"assert":1,"nanoscheduler":111,"on-performance":115}],57:[function(require,module,exports){
 var assert = require('assert')
 var LRU = require('nanolru')
 
@@ -26255,13 +26255,13 @@ function newCall (Cls) {
   return new (Cls.bind.apply(Cls, arguments)) // eslint-disable-line
 }
 
-},{"assert":92,"nanolru":103}],58:[function(require,module,exports){
+},{"assert":93,"nanolru":104}],58:[function(require,module,exports){
 module.exports = require('nanocomponent')
 
-},{"nanocomponent":94}],59:[function(require,module,exports){
+},{"nanocomponent":95}],59:[function(require,module,exports){
 module.exports = require('nanohtml')
 
-},{"nanohtml":98}],60:[function(require,module,exports){
+},{"nanohtml":99}],60:[function(require,module,exports){
 var scrollToAnchor = require('scroll-to-anchor')
 var documentReady = require('document-ready')
 var nanotiming = require('nanotiming')
@@ -26545,7 +26545,7 @@ Choo.prototype._setCache = function (state) {
   }
 }
 
-},{"./component/cache":57,"assert":92,"document-ready":63,"nanobus":93,"nanohref":95,"nanomorph":104,"nanoquery":107,"nanoraf":108,"nanorouter":109,"nanotiming":111,"scroll-to-anchor":123}],61:[function(require,module,exports){
+},{"./component/cache":57,"assert":93,"document-ready":63,"nanobus":94,"nanohref":96,"nanomorph":105,"nanoquery":108,"nanoraf":109,"nanorouter":110,"nanotiming":112,"scroll-to-anchor":124}],61:[function(require,module,exports){
 /*! clipboard-copy. MIT License. Feross Aboukhadijeh <https://feross.org/opensource> */
 /* global DOMException */
 
@@ -27083,7 +27083,7 @@ module.exports = win;
 const Output = require('./src/output.js')
 const loop = require('raf-loop')
 const Source = require('./src/hydra-source.js')
-const Mouse = require('mouse-change')()
+const Mouse = require('./src/lib/mouse.js')()
 const Audio = require('./src/lib/audio.js')
 const VidRecorder = require('./src/lib/video-recorder.js')
 const ArrayUtils = require('./src/lib/array-utils.js')
@@ -27105,7 +27105,7 @@ class HydraRenderer {
     detectAudio = true,
     enableStreamCapture = true,
     canvas,
-    precision = 'mediump',
+    precision,
     extendTransforms = {} // add your own functions on init
   } = {}) {
 
@@ -27139,20 +27139,29 @@ class HydraRenderer {
       hush: this.hush.bind(this)
     }
 
+    if (makeGlobal) window.loadScript = this.loadScript
+
+
     this.timeSinceLastUpdate = 0
     this._time = 0 // for internal use, only to use for deciding when to render frames
 
-  //  window.synth = this.synth
-
     // only allow valid precision options
     let precisionOptions = ['lowp','mediump','highp']
-    let precisionValid = precisionOptions.includes(precision.toLowerCase())
-
-    this.precision = precisionValid ? precision.toLowerCase() : 'mediump'
-
-    if(!precisionValid){
-      console.warn('[hydra-synth warning]\nConstructor was provided an invalid floating point precision value of "' + precision + '". Using default value of "mediump" instead.')
+    if(precision && precisionOptions.includes(precision.toLowerCase())) {
+      this.precision = precision.toLowerCase()
+      //
+      // if(!precisionValid){
+      //   console.warn('[hydra-synth warning]\nConstructor was provided an invalid floating point precision value of "' + precision + '". Using default value of "mediump" instead.')
+      // }
+    } else {
+      let isIOS =
+    (/iPad|iPhone|iPod/.test(navigator.platform) ||
+      (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1)) &&
+    !window.MSStream;
+      this.precision = isIOS ? 'highp' : 'mediump'
     }
+
+
 
     this.extendTransforms = extendTransforms
 
@@ -27174,9 +27183,14 @@ class HydraRenderer {
     }
 
     if (enableStreamCapture) {
-      this.captureStream = this.canvas.captureStream(25)
-      // to do: enable capture stream of specific sources and outputs
-      this.synth.vidRecorder = new VidRecorder(this.captureStream)
+      try {
+        this.captureStream = this.canvas.captureStream(25)
+        // to do: enable capture stream of specific sources and outputs
+        this.synth.vidRecorder = new VidRecorder(this.captureStream)
+      } catch (e) {
+        console.warn('[hydra-synth warning]\nnew MediaSource() is not currently supported on iOS.')
+        console.error(e)
+      }
     }
 
     if(detectAudio) this._initAudio()
@@ -27204,6 +27218,23 @@ class HydraRenderer {
       this.synth.solid(1, 1, 1, 0).out(output)
     })
   }
+
+  loadScript(url = "") {
+   const p = new Promise((res, rej) => {
+     var script = document.createElement("script");
+     script.onload = function () {
+       console.log(`loaded script ${url}`);
+       res();
+     };
+     script.onerror = (err) => {
+       console.log(`error loading script ${url}`, "log-error");
+       res()
+     };
+     script.src = url;
+     document.head.appendChild(script);
+   });
+   return p;
+ }
 
   setResolution(width, height) {
   //  console.log(width, height)
@@ -27511,7 +27542,7 @@ class HydraRenderer {
 
 module.exports = HydraRenderer
 
-},{"./src/eval-sandbox.js":69,"./src/generator-factory.js":70,"./src/hydra-source.js":75,"./src/lib/array-utils.js":76,"./src/lib/audio.js":77,"./src/lib/video-recorder.js":81,"./src/output.js":83,"mouse-change":90,"raf-loop":118,"regl":120}],68:[function(require,module,exports){
+},{"./src/eval-sandbox.js":69,"./src/generator-factory.js":72,"./src/hydra-source.js":76,"./src/lib/array-utils.js":77,"./src/lib/audio.js":78,"./src/lib/mouse.js":81,"./src/lib/video-recorder.js":84,"./src/output.js":86,"raf-loop":119,"regl":121}],68:[function(require,module,exports){
 const Synth = require('./hydra-synth.js')
 //const ShaderGenerator = require('./shader-generator.js')
 
@@ -27565,8 +27596,250 @@ class EvalSandbox {
 
 module.exports = EvalSandbox
 
-},{"./lib/array-utils.js":76,"./lib/sandbox.js":79}],70:[function(require,module,exports){
-const glslTransforms = require('./glsl/glsl-functions.js')
+},{"./lib/array-utils.js":77,"./lib/sandbox.js":82}],70:[function(require,module,exports){
+const arrayUtils = require('./lib/array-utils.js')
+
+// [WIP] how to treat different dimensions (?)
+const DEFAULT_CONVERSIONS = {
+  float: {
+    'vec4': { name: 'sum', args: [[1, 1, 1, 1]] },
+    'vec2': { name: 'sum', args: [[1, 1]] }
+  }
+}
+
+function fillArrayWithDefaults(arr, len) {
+  // fill the array with default values if it's too short
+  while (arr.length < len) {
+    if (arr.length === 3) { // push a 1 as the default for .a in vec4
+      arr.push(1.0)
+    } else {
+      arr.push(0.0)
+    }
+  }
+  return arr.slice(0, len)
+}
+
+const ensure_decimal_dot = (val) => {
+  val = val.toString()
+  if (val.indexOf('.') < 0) {
+    val += '.'
+  }
+  return val
+}
+
+
+
+module.exports = function formatArguments(transform, startIndex, synthContext) {
+  const defaultArgs = transform.transform.inputs
+  const userArgs = transform.userArgs
+  const { generators } = transform.synth
+  const { src } = generators // depends on synth having src() function
+  return defaultArgs.map((input, index) => {
+    const typedArg = {
+      value: input.default,
+      type: input.type, //
+      isUniform: false,
+      name: input.name,
+      vecLen: 0
+      //  generateGlsl: null // function for creating glsl
+    }
+
+    if (typedArg.type === 'float') typedArg.value = ensure_decimal_dot(input.default)
+    if (input.type.startsWith('vec')) {
+      try {
+        typedArg.vecLen = Number.parseInt(input.type.substr(3))
+      } catch (e) {
+        console.log(`Error determining length of vector input type ${input.type} (${input.name})`)
+      }
+    }
+
+    // if user has input something for this argument
+    if (userArgs.length > index) {
+      typedArg.value = userArgs[index]
+      // do something if a composite or transform
+
+      if (typeof userArgs[index] === 'function') {
+        // if (typedArg.vecLen > 0) { // expected input is a vector, not a scalar
+        //    typedArg.value = (context, props, batchId) => (fillArrayWithDefaults(userArgs[index](props), typedArg.vecLen))
+        // } else {
+        typedArg.value = (context, props, batchId) => {
+          try {
+            return userArgs[index](props)
+          } catch (e) {
+            console.log('ERROR', e)
+            return input.default
+          }
+        }
+        //  }
+
+        typedArg.isUniform = true
+      } else if (userArgs[index].constructor === Array) {
+        //   if (typedArg.vecLen > 0) { // expected input is a vector, not a scalar
+        //     typedArg.isUniform = true
+        //     typedArg.value = fillArrayWithDefaults(typedArg.value, typedArg.vecLen)
+        //  } else {
+        //  console.log("is Array")
+        typedArg.value = (context, props, batchId) => arrayUtils.getValue(userArgs[index])(props)
+        typedArg.isUniform = true
+        // }
+      }
+    }
+
+    if (startIndex < 0) {
+    } else {
+      if (typedArg.value && typedArg.value.transforms) {
+        const final_transform = typedArg.value.transforms[typedArg.value.transforms.length - 1]
+
+        if (final_transform.transform.glsl_return_type !== input.type) {
+          const defaults = DEFAULT_CONVERSIONS[input.type]
+          if (typeof defaults !== 'undefined') {
+            const default_def = defaults[final_transform.transform.glsl_return_type]
+            if (typeof default_def !== 'undefined') {
+              const { name, args } = default_def
+              typedArg.value = typedArg.value[name](...args)
+            }
+          }
+        }
+
+        typedArg.isUniform = false
+      } else if (typedArg.type === 'float' && typeof typedArg.value === 'number') {
+        typedArg.value = ensure_decimal_dot(typedArg.value)
+      } else if (typedArg.type.startsWith('vec') && typeof typedArg.value === 'object' && Array.isArray(typedArg.value)) {
+        typedArg.isUniform = false
+        typedArg.value = `${typedArg.type}(${typedArg.value.map(ensure_decimal_dot).join(', ')})`
+      } else if (input.type === 'sampler2D') {
+        // typedArg.tex = typedArg.value
+        var x = typedArg.value
+        typedArg.value = () => (x.getTexture())
+        typedArg.isUniform = true
+      } else {
+        // if passing in a texture reference, when function asks for vec4, convert to vec4
+        if (typedArg.value.getTexture && input.type === 'vec4') {
+          var x1 = typedArg.value
+          typedArg.value = src(x1)
+          typedArg.isUniform = false
+        }
+      }
+
+      // add tp uniform array if is a function that will pass in a different value on each render frame,
+      // or a texture/ external source
+
+      if (typedArg.isUniform) {
+        typedArg.name += startIndex
+        //  shaderParams.uniforms.push(typedArg)
+      }
+    }
+    return typedArg
+  })
+}
+
+
+},{"./lib/array-utils.js":77}],71:[function(require,module,exports){
+const formatArguments = require('./format-arguments.js')
+
+// Add extra functionality to Array.prototype for generating sequences in time
+const arrayUtils = require('./lib/array-utils.js')
+
+
+
+// converts a tree of javascript functions to a shader
+module.exports =  function (transforms) {
+    var shaderParams = {
+      uniforms: [], // list of uniforms used in shader
+      glslFunctions: [], // list of functions used in shader
+      fragColor: ''
+    }
+
+    var gen = generateGlsl(transforms, shaderParams)('st')
+    shaderParams.fragColor = gen
+    // remove uniforms with duplicate names
+    let uniforms = {}
+    shaderParams.uniforms.forEach((uniform) => uniforms[uniform.name] = uniform)
+    shaderParams.uniforms = Object.values(uniforms)
+    return shaderParams
+
+}
+
+
+// recursive function for generating shader string from object containing functions and user arguments. Order of functions in string depends on type of function
+// to do: improve variable names
+function generateGlsl (transforms, shaderParams) {
+  // transform function that outputs a shader string corresponding to gl_FragColor
+  var fragColor = () => ''
+  // var uniforms = []
+  // var glslFunctions = []
+  transforms.forEach((transform) => {
+    var inputs = formatArguments(transform, shaderParams.uniforms.length)
+    inputs.forEach((input) => {
+      if(input.isUniform) shaderParams.uniforms.push(input)
+    })
+
+    // add new glsl function to running list of functions
+    if(!contains(transform, shaderParams.glslFunctions)) shaderParams.glslFunctions.push(transform)
+
+    // current function for generating frag color shader code
+    var f0 = fragColor
+    if (transform.transform.type === 'src') {
+      fragColor = (uv) => `${shaderString(uv, transform.name, inputs, shaderParams)}`
+    } else if (transform.transform.type === 'coord') {
+      fragColor = (uv) => `${f0(`${shaderString(uv, transform.name, inputs, shaderParams)}`)}`
+    } else if (transform.transform.type === 'color') {
+      fragColor = (uv) =>  `${shaderString(`${f0(uv)}`, transform.name, inputs, shaderParams)}`
+    } else if (transform.transform.type === 'combine') {
+      // combining two generated shader strings (i.e. for blend, mult, add funtions)
+      var f1 = inputs[0].value && inputs[0].value.transforms ?
+      (uv) => `${generateGlsl(inputs[0].value.transforms, shaderParams)(uv)}` :
+      (inputs[0].isUniform ? () => inputs[0].name : () => inputs[0].value)
+      fragColor = (uv) => `${shaderString(`${f0(uv)}, ${f1(uv)}`, transform.name, inputs.slice(1), shaderParams)}`
+    } else if (transform.transform.type === 'combineCoord') {
+      // combining two generated shader strings (i.e. for modulate functions)
+      var f1 = inputs[0].value && inputs[0].value.transforms ?
+      (uv) => `${generateGlsl(inputs[0].value.transforms, shaderParams)(uv)}` :
+      (inputs[0].isUniform ? () => inputs[0].name : () => inputs[0].value)
+      fragColor = (uv) => `${f0(`${shaderString(`${uv}, ${f1(uv)}`, transform.name, inputs.slice(1), shaderParams)}`)}`
+
+
+    }
+  })
+//  console.log(fragColor)
+  //  break;
+  return fragColor
+}
+
+// assembles a shader string containing the arguments and the function name, i.e. 'osc(uv, frequency)'
+function shaderString (uv, method, inputs, shaderParams) {
+  const str = inputs.map((input) => {
+    if (input.isUniform) {
+      return input.name
+    } else if (input.value && input.value.transforms) {
+      // this by definition needs to be a generator, hence we start with 'st' as the initial value for generating the glsl fragment
+      return `${generateGlsl(input.value.transforms, shaderParams)('st')}`
+    }
+    return input.value
+  }).reduce((p, c) => `${p}, ${c}`, '')
+
+  return `${method}(${uv}${str})`
+}
+
+// merge two arrays and remove duplicates
+function mergeArrays (a, b) {
+  return a.concat(b.filter(function (item) {
+    return a.indexOf(item) < 0;
+  }))
+}
+
+// check whether array
+function contains(object, arr) {
+  for(var i = 0; i < arr.length; i++){
+    if(object.name == arr[i].name) return true
+  }
+  return false
+}
+
+
+
+
+},{"./format-arguments.js":70,"./lib/array-utils.js":77}],72:[function(require,module,exports){
 const GlslSource = require('./glsl-source.js')
 
 class GeneratorFactory {
@@ -27596,7 +27869,7 @@ class GeneratorFactory {
       }
     })()
 
-    let functions = glslTransforms
+    let functions = require('./glsl/glsl-functions.js')()
 
     // add user definied transforms
     if (Array.isArray(this.extendTransforms)) {
@@ -27609,6 +27882,7 @@ class GeneratorFactory {
  }
 
  _addMethod (method, transform) {
+    const self = this
     this.glslTransforms[method] = transform
     if (transform.type === 'src') {
       const func = (...args) => new this.sourceClass({
@@ -27617,14 +27891,14 @@ class GeneratorFactory {
         userArgs: args,
         defaultOutput: this.defaultOutput,
         defaultUniforms: this.defaultUniforms,
-        synth: this
+        synth: self
       })
       this.generators[method] = func
       this.changeListener({type: 'add', synth: this, method})
       return func
     } else  {
       this.sourceClass.prototype[method] = function (...args) {
-        this.transforms.push({name: method, transform: transform, userArgs: args})
+        this.transforms.push({name: method, transform: transform, userArgs: args, synth: self})
         return this
       }
     }
@@ -27728,9 +28002,9 @@ function processGlsl(obj) {
 
 module.exports = GeneratorFactory
 
-},{"./glsl-source.js":71,"./glsl/glsl-functions.js":73}],71:[function(require,module,exports){
-const generateGlsl = require('./glsl-utils.js').generateGlsl
-const formatArguments = require('./glsl-utils.js').formatArguments
+},{"./glsl-source.js":73,"./glsl/glsl-functions.js":74}],73:[function(require,module,exports){
+const generateGlsl = require('./generate-glsl.js')
+// const formatArguments = require('./glsl-utils.js').formatArguments
 
 // const glslTransforms = require('./glsl/composable-glsl-functions.js')
 const utilityGlsl = require('./glsl/utility-functions.js')
@@ -27794,13 +28068,12 @@ GlslSource.prototype.glsl = function () {
 }
 
 GlslSource.prototype.compile = function (transforms) {
-
-  var shaderInfo = generateGlsl(transforms)
+  var shaderInfo = generateGlsl(transforms, this.synth)
   var uniforms = {}
   shaderInfo.uniforms.forEach((uniform) => { uniforms[uniform.name] = uniform.value })
 
   var frag = `
-  precision mediump float;
+  precision ${this.defaultOutput.precision} float;
   ${Object.values(shaderInfo.uniforms).map((uniform) => {
     let type = uniform.type
     switch (uniform.type) {
@@ -27845,239 +28118,7 @@ GlslSource.prototype.compile = function (transforms) {
 
 module.exports = GlslSource
 
-},{"./glsl-utils.js":72,"./glsl/utility-functions.js":74}],72:[function(require,module,exports){
-// converts a tree of javascript functions to a shader
-
-// Add extra functionality to Array.prototype for generating sequences in time
-const arrayUtils = require('./lib/array-utils.js')
-
-// [WIP] how to treat different dimensions (?)
-const DEFAULT_CONVERSIONS = {
-  float: {
-    'vec4': {name: 'sum', args: [[1, 1, 1, 1]]},
-    'vec2': {name: 'sum', args: [[1, 1]]}
-  }
-}
-
-module.exports = {
-  generateGlsl: function (transforms) {
-    var shaderParams = {
-      uniforms: [], // list of uniforms used in shader
-      glslFunctions: [], // list of functions used in shader
-      fragColor: ''
-    }
-
-    var gen = generateGlsl(transforms, shaderParams)('st')
-    shaderParams.fragColor = gen
-    // remove uniforms with duplicate names
-    let uniforms = {}
-    shaderParams.uniforms.forEach((uniform) => uniforms[uniform.name] = uniform)
-    shaderParams.uniforms = Object.values(uniforms)
-    return shaderParams
-  },
-  formatArguments: formatArguments
-}
-// recursive function for generating shader string from object containing functions and user arguments. Order of functions in string depends on type of function
-// to do: improve variable names
-function generateGlsl (transforms, shaderParams) {
-
-  // transform function that outputs a shader string corresponding to gl_FragColor
-  var fragColor = () => ''
-  // var uniforms = []
-  // var glslFunctions = []
-  transforms.forEach((transform) => {
-    var inputs = formatArguments(transform, shaderParams.uniforms.length)
-  //  console.log('inputs', inputs, transform)
-    inputs.forEach((input) => {
-      if(input.isUniform) shaderParams.uniforms.push(input)
-    })
-
-    // add new glsl function to running list of functions
-    if(!contains(transform, shaderParams.glslFunctions)) shaderParams.glslFunctions.push(transform)
-
-    // current function for generating frag color shader code
-    var f0 = fragColor
-    if (transform.transform.type === 'src') {
-      fragColor = (uv) => `${shaderString(uv, transform.name, inputs, shaderParams)}`
-    } else if (transform.transform.type === 'coord') {
-      fragColor = (uv) => `${f0(`${shaderString(uv, transform.name, inputs, shaderParams)}`)}`
-    } else if (transform.transform.type === 'color') {
-      fragColor = (uv) =>  `${shaderString(`${f0(uv)}`, transform.name, inputs, shaderParams)}`
-    } else if (transform.transform.type === 'combine') {
-      // combining two generated shader strings (i.e. for blend, mult, add funtions)
-      var f1 = inputs[0].value && inputs[0].value.transforms ?
-      (uv) => `${generateGlsl(inputs[0].value.transforms, shaderParams)(uv)}` :
-      (inputs[0].isUniform ? () => inputs[0].name : () => inputs[0].value)
-      fragColor = (uv) => `${shaderString(`${f0(uv)}, ${f1(uv)}`, transform.name, inputs.slice(1), shaderParams)}`
-    } else if (transform.transform.type === 'combineCoord') {
-      // combining two generated shader strings (i.e. for modulate functions)
-      var f1 = inputs[0].value && inputs[0].value.transforms ?
-      (uv) => `${generateGlsl(inputs[0].value.transforms, shaderParams)(uv)}` :
-      (inputs[0].isUniform ? () => inputs[0].name : () => inputs[0].value)
-      fragColor = (uv) => `${f0(`${shaderString(`${uv}, ${f1(uv)}`, transform.name, inputs.slice(1), shaderParams)}`)}`
-
-
-    }
-  })
-//  console.log(fragColor)
-  //  break;
-  return fragColor
-}
-
-// assembles a shader string containing the arguments and the function name, i.e. 'osc(uv, frequency)'
-function shaderString (uv, method, inputs, shaderParams) {
-  const str = inputs.map((input) => {
-    if (input.isUniform) {
-      return input.name
-    } else if (input.value && input.value.transforms) {
-      // this by definition needs to be a generator, hence we start with 'st' as the initial value for generating the glsl fragment
-      return `${generateGlsl(input.value.transforms, shaderParams)('st')}`
-    }
-    return input.value
-  }).reduce((p, c) => `${p}, ${c}`, '')
-
-  return `${method}(${uv}${str})`
-}
-
-// merge two arrays and remove duplicates
-function mergeArrays (a, b) {
-  return a.concat(b.filter(function (item) {
-    return a.indexOf(item) < 0;
-  }))
-}
-
-// check whether array
-function contains(object, arr) {
-  for(var i = 0; i < arr.length; i++){
-    if(object.name == arr[i].name) return true
-  }
-  return false
-}
-
-function fillArrayWithDefaults (arr, len) {
-  // fill the array with default values if it's too short
-  while (arr.length < len) {
-    if (arr.length === 3) { // push a 1 as the default for .a in vec4
-      arr.push(1.0)
-    } else {
-      arr.push(0.0)
-    }
-  }
-  return arr.slice(0, len)
-}
-
-const ensure_decimal_dot = (val) => {
-  val = val.toString()
-  if (val.indexOf('.') < 0) {
-    val += '.'
-  }
-  return val
-}
-
-function formatArguments (transform, startIndex) {
-  //  console.log('processing args', transform, startIndex)
-  const defaultArgs = transform.transform.inputs
-  const userArgs = transform.userArgs
-  return defaultArgs.map( (input, index) => {
-    const typedArg = {
-      value: input.default,
-      type: input.type, //
-      isUniform: false,
-      name: input.name,
-      vecLen: 0
-      //  generateGlsl: null // function for creating glsl
-    }
-
-    if(typedArg.type === 'float') typedArg.value = ensure_decimal_dot(input.default)
-    if (input.type.startsWith('vec')) {
-      try {
-        typedArg.vecLen = Number.parseInt(input.type.substr(3))
-      } catch (e) {
-        console.log(`Error determining length of vector input type ${input.type} (${input.name})`)
-      }
-    }
-
-    // if user has input something for this argument
-    if(userArgs.length > index) {
-      typedArg.value = userArgs[index]
-      // do something if a composite or transform
-
-      if (typeof userArgs[index] === 'function') {
-        if (typedArg.vecLen > 0) { // expected input is a vector, not a scalar
-          typedArg.value = (context, props, batchId) => (fillArrayWithDefaults(userArgs[index](props), typedArg.vecLen))
-        } else {
-          typedArg.value = (context, props, batchId) => {
-            try {
-              return userArgs[index](props)
-            } catch (e) {
-              console.log('ERROR', e)
-              return input.default
-            }
-          }
-        }
-
-        typedArg.isUniform = true
-      } else if (userArgs[index].constructor === Array) {
-        if (typedArg.vecLen > 0) { // expected input is a vector, not a scalar
-          typedArg.isUniform = true
-          typedArg.value = fillArrayWithDefaults(typedArg.value, typedArg.vecLen)
-        } else {
-          //  console.log("is Array")
-          typedArg.value = (context, props, batchId) => arrayUtils.getValue(userArgs[index])(props)
-          typedArg.isUniform = true
-        }
-      }
-    }
-
-    if(startIndex< 0){
-    } else {
-      if (typedArg.value && typedArg.value.transforms) {
-        const final_transform = typedArg.value.transforms[typedArg.value.transforms.length - 1]
-
-        if (final_transform.transform.glsl_return_type !== input.type) {
-          const defaults = DEFAULT_CONVERSIONS[input.type]
-          if (typeof defaults !== 'undefined') {
-            const default_def = defaults[final_transform.transform.glsl_return_type]
-            if (typeof default_def !== 'undefined') {
-              const {name, args} = default_def
-              typedArg.value = typedArg.value[name](...args)
-            }
-          }
-        }
-
-        typedArg.isUniform = false
-      } else if (typedArg.type === 'float' && typeof typedArg.value === 'number') {
-        typedArg.value = ensure_decimal_dot(typedArg.value)
-      } else if (typedArg.type.startsWith('vec') && typeof typedArg.value === 'object' && Array.isArray(typedArg.value)) {
-        typedArg.isUniform = false
-        typedArg.value = `${typedArg.type}(${typedArg.value.map(ensure_decimal_dot).join(', ')})`
-      } else if (input.type === 'sampler2D') {
-        // typedArg.tex = typedArg.value
-        var x = typedArg.value
-        typedArg.value = () => (x.getTexture())
-        typedArg.isUniform = true
-      } else {
-        // if passing in a texture reference, when function asks for vec4, convert to vec4
-        if (typedArg.value.getTexture && input.type === 'vec4') {
-          var x1 = typedArg.value
-          typedArg.value = src(x1)
-          typedArg.isUniform = false
-        }
-      }
-
-      // add tp uniform array if is a function that will pass in a different value on each render frame,
-      // or a texture/ external source
-
-      if(typedArg.isUniform) {
-        typedArg.name += startIndex
-        //  shaderParams.uniforms.push(typedArg)
-      }
-    }
-    return typedArg
-  })
-}
-
-},{"./lib/array-utils.js":76}],73:[function(require,module,exports){
+},{"./generate-glsl.js":71,"./glsl/utility-functions.js":75}],74:[function(require,module,exports){
 /*
 Format for adding functions to hydra. For each entry in this file, hydra automatically generates a glsl function and javascript function with the same name. You can also ass functions dynamically using setFunction(object).
 
@@ -28148,7 +28189,7 @@ const types = {
 
 */
 
-module.exports = [
+module.exports = () => [
   {
   name: 'noise',
   type: 'src',
@@ -28268,7 +28309,7 @@ module.exports = [
    float a = atan(st.x,st.y)+3.1416;
    float r = (2.*3.1416)/sides;
    float d = cos(floor(.5+a/r)*r-a)*length(st);
-   return vec4(vec3(1.0-smoothstep(radius,radius + smoothing,d)), 1.0);`
+   return vec4(vec3(1.0-smoothstep(radius,radius + smoothing + 0.0000001,d)), 1.0);`
 },
 {
   name: 'gradient',
@@ -28710,7 +28751,7 @@ module.exports = [
     }
   ],
   glsl:
-`   _st.x += _c0.r*amount + time*speed;
+`   _st.x += _c0.r*scrollX + time*speed;
    return fract(_st);`
 },
 {
@@ -28957,9 +28998,10 @@ module.exports = [
 
   ],
   glsl:
-`   float a = _luminance(_c1.rgb);
-   return vec4(_c0.rgb*a, a);`
+  `   float a = _luminance(_c1.rgb);
+  return vec4(_c0.rgb*a, a*_c0.a);`
 },
+
 {
   name: 'luma',
   type: 'color',
@@ -28976,7 +29018,7 @@ module.exports = [
     }
   ],
   glsl:
-`   float a = smoothstep(threshold-tolerance, threshold+tolerance, _luminance(_c0.rgb));
+`   float a = smoothstep(threshold-(tolerance+0.0000001), threshold+(tolerance+0.0000001), _luminance(_c0.rgb));
    return vec4(_c0.rgb*a, a);`
 },
 {
@@ -28995,7 +29037,7 @@ module.exports = [
     }
   ],
   glsl:
-`   return vec4(vec3(smoothstep(threshold-tolerance, threshold+tolerance, _luminance(_c0.rgb))), _c0.a);`
+`   return vec4(vec3(smoothstep(threshold-(tolerance+0.0000001), threshold+(tolerance+0.0000001), _luminance(_c0.rgb))), _c0.a);`
 },
 {
   name: 'color',
@@ -29178,7 +29220,7 @@ module.exports = [
 }
 ]
 
-},{}],74:[function(require,module,exports){
+},{}],75:[function(require,module,exports){
 // functions that are only used within other functions
 
 module.exports = {
@@ -29291,7 +29333,7 @@ module.exports = {
   }
 }
 
-},{}],75:[function(require,module,exports){
+},{}],76:[function(require,module,exports){
 const Webcam = require('./lib/webcam.js')
 const Screen = require('./lib/screenmedia.js')
 
@@ -29336,7 +29378,7 @@ class HydraSource {
     vid.autoplay = true
     vid.loop = true
     vid.muted = true // mute in order to load without user interaction
-    vid.addEventListener('canplay', () => {
+    const onload = vid.addEventListener('loadeddata', () => {
       this.src = vid
       vid.play()
       this.tex = this.regl.texture(this.src)
@@ -29427,7 +29469,7 @@ class HydraSource {
 
 module.exports = HydraSource
 
-},{"./lib/screenmedia.js":80,"./lib/webcam.js":82}],76:[function(require,module,exports){
+},{"./lib/screenmedia.js":83,"./lib/webcam.js":85}],77:[function(require,module,exports){
 // WIP utils for working with arrays
 // Possibly should be integrated with lfo extension, etc.
 // to do: transform time rather than array values, similar to working with coordinates in hydra
@@ -29503,7 +29545,7 @@ module.exports = {
   }
 }
 
-},{"./easing-functions.js":78}],77:[function(require,module,exports){
+},{"./easing-functions.js":79}],78:[function(require,module,exports){
 const Meyda = require('meyda')
 
 class Audio {
@@ -29550,7 +29592,7 @@ class Audio {
     this.ctx.fillStyle="#DFFFFF"
     this.ctx.strokeStyle="#0ff"
     this.ctx.lineWidth=0.5
-
+    if(window.navigator.mediaDevices) {
     window.navigator.mediaDevices.getUserMedia({video: false, audio: true})
       .then((stream) => {
       //  console.log('got mic stream', stream)
@@ -29572,6 +29614,7 @@ class Audio {
         })
       })
       .catch((err) => console.log('ERROR', err))
+    }
   }
 
   detectBeat (level) {
@@ -29720,7 +29763,7 @@ class Audio {
 
 module.exports = Audio
 
-},{"meyda":89}],78:[function(require,module,exports){
+},{"meyda":92}],79:[function(require,module,exports){
 // from https://gist.github.com/gre/1650294
 
 module.exports = {
@@ -29754,7 +29797,274 @@ module.exports = {
   sin: function (t) { return (1 + Math.sin(Math.PI*t-Math.PI/2))/2 }
 }
 
-},{}],79:[function(require,module,exports){
+},{}],80:[function(require,module,exports){
+// https://github.com/mikolalysenko/mouse-event
+
+'use strict'
+
+function mouseButtons(ev) {
+  if(typeof ev === 'object') {
+    if('buttons' in ev) {
+      return ev.buttons
+    } else if('which' in ev) {
+      var b = ev.which
+      if(b === 2) {
+        return 4
+      } else if(b === 3) {
+        return 2
+      } else if(b > 0) {
+        return 1<<(b-1)
+      }
+    } else if('button' in ev) {
+      var b = ev.button
+      if(b === 1) {
+        return 4
+      } else if(b === 2) {
+        return 2
+      } else if(b >= 0) {
+        return 1<<b
+      }
+    }
+  }
+  return 0
+}
+exports.buttons = mouseButtons
+
+function mouseElement(ev) {
+  return ev.target || ev.srcElement || window
+}
+exports.element = mouseElement
+
+function mouseRelativeX(ev) {
+  if(typeof ev === 'object') {
+    if('pageX' in ev) {
+      return ev.pageX
+    }
+  }
+  return 0
+}
+exports.x = mouseRelativeX
+
+function mouseRelativeY(ev) {
+  if(typeof ev === 'object') {
+    if('pageY' in ev) {
+      return ev.pageY
+    }
+  }
+  return 0
+}
+exports.y = mouseRelativeY
+
+},{}],81:[function(require,module,exports){
+// based on https://github.com/mikolalysenko/mouse-change
+
+'use strict'
+
+module.exports = mouseListen
+
+var mouse = require('./mouse-event.js')
+
+function mouseListen (element, callback) {
+  if (!callback) {
+    callback = element
+    element = window
+  }
+
+  var buttonState = 0
+  var x = 0
+  var y = 0
+  var mods = {
+    shift: false,
+    alt: false,
+    control: false,
+    meta: false
+  }
+  var attached = false
+
+  function updateMods (ev) {
+    var changed = false
+    if ('altKey' in ev) {
+      changed = changed || ev.altKey !== mods.alt
+      mods.alt = !!ev.altKey
+    }
+    if ('shiftKey' in ev) {
+      changed = changed || ev.shiftKey !== mods.shift
+      mods.shift = !!ev.shiftKey
+    }
+    if ('ctrlKey' in ev) {
+      changed = changed || ev.ctrlKey !== mods.control
+      mods.control = !!ev.ctrlKey
+    }
+    if ('metaKey' in ev) {
+      changed = changed || ev.metaKey !== mods.meta
+      mods.meta = !!ev.metaKey
+    }
+    return changed
+  }
+
+  function handleEvent (nextButtons, ev) {
+    var nextX = mouse.x(ev)
+    var nextY = mouse.y(ev)
+    if ('buttons' in ev) {
+      nextButtons = ev.buttons | 0
+    }
+    if (nextButtons !== buttonState ||
+      nextX !== x ||
+      nextY !== y ||
+      updateMods(ev)) {
+      buttonState = nextButtons | 0
+      x = nextX || 0
+      y = nextY || 0
+      callback && callback(buttonState, x, y, mods)
+    }
+  }
+
+  function clearState (ev) {
+    handleEvent(0, ev)
+  }
+
+  function handleBlur () {
+    if (buttonState ||
+      x ||
+      y ||
+      mods.shift ||
+      mods.alt ||
+      mods.meta ||
+      mods.control) {
+      x = y = 0
+      buttonState = 0
+      mods.shift = mods.alt = mods.control = mods.meta = false
+      callback && callback(0, 0, 0, mods)
+    }
+  }
+
+  function handleMods (ev) {
+    if (updateMods(ev)) {
+      callback && callback(buttonState, x, y, mods)
+    }
+  }
+
+  function handleMouseMove (ev) {
+    if (mouse.buttons(ev) === 0) {
+      handleEvent(0, ev)
+    } else {
+      handleEvent(buttonState, ev)
+    }
+  }
+
+  function handleMouseDown (ev) {
+    handleEvent(buttonState | mouse.buttons(ev), ev)
+  }
+
+  function handleMouseUp (ev) {
+    handleEvent(buttonState & ~mouse.buttons(ev), ev)
+  }
+
+  function attachListeners () {
+    if (attached) {
+      return
+    }
+    attached = true
+
+    element.addEventListener('mousemove', handleMouseMove)
+
+    element.addEventListener('mousedown', handleMouseDown)
+
+    element.addEventListener('mouseup', handleMouseUp)
+
+    element.addEventListener('mouseleave', clearState)
+    element.addEventListener('mouseenter', clearState)
+    element.addEventListener('mouseout', clearState)
+    element.addEventListener('mouseover', clearState)
+
+    element.addEventListener('blur', handleBlur)
+
+    element.addEventListener('keyup', handleMods)
+    element.addEventListener('keydown', handleMods)
+    element.addEventListener('keypress', handleMods)
+
+    if (element !== window) {
+      window.addEventListener('blur', handleBlur)
+
+      window.addEventListener('keyup', handleMods)
+      window.addEventListener('keydown', handleMods)
+      window.addEventListener('keypress', handleMods)
+    }
+  }
+
+  function detachListeners () {
+    if (!attached) {
+      return
+    }
+    attached = false
+
+    element.removeEventListener('mousemove', handleMouseMove)
+
+    element.removeEventListener('mousedown', handleMouseDown)
+
+    element.removeEventListener('mouseup', handleMouseUp)
+
+    element.removeEventListener('mouseleave', clearState)
+    element.removeEventListener('mouseenter', clearState)
+    element.removeEventListener('mouseout', clearState)
+    element.removeEventListener('mouseover', clearState)
+
+    element.removeEventListener('blur', handleBlur)
+
+    element.removeEventListener('keyup', handleMods)
+    element.removeEventListener('keydown', handleMods)
+    element.removeEventListener('keypress', handleMods)
+
+    if (element !== window) {
+      window.removeEventListener('blur', handleBlur)
+
+      window.removeEventListener('keyup', handleMods)
+      window.removeEventListener('keydown', handleMods)
+      window.removeEventListener('keypress', handleMods)
+    }
+  }
+
+  // Attach listeners
+  attachListeners()
+
+  var result = {
+    element: element
+  }
+
+  Object.defineProperties(result, {
+    enabled: {
+      get: function () { return attached },
+      set: function (f) {
+        if (f) {
+          attachListeners()
+        } else {
+          detachListeners()
+        }
+      },
+      enumerable: true
+    },
+    buttons: {
+      get: function () { return buttonState },
+      enumerable: true
+    },
+    x: {
+      get: function () { return x },
+      enumerable: true
+    },
+    y: {
+      get: function () { return y },
+      enumerable: true
+    },
+    mods: {
+      get: function () { return mods },
+      enumerable: true
+    }
+  })
+
+  return result
+}
+
+},{"./mouse-event.js":80}],82:[function(require,module,exports){
 // attempt custom evaluation sandbox for hydra functions
 // for now, just avoids polluting the global namespace
 // should probably be replaced with an abstract syntax tree
@@ -29791,7 +30101,7 @@ module.exports = (parent) => {
   }
 }
 
-},{}],80:[function(require,module,exports){
+},{}],83:[function(require,module,exports){
 
 module.exports = function (options) {
   return new Promise(function(resolve, reject) {
@@ -29807,7 +30117,7 @@ module.exports = function (options) {
   })
 }
 
-},{}],81:[function(require,module,exports){
+},{}],84:[function(require,module,exports){
 class VideoRecorder {
   constructor(stream) {
     this.mediaSource = new MediaSource()
@@ -29895,7 +30205,7 @@ class VideoRecorder {
 
 module.exports = VideoRecorder
 
-},{}],82:[function(require,module,exports){
+},{}],85:[function(require,module,exports){
 //const enumerateDevices = require('enumerate-devices')
 
 module.exports = function (deviceId) {
@@ -29913,6 +30223,9 @@ module.exports = function (deviceId) {
     })
     .then(stream => {
       const video = document.createElement('video')
+      video.setAttribute('autoplay', '')
+      video.setAttribute('muted', '')
+      video.setAttribute('playsinline', '')
       //  video.src = window.URL.createObjectURL(stream)
       video.srcObject = stream
       return new Promise((resolve, reject) => {
@@ -29924,7 +30237,7 @@ module.exports = function (deviceId) {
     .catch(console.log.bind(console))
 }
 
-},{}],83:[function(require,module,exports){
+},{}],86:[function(require,module,exports){
 //const transforms = require('./glsl-transforms.js')
 
 var Output = function ({ regl, precision, label = "", width, height}) {
@@ -29982,6 +30295,7 @@ Output.prototype.init = function () {
   uniform float time;
   varying vec2 uv;
   `
+
   this.fragBody = ``
 
   this.vert = `
@@ -30049,7 +30363,7 @@ Output.prototype.tick = function (props) {
 
 module.exports = Output
 
-},{}],84:[function(require,module,exports){
+},{}],87:[function(require,module,exports){
 module.exports = attributeToProperty
 
 var transform = {
@@ -30070,7 +30384,7 @@ function attributeToProperty (h) {
   }
 }
 
-},{}],85:[function(require,module,exports){
+},{}],88:[function(require,module,exports){
 var attrToProp = require('hyperscript-attribute-to-property')
 
 var VAR = 0, TEXT = 1, OPEN = 2, CLOSE = 3, ATTR = 4
@@ -30367,7 +30681,7 @@ var closeRE = RegExp('^(' + [
 ].join('|') + ')(?:[\.#][a-zA-Z0-9\u007F-\uFFFF_:-]+)*$')
 function selfClosing (tag) { return closeRE.test(tag) }
 
-},{"hyperscript-attribute-to-property":84}],86:[function(require,module,exports){
+},{"hyperscript-attribute-to-property":87}],89:[function(require,module,exports){
 'use strict';
 
 var _classCallCheck = require('@babel/runtime/helpers/classCallCheck');
@@ -30790,7 +31104,7 @@ Browser.type = 'languageDetector';
 
 module.exports = Browser;
 
-},{"@babel/runtime/helpers/classCallCheck":21,"@babel/runtime/helpers/createClass":22}],87:[function(require,module,exports){
+},{"@babel/runtime/helpers/classCallCheck":21,"@babel/runtime/helpers/createClass":22}],90:[function(require,module,exports){
 'use strict';
 
 var _typeof = require('@babel/runtime/helpers/typeof');
@@ -33523,7 +33837,7 @@ instance.createInstance = I18n.createInstance;
 
 module.exports = instance;
 
-},{"@babel/runtime/helpers/assertThisInitialized":20,"@babel/runtime/helpers/classCallCheck":21,"@babel/runtime/helpers/createClass":22,"@babel/runtime/helpers/defineProperty":23,"@babel/runtime/helpers/getPrototypeOf":24,"@babel/runtime/helpers/inherits":25,"@babel/runtime/helpers/possibleConstructorReturn":28,"@babel/runtime/helpers/toArray":30,"@babel/runtime/helpers/typeof":31}],88:[function(require,module,exports){
+},{"@babel/runtime/helpers/assertThisInitialized":20,"@babel/runtime/helpers/classCallCheck":21,"@babel/runtime/helpers/createClass":22,"@babel/runtime/helpers/defineProperty":23,"@babel/runtime/helpers/getPrototypeOf":24,"@babel/runtime/helpers/inherits":25,"@babel/runtime/helpers/possibleConstructorReturn":28,"@babel/runtime/helpers/toArray":30,"@babel/runtime/helpers/typeof":31}],91:[function(require,module,exports){
 if (typeof Object.create === 'function') {
   // implementation from standard node.js 'util' module
   module.exports = function inherits(ctor, superCtor) {
@@ -33552,7 +33866,7 @@ if (typeof Object.create === 'function') {
   }
 }
 
-},{}],89:[function(require,module,exports){
+},{}],92:[function(require,module,exports){
 (function webpackUniversalModuleDefinition(root, factory) {
 	if(typeof exports === 'object' && typeof module === 'object')
 		module.exports = factory();
@@ -37014,276 +37328,7 @@ function hamming(size) {
 /******/ });
 });
 
-},{}],90:[function(require,module,exports){
-'use strict'
-
-module.exports = mouseListen
-
-var mouse = require('mouse-event')
-
-function mouseListen (element, callback) {
-  if (!callback) {
-    callback = element
-    element = window
-  }
-
-  var buttonState = 0
-  var x = 0
-  var y = 0
-  var mods = {
-    shift: false,
-    alt: false,
-    control: false,
-    meta: false
-  }
-  var attached = false
-
-  function updateMods (ev) {
-    var changed = false
-    if ('altKey' in ev) {
-      changed = changed || ev.altKey !== mods.alt
-      mods.alt = !!ev.altKey
-    }
-    if ('shiftKey' in ev) {
-      changed = changed || ev.shiftKey !== mods.shift
-      mods.shift = !!ev.shiftKey
-    }
-    if ('ctrlKey' in ev) {
-      changed = changed || ev.ctrlKey !== mods.control
-      mods.control = !!ev.ctrlKey
-    }
-    if ('metaKey' in ev) {
-      changed = changed || ev.metaKey !== mods.meta
-      mods.meta = !!ev.metaKey
-    }
-    return changed
-  }
-
-  function handleEvent (nextButtons, ev) {
-    var nextX = mouse.x(ev)
-    var nextY = mouse.y(ev)
-    if ('buttons' in ev) {
-      nextButtons = ev.buttons | 0
-    }
-    if (nextButtons !== buttonState ||
-      nextX !== x ||
-      nextY !== y ||
-      updateMods(ev)) {
-      buttonState = nextButtons | 0
-      x = nextX || 0
-      y = nextY || 0
-      callback && callback(buttonState, x, y, mods)
-    }
-  }
-
-  function clearState (ev) {
-    handleEvent(0, ev)
-  }
-
-  function handleBlur () {
-    if (buttonState ||
-      x ||
-      y ||
-      mods.shift ||
-      mods.alt ||
-      mods.meta ||
-      mods.control) {
-      x = y = 0
-      buttonState = 0
-      mods.shift = mods.alt = mods.control = mods.meta = false
-      callback && callback(0, 0, 0, mods)
-    }
-  }
-
-  function handleMods (ev) {
-    if (updateMods(ev)) {
-      callback && callback(buttonState, x, y, mods)
-    }
-  }
-
-  function handleMouseMove (ev) {
-    if (mouse.buttons(ev) === 0) {
-      handleEvent(0, ev)
-    } else {
-      handleEvent(buttonState, ev)
-    }
-  }
-
-  function handleMouseDown (ev) {
-    handleEvent(buttonState | mouse.buttons(ev), ev)
-  }
-
-  function handleMouseUp (ev) {
-    handleEvent(buttonState & ~mouse.buttons(ev), ev)
-  }
-
-  function attachListeners () {
-    if (attached) {
-      return
-    }
-    attached = true
-
-    element.addEventListener('mousemove', handleMouseMove)
-
-    element.addEventListener('mousedown', handleMouseDown)
-
-    element.addEventListener('mouseup', handleMouseUp)
-
-    element.addEventListener('mouseleave', clearState)
-    element.addEventListener('mouseenter', clearState)
-    element.addEventListener('mouseout', clearState)
-    element.addEventListener('mouseover', clearState)
-
-    element.addEventListener('blur', handleBlur)
-
-    element.addEventListener('keyup', handleMods)
-    element.addEventListener('keydown', handleMods)
-    element.addEventListener('keypress', handleMods)
-
-    if (element !== window) {
-      window.addEventListener('blur', handleBlur)
-
-      window.addEventListener('keyup', handleMods)
-      window.addEventListener('keydown', handleMods)
-      window.addEventListener('keypress', handleMods)
-    }
-  }
-
-  function detachListeners () {
-    if (!attached) {
-      return
-    }
-    attached = false
-
-    element.removeEventListener('mousemove', handleMouseMove)
-
-    element.removeEventListener('mousedown', handleMouseDown)
-
-    element.removeEventListener('mouseup', handleMouseUp)
-
-    element.removeEventListener('mouseleave', clearState)
-    element.removeEventListener('mouseenter', clearState)
-    element.removeEventListener('mouseout', clearState)
-    element.removeEventListener('mouseover', clearState)
-
-    element.removeEventListener('blur', handleBlur)
-
-    element.removeEventListener('keyup', handleMods)
-    element.removeEventListener('keydown', handleMods)
-    element.removeEventListener('keypress', handleMods)
-
-    if (element !== window) {
-      window.removeEventListener('blur', handleBlur)
-
-      window.removeEventListener('keyup', handleMods)
-      window.removeEventListener('keydown', handleMods)
-      window.removeEventListener('keypress', handleMods)
-    }
-  }
-
-  // Attach listeners
-  attachListeners()
-
-  var result = {
-    element: element
-  }
-
-  Object.defineProperties(result, {
-    enabled: {
-      get: function () { return attached },
-      set: function (f) {
-        if (f) {
-          attachListeners()
-        } else {
-          detachListeners()
-        }
-      },
-      enumerable: true
-    },
-    buttons: {
-      get: function () { return buttonState },
-      enumerable: true
-    },
-    x: {
-      get: function () { return x },
-      enumerable: true
-    },
-    y: {
-      get: function () { return y },
-      enumerable: true
-    },
-    mods: {
-      get: function () { return mods },
-      enumerable: true
-    }
-  })
-
-  return result
-}
-
-},{"mouse-event":91}],91:[function(require,module,exports){
-'use strict'
-
-function mouseButtons(ev) {
-  if(typeof ev === 'object') {
-    if('buttons' in ev) {
-      return ev.buttons
-    } else if('which' in ev) {
-      var b = ev.which
-      if(b === 2) {
-        return 4
-      } else if(b === 3) {
-        return 2
-      } else if(b > 0) {
-        return 1<<(b-1)
-      }
-    } else if('button' in ev) {
-      var b = ev.button
-      if(b === 1) {
-        return 4
-      } else if(b === 2) {
-        return 2
-      } else if(b >= 0) {
-        return 1<<b
-      }
-    }
-  }
-  return 0
-}
-exports.buttons = mouseButtons
-
-function mouseElement(ev) {
-  return ev.target || ev.srcElement || window
-}
-exports.element = mouseElement
-
-function mouseRelativeX(ev) {
-  if(typeof ev === 'object') {
-    if('offsetX' in ev) {
-      return ev.offsetX
-    }
-    var target = mouseElement(ev)
-    var bounds = target.getBoundingClientRect()
-    return ev.clientX - bounds.left
-  }
-  return 0
-}
-exports.x = mouseRelativeX
-
-function mouseRelativeY(ev) {
-  if(typeof ev === 'object') {
-    if('offsetY' in ev) {
-      return ev.offsetY
-    }
-    var target = mouseElement(ev)
-    var bounds = target.getBoundingClientRect()
-    return ev.clientY - bounds.top
-  }
-  return 0
-}
-exports.y = mouseRelativeY
-
-},{}],92:[function(require,module,exports){
+},{}],93:[function(require,module,exports){
 assert.notEqual = notEqual
 assert.notOk = notOk
 assert.equal = equal
@@ -37307,7 +37352,7 @@ function assert (t, m) {
   if (!t) throw new Error(m || 'AssertionError')
 }
 
-},{}],93:[function(require,module,exports){
+},{}],94:[function(require,module,exports){
 var splice = require('remove-array-items')
 var nanotiming = require('nanotiming')
 var assert = require('assert')
@@ -37471,7 +37516,7 @@ Nanobus.prototype._emit = function (arr, eventName, data, uuid) {
   }
 }
 
-},{"assert":92,"nanotiming":111,"remove-array-items":121}],94:[function(require,module,exports){
+},{"assert":93,"nanotiming":112,"remove-array-items":122}],95:[function(require,module,exports){
 var document = require('global/document')
 var nanotiming = require('nanotiming')
 var morph = require('nanomorph')
@@ -37627,7 +37672,7 @@ Nanocomponent.prototype.update = function () {
   throw new Error('nanocomponent: update should be implemented!')
 }
 
-},{"assert":92,"global/document":65,"nanomorph":104,"nanotiming":111,"on-load":113}],95:[function(require,module,exports){
+},{"assert":93,"global/document":65,"nanomorph":105,"nanotiming":112,"on-load":114}],96:[function(require,module,exports){
 var assert = require('assert')
 
 var safeExternalLink = /(noopener|noreferrer) (noopener|noreferrer)/
@@ -37672,7 +37717,7 @@ function href (cb, root) {
   })
 }
 
-},{"assert":92}],96:[function(require,module,exports){
+},{"assert":93}],97:[function(require,module,exports){
 'use strict'
 
 var trailingNewlineRegex = /\n[\s]+$/
@@ -37806,7 +37851,7 @@ module.exports = function appendChild (el, childs) {
   }
 }
 
-},{}],97:[function(require,module,exports){
+},{}],98:[function(require,module,exports){
 'use strict'
 
 module.exports = [
@@ -37816,17 +37861,17 @@ module.exports = [
   'readonly', 'required', 'reversed', 'selected'
 ]
 
-},{}],98:[function(require,module,exports){
+},{}],99:[function(require,module,exports){
 module.exports = require('./dom')(document)
 
-},{"./dom":100}],99:[function(require,module,exports){
+},{"./dom":101}],100:[function(require,module,exports){
 'use strict'
 
 module.exports = [
   'indeterminate'
 ]
 
-},{}],100:[function(require,module,exports){
+},{}],101:[function(require,module,exports){
 'use strict'
 
 var hyperx = require('hyperx')
@@ -37944,7 +37989,7 @@ module.exports = function (document) {
   return exports
 }
 
-},{"./append-child":96,"./bool-props":97,"./direct-props":99,"./svg-tags":101,"hyperx":85}],101:[function(require,module,exports){
+},{"./append-child":97,"./bool-props":98,"./direct-props":100,"./svg-tags":102,"hyperx":88}],102:[function(require,module,exports){
 'use strict'
 
 module.exports = [
@@ -37964,7 +38009,7 @@ module.exports = [
   'tspan', 'use', 'view', 'vkern'
 ]
 
-},{}],102:[function(require,module,exports){
+},{}],103:[function(require,module,exports){
 var assert = require('assert')
 
 var emojis = {
@@ -38129,7 +38174,7 @@ function pad (str) {
   return str.length !== 2 ? 0 + str : str
 }
 
-},{"assert":1}],103:[function(require,module,exports){
+},{"assert":1}],104:[function(require,module,exports){
 module.exports = LRU
 
 function LRU (opts) {
@@ -38267,7 +38312,7 @@ LRU.prototype.evict = function () {
   this.remove(this.tail)
 }
 
-},{}],104:[function(require,module,exports){
+},{}],105:[function(require,module,exports){
 var assert = require('nanoassert')
 var morph = require('./lib/morph')
 
@@ -38432,7 +38477,7 @@ function same (a, b) {
   return false
 }
 
-},{"./lib/morph":106,"nanoassert":92}],105:[function(require,module,exports){
+},{"./lib/morph":107,"nanoassert":93}],106:[function(require,module,exports){
 module.exports = [
   // attribute events (can be set with attributes)
   'onclick',
@@ -38476,7 +38521,7 @@ module.exports = [
   'onfocusout'
 ]
 
-},{}],106:[function(require,module,exports){
+},{}],107:[function(require,module,exports){
 var events = require('./events')
 var eventsLength = events.length
 
@@ -38651,7 +38696,7 @@ function updateAttribute (newNode, oldNode, name) {
   }
 }
 
-},{"./events":105}],107:[function(require,module,exports){
+},{"./events":106}],108:[function(require,module,exports){
 var reg = /([^?=&]+)(=([^&]*))?/g
 var assert = require('assert')
 
@@ -38675,7 +38720,7 @@ function qs (url) {
   return obj
 }
 
-},{"assert":92}],108:[function(require,module,exports){
+},{"assert":93}],109:[function(require,module,exports){
 'use strict'
 
 var assert = require('assert')
@@ -38712,7 +38757,7 @@ function nanoraf (render, raf) {
   }
 }
 
-},{"assert":92}],109:[function(require,module,exports){
+},{"assert":93}],110:[function(require,module,exports){
 var assert = require('assert')
 var wayfarer = require('wayfarer')
 
@@ -38768,7 +38813,7 @@ function pathname (routename, isElectron) {
   return decodeURI(routename.replace(suffix, '').replace(normalize, '/'))
 }
 
-},{"assert":92,"wayfarer":128}],110:[function(require,module,exports){
+},{"assert":93,"wayfarer":129}],111:[function(require,module,exports){
 var assert = require('assert')
 
 var hasWindow = typeof window !== 'undefined'
@@ -38825,7 +38870,7 @@ NanoScheduler.prototype.setTimeout = function (cb) {
 
 module.exports = createScheduler
 
-},{"assert":92}],111:[function(require,module,exports){
+},{"assert":93}],112:[function(require,module,exports){
 var scheduler = require('nanoscheduler')()
 var assert = require('assert')
 
@@ -38875,7 +38920,7 @@ function noop (cb) {
   }
 }
 
-},{"assert":92,"nanoscheduler":110}],112:[function(require,module,exports){
+},{"assert":93,"nanoscheduler":111}],113:[function(require,module,exports){
 var assert = require('assert')
 
 module.exports = objectChangeCallsite
@@ -38912,7 +38957,7 @@ function strip (str) {
   return '\n' + arr.join('\n')
 }
 
-},{"assert":1}],113:[function(require,module,exports){
+},{"assert":1}],114:[function(require,module,exports){
 /* global MutationObserver */
 var document = require('global/document')
 var window = require('global/window')
@@ -39016,7 +39061,7 @@ function eachMutation (nodes, fn) {
   }
 }
 
-},{"assert":92,"global/document":65,"global/window":66}],114:[function(require,module,exports){
+},{"assert":93,"global/document":65,"global/window":66}],115:[function(require,module,exports){
 var scheduler = require('nanoscheduler')()
 var assert = require('assert')
 
@@ -39076,7 +39121,7 @@ function onPerformance (cb) {
   }
 }
 
-},{"assert":92,"nanoscheduler":110}],115:[function(require,module,exports){
+},{"assert":93,"nanoscheduler":111}],116:[function(require,module,exports){
 (function (process){(function (){
 // Generated by CoffeeScript 1.12.2
 (function() {
@@ -39116,7 +39161,7 @@ function onPerformance (cb) {
 
 
 }).call(this)}).call(this,require('_process'))
-},{"_process":11}],116:[function(require,module,exports){
+},{"_process":11}],117:[function(require,module,exports){
 module.exports = plucker
 
 function plucker(path, object) {
@@ -39153,7 +39198,7 @@ function pluck(path) {
   }
 }
 
-},{}],117:[function(require,module,exports){
+},{}],118:[function(require,module,exports){
 module.exports = prettierBytes
 
 function prettierBytes (num) {
@@ -39185,7 +39230,7 @@ function prettierBytes (num) {
   }
 }
 
-},{}],118:[function(require,module,exports){
+},{}],119:[function(require,module,exports){
 var inherits = require('inherits')
 var EventEmitter = require('events').EventEmitter
 var now = require('right-now')
@@ -39230,7 +39275,7 @@ Engine.prototype.tick = function() {
     this.emit('tick', dt)
     this.last = time
 }
-},{"events":8,"inherits":88,"raf":119,"right-now":122}],119:[function(require,module,exports){
+},{"events":8,"inherits":91,"raf":120,"right-now":123}],120:[function(require,module,exports){
 (function (global){(function (){
 var now = require('performance-now')
   , root = typeof window === 'undefined' ? global : window
@@ -39309,7 +39354,7 @@ module.exports.polyfill = function(object) {
 }
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{"performance-now":115}],120:[function(require,module,exports){
+},{"performance-now":116}],121:[function(require,module,exports){
 (function(U,X){"object"===typeof exports&&"undefined"!==typeof module?module.exports=X():"function"===typeof define&&define.amd?define(X):U.createREGL=X()})(this,function(){function U(a,b){this.id=Eb++;this.type=a;this.data=b}function X(a){if(0===a.length)return[];var b=a.charAt(0),c=a.charAt(a.length-1);if(1<a.length&&b===c&&('"'===b||"'"===b))return['"'+a.substr(1,a.length-2).replace(/\\/g,"\\\\").replace(/"/g,'\\"')+'"'];if(b=/\[(false|true|null|\d+|'[^']*'|"[^"]*")\]/.exec(a))return X(a.substr(0,
 b.index)).concat(X(b[1])).concat(X(a.substr(b.index+b[0].length)));b=a.split(".");if(1===b.length)return['"'+a.replace(/\\/g,"\\\\").replace(/"/g,'\\"')+'"'];a=[];for(c=0;c<b.length;++c)a=a.concat(X(b[c]));return a}function cb(a){return"["+X(a).join("][")+"]"}function db(a,b){if("function"===typeof a)return new U(0,a);if("number"===typeof a||"boolean"===typeof a)return new U(5,a);if(Array.isArray(a))return new U(6,a.map(function(a,e){return db(a,b+"["+e+"]")}));if(a instanceof U)return a}function Fb(){var a=
 {"":0},b=[""];return{id:function(c){var e=a[c];if(e)return e;e=a[c]=b.length;b.push(c);return e},str:function(a){return b[a]}}}function Gb(a,b,c){function e(){var b=window.innerWidth,e=window.innerHeight;a!==document.body&&(e=a.getBoundingClientRect(),b=e.right-e.left,e=e.bottom-e.top);f.width=c*b;f.height=c*e;A(f.style,{width:b+"px",height:e+"px"})}var f=document.createElement("canvas");A(f.style,{border:0,margin:0,padding:0,top:0,left:0});a.appendChild(f);a===document.body&&(f.style.position="absolute",
@@ -39475,7 +39520,7 @@ H=Yb(l,m),O=Kb(l,r,a,function(a){return J.destroyBuffer(a)}),J=Sb(l,m,H,r,O),M=L
 vao:J.createVAO,attributes:h,frame:u,on:function(a,b){var c;switch(a){case "frame":return u(b);case "lost":c=S;break;case "restore":c=T;break;case "destroy":c=U}c.push(b);return{cancel:function(){for(var a=0;a<c.length;++a)if(c[a]===b){c[a]=c[c.length-1];c.pop();break}}}},limits:H,hasExtension:function(a){return 0<=H.extensions.indexOf(a.toLowerCase())},read:q,destroy:function(){C.length=0;e();N&&(N.removeEventListener("webglcontextlost",f),N.removeEventListener("webglcontextrestored",d));D.clear();
 V.clear();L.clear();y.clear();M.clear();O.clear();J.clear();z&&z.clear();U.forEach(function(a){a()})},_gl:l,_refresh:k,poll:function(){w();z&&z.update()},now:v,stats:r});a.onDone(null,h);return h}});
 
-},{}],121:[function(require,module,exports){
+},{}],122:[function(require,module,exports){
 'use strict'
 
 /**
@@ -39504,7 +39549,7 @@ module.exports = function removeItems (arr, startIdx, removeCount) {
   arr.length = len
 }
 
-},{}],122:[function(require,module,exports){
+},{}],123:[function(require,module,exports){
 (function (global){(function (){
 module.exports =
   global.performance &&
@@ -39515,7 +39560,7 @@ module.exports =
   }
 
 }).call(this)}).call(this,typeof global !== "undefined" ? global : typeof self !== "undefined" ? self : typeof window !== "undefined" ? window : {})
-},{}],123:[function(require,module,exports){
+},{}],124:[function(require,module,exports){
 module.exports = scrollToAnchor
 
 function scrollToAnchor (anchor, options) {
@@ -39527,7 +39572,7 @@ function scrollToAnchor (anchor, options) {
   }
 }
 
-},{}],124:[function(require,module,exports){
+},{}],125:[function(require,module,exports){
 var fastSafeStringify = require('fast-safe-stringify')
 var copy = require('clipboard-copy')
 
@@ -39544,7 +39589,7 @@ function stateCopy (obj) {
 
 module.exports = stateCopy
 
-},{"clipboard-copy":61,"fast-safe-stringify":64}],125:[function(require,module,exports){
+},{"clipboard-copy":61,"fast-safe-stringify":64}],126:[function(require,module,exports){
 var C = "\u037c"
 var COUNT = typeof Symbol == "undefined" ? "__" + C : Symbol.for(C)
 var SET = typeof Symbol == "undefined" ? "__styleSet" + Math.floor(Math.random() * 1e8) : Symbol("styleSet")
@@ -39697,7 +39742,7 @@ StyleSet.prototype.mount = function mount (modules) {
 // (min-width: 400px)": {...}}`.
 
 
-},{}],126:[function(require,module,exports){
+},{}],127:[function(require,module,exports){
 'use strict';
 
 Object.defineProperty(exports, '__esModule', { value: true });
@@ -39831,7 +39876,7 @@ exports.base = base;
 exports.keyName = keyName;
 exports.shift = shift;
 
-},{}],127:[function(require,module,exports){
+},{}],128:[function(require,module,exports){
 /* eslint-disable node/no-deprecated-api */
 var assert = require('assert')
 
@@ -39869,7 +39914,7 @@ function getAllRoutes (router) {
   return transform(tree)
 }
 
-},{"assert":92}],128:[function(require,module,exports){
+},{"assert":93}],129:[function(require,module,exports){
 /* eslint-disable node/no-deprecated-api */
 var assert = require('assert')
 var trie = require('./trie')
@@ -39944,7 +39989,7 @@ function Wayfarer (dft) {
   }
 }
 
-},{"./trie":129,"assert":92}],129:[function(require,module,exports){
+},{"./trie":130,"assert":93}],130:[function(require,module,exports){
 /* eslint-disable node/no-deprecated-api */
 var assert = require('assert')
 
@@ -40085,7 +40130,7 @@ function has (object, property) {
   return Object.prototype.hasOwnProperty.call(object, property)
 }
 
-},{"assert":92}],130:[function(require,module,exports){
+},{"assert":93}],131:[function(require,module,exports){
 module.exports = {
   src: {
     label: "source",

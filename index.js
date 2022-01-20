@@ -85,6 +85,9 @@ function editorView (state, emit) {
       </div>
       ${ exampleTabView(state, emit) }
       ${ cmEditor.render(state) }
+      <p>
+      ${i18next.t('editor-info')}
+      </p>
     </div>
   </div>`
 }
@@ -152,10 +155,7 @@ function mainView (state, emit) {
         <div class="flex flex-column-reverse flex-row-ns flex-column-reverse-m w-100" style="max-width:1000px">
 
           <div style="" class="overflow-y-auto w-50-ns w-100 w-100-m ">
-          <p>${i18next.t('intro1')()}</p>
-          <p>
-            ${i18next.t('intro2')}
-          </p>
+          <p>${i18next.t('intro')()}</p>
 
           ${ functionListView(state, emit) }
           </div>

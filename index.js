@@ -53,7 +53,7 @@ function exampleTabView (state, emit) {
       const isSelected = i == state.page.tabIndex;
       const hsl = indexToHsl(state.page.selected.typeIndex, isSelected?100:20, isSelected?90:60)
       tabs.push(html`
-        <div class="tab courier pointer dib mr2 pa2 pv1" style="background-color:${hsl}" onclick=${()=>emit('show details', obj, i)}>
+        <div class="tab plex-mono pointer dib mr2 pa2 pv1" style="background-color:${hsl}" onclick=${()=>emit('show details', obj, i)}>
           <!--${i18next.t('example')}-->
           ${i}
         </div>
@@ -99,9 +99,9 @@ function editorView (state, emit) {
       <div class="flex justify-between">
         ${ exampleTabView(state, emit) }
         <div class="">
-          <button class="courier br0 h-100" title="${ i18next.t('run') }" onclick=${ evaluate }>▶</button>
-          <button class="courier br0 h-100" title="${ i18next.t('reset') }" onclick=${ reset }>💔</button>
-          <button class="courier br0 h-100" title="${ i18next.t('openin') }" onclick=${ openin }>🚀</button>
+          <button class="plex-mono br0 h-100" title="${ i18next.t('run') }" onclick=${ evaluate }>▶</button>
+          <button class="plex-mono br0 h-100" title="${ i18next.t('reset') }" onclick=${ reset }>💔</button>
+          <button class="plex-mono br0 h-100" title="${ i18next.t('openin') }" onclick=${ openin }>🚀</button>
         </div>
       </div>
       <div class="w-100">
@@ -145,7 +145,7 @@ function functionListView (state, emit) {
         emit('show details', obj, 0)
       }
       const func = html`
-        <div class="courier dib ma1 pointer dim token function pa1 pv1 ${ obj.undocumented ? 'gray' : '' }" onclick=${ onclick }
+        <div class="plex-mono dib ma1 pointer dim token function pa1 pv1 ${ obj.undocumented ? 'gray' : '' }" onclick=${ onclick }
           title=${obj.name}
           style="border-bottom: 4px solid ${ indexToHsl(obj.typeIndex, 100, 70) };line-height:0.6"
           >${obj.name}</div>
@@ -168,7 +168,7 @@ function mainView (state, emit) {
   const color = indexToHsl(state.page.selected?.typeIndex, 100, 90)
 
   return html`
-    <body class="pa2 f6 georgia w-100 h-100 flex justify-center" style="background-color:${color};transition: background-color 1s;">
+    <body class="pa2 f6 w-100 h-100 flex justify-center" style="font-family: 'Chivo', 'Noto Sans JP', sans-serif;background-color:${color};transition: background-color 1s;">
       <div style = "max-width: 1000px">
         <div class="flex justify-between items-end mv2">
           <div class="pt2 f3"> ${i18next.t('title')}${state.page.selected === null ? '' : `::: ${state.page.selected.name}`} </div>
@@ -176,15 +176,15 @@ function mainView (state, emit) {
         </div>
         <div class="flex flex-column-reverse flex-row-ns flex-column-reverse-m w-100" style="max-width:1000px">
 
-          <div style="" class="overflow-y-auto w-50-ns w-100 w-100-m ">
-          <p>${ raw(i18next.t('intro', {
-            hydra: 'https://hydra.ojack.xyz/',
-            gettingStarted: 'https://github.com/ojack/hydra#Getting-Started',
-            hydraBook: 'https://hydra-book.glitch.me/',
-            tb: 'target="_blank"'
-          })) }</p>
+          <div style="" class="overflow-y-auto w-50-ns w-100 w-100-m mr2">
+            <p>${ raw(i18next.t('intro', {
+              hydra: 'https://hydra.ojack.xyz/',
+              gettingStarted: 'https://github.com/ojack/hydra#Getting-Started',
+              hydraBook: 'https://hydra-book.glitch.me/',
+              att: 'class=blue target=_blank'
+            })) }</p>
 
-          ${ functionListView(state, emit) }
+            ${ functionListView(state, emit) }
           </div>
         ${ editorView(state, emit) }
         </div>

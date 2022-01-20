@@ -8,6 +8,12 @@ const {defaultKeymap} = require('@codemirror/commands')
 const {javascript} = require('@codemirror/lang-javascript')
 const { default: i18next } = require('i18next')
 
+const defaultStyle = {
+  // fontFamily: "'IBM Plex Mono', monospace",
+  border: 'solid rgba(0,0,0,0)',
+  backgroundColor: 'rgba(255,255,255,0.5)',
+}
+
 module.exports = class CodeMirror extends Component {
   constructor (id, state, emit, editable = true, i18next) {
     super(id)
@@ -24,9 +30,9 @@ module.exports = class CodeMirror extends Component {
       this.view.dispatch({
         effects: this.theme.reconfigure(EditorView.theme({
           '&': {
-            border: 'solid lime',
-            backgroundColor: 'rgba(255,255,255,0.5)',
+            ...defaultStyle,
             minHeight: this.editable ? '8rem' : '1rem',
+            border: 'solid lime',
             transition: 'border 0s',
           },
         }))
@@ -35,9 +41,9 @@ module.exports = class CodeMirror extends Component {
         this.view.dispatch({
           effects: this.theme.reconfigure(EditorView.theme({
             '&': {
-              border: 'solid rgba(0,0,0,0)',
-              backgroundColor: 'rgba(255,255,255,0.5)',
+              ...defaultStyle,
               minHeight: this.editable ? '8rem' : '1rem',
+              border: 'solid rgba(0,0,0,0)',
               transition: 'border 1s',
             },
           }))
@@ -49,9 +55,9 @@ module.exports = class CodeMirror extends Component {
       this.view.dispatch({
         effects: this.theme.reconfigure(EditorView.theme({
           '&': {
-            border: 'solid red',
-            backgroundColor: 'rgba(255,255,255,0.5)',
+            ...defaultStyle,
             minHeight: this.editable ? '8rem' : '1rem',
+            border: 'solid red',
             transition: 'border 0s',
           },
         }))
@@ -70,11 +76,10 @@ module.exports = class CodeMirror extends Component {
     this.theme = new Compartment
     let theme = EditorView.theme({
       '&': {
-        border: 'solid rgba(0,0,0,0)',
-        backgroundColor: 'rgba(255,255,255,0.5)',
+        ...defaultStyle,
         minHeight: this.editable ? '8rem' : '1rem',
         transition: 'border 1s',
-      },
+      }
     })
     
     const editorState = EditorState.create({
@@ -115,7 +120,7 @@ module.exports = class CodeMirror extends Component {
 
   createElement () {
     if (this.editable) {
-      this.errorMessage = html`<p class="red h1 courier pa0 ma0" style="background-color:rgba(255,255,255,0.3)"></p>`
+      this.errorMessage = html`<p class="red h1 plex-mono pa0 ma0" style="background-color:rgba(255,255,255,0.3)"></p>`
       return html`
         <div class="w-100">
           <div class="editor"></div>

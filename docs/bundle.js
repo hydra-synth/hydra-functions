@@ -3940,6 +3940,12 @@ const {defaultKeymap} = require('@codemirror/commands')
 const {javascript} = require('@codemirror/lang-javascript')
 const { default: i18next } = require('i18next')
 
+const defaultStyle = {
+  // fontFamily: "'IBM Plex Mono', monospace",
+  border: 'solid rgba(0,0,0,0)',
+  backgroundColor: 'rgba(255,255,255,0.5)',
+}
+
 module.exports = class CodeMirror extends Component {
   constructor (id, state, emit, editable = true, i18next) {
     super(id)
@@ -3956,9 +3962,9 @@ module.exports = class CodeMirror extends Component {
       this.view.dispatch({
         effects: this.theme.reconfigure(EditorView.theme({
           '&': {
-            border: 'solid lime',
-            backgroundColor: 'rgba(255,255,255,0.5)',
+            ...defaultStyle,
             minHeight: this.editable ? '8rem' : '1rem',
+            border: 'solid lime',
             transition: 'border 0s',
           },
         }))
@@ -3967,9 +3973,9 @@ module.exports = class CodeMirror extends Component {
         this.view.dispatch({
           effects: this.theme.reconfigure(EditorView.theme({
             '&': {
-              border: 'solid rgba(0,0,0,0)',
-              backgroundColor: 'rgba(255,255,255,0.5)',
+              ...defaultStyle,
               minHeight: this.editable ? '8rem' : '1rem',
+              border: 'solid rgba(0,0,0,0)',
               transition: 'border 1s',
             },
           }))
@@ -3981,9 +3987,9 @@ module.exports = class CodeMirror extends Component {
       this.view.dispatch({
         effects: this.theme.reconfigure(EditorView.theme({
           '&': {
-            border: 'solid red',
-            backgroundColor: 'rgba(255,255,255,0.5)',
+            ...defaultStyle,
             minHeight: this.editable ? '8rem' : '1rem',
+            border: 'solid red',
             transition: 'border 0s',
           },
         }))
@@ -4002,11 +4008,10 @@ module.exports = class CodeMirror extends Component {
     this.theme = new Compartment
     let theme = EditorView.theme({
       '&': {
-        border: 'solid rgba(0,0,0,0)',
-        backgroundColor: 'rgba(255,255,255,0.5)',
+        ...defaultStyle,
         minHeight: this.editable ? '8rem' : '1rem',
         transition: 'border 1s',
-      },
+      }
     })
     
     const editorState = EditorState.create({
@@ -4047,7 +4052,7 @@ module.exports = class CodeMirror extends Component {
 
   createElement () {
     if (this.editable) {
-      this.errorMessage = html`<p class="red h1 courier pa0 ma0" style="background-color:rgba(255,255,255,0.3)"></p>`
+      this.errorMessage = html`<p class="red h1 plex-mono pa0 ma0" style="background-color:rgba(255,255,255,0.3)"></p>`
       return html`
         <div class="w-100">
           <div class="editor"></div>
@@ -4623,7 +4628,7 @@ function exampleTabView (state, emit) {
       const isSelected = i == state.page.tabIndex;
       const hsl = indexToHsl(state.page.selected.typeIndex, isSelected?100:20, isSelected?90:60)
       tabs.push(html`
-        <div class="tab courier pointer dib mr2 pa2 pv1" style="background-color:${hsl}" onclick=${()=>emit('show details', obj, i)}>
+        <div class="tab plex-mono pointer dib mr2 pa2 pv1" style="background-color:${hsl}" onclick=${()=>emit('show details', obj, i)}>
           <!--${i18next.t('example')}-->
           ${i}
         </div>
@@ -4669,9 +4674,9 @@ function editorView (state, emit) {
       <div class="flex justify-between">
         ${ exampleTabView(state, emit) }
         <div class="">
-          <button class="courier br0 h-100" title="${ i18next.t('run') }" onclick=${ evaluate }>▶</button>
-          <button class="courier br0 h-100" title="${ i18next.t('reset') }" onclick=${ reset }>💔</button>
-          <button class="courier br0 h-100" title="${ i18next.t('openin') }" onclick=${ openin }>🚀</button>
+          <button class="plex-mono br0 h-100" title="${ i18next.t('run') }" onclick=${ evaluate }>▶</button>
+          <button class="plex-mono br0 h-100" title="${ i18next.t('reset') }" onclick=${ reset }>💔</button>
+          <button class="plex-mono br0 h-100" title="${ i18next.t('openin') }" onclick=${ openin }>🚀</button>
         </div>
       </div>
       <div class="w-100">
@@ -4715,7 +4720,7 @@ function functionListView (state, emit) {
         emit('show details', obj, 0)
       }
       const func = html`
-        <div class="courier dib ma1 pointer dim token function pa1 pv1 ${ obj.undocumented ? 'gray' : '' }" onclick=${ onclick }
+        <div class="plex-mono dib ma1 pointer dim token function pa1 pv1 ${ obj.undocumented ? 'gray' : '' }" onclick=${ onclick }
           title=${obj.name}
           style="border-bottom: 4px solid ${ indexToHsl(obj.typeIndex, 100, 70) };line-height:0.6"
           >${obj.name}</div>
@@ -4738,7 +4743,7 @@ function mainView (state, emit) {
   const color = indexToHsl(state.page.selected?.typeIndex, 100, 90)
 
   return html`
-    <body class="pa2 f6 georgia w-100 h-100 flex justify-center" style="background-color:${color};transition: background-color 1s;">
+    <body class="pa2 f6 w-100 h-100 flex justify-center" style="font-family: 'Chivo', 'Noto Sans JP', sans-serif;background-color:${color};transition: background-color 1s;">
       <div style = "max-width: 1000px">
         <div class="flex justify-between items-end mv2">
           <div class="pt2 f3"> ${i18next.t('title')}${state.page.selected === null ? '' : `::: ${state.page.selected.name}`} </div>
@@ -4746,15 +4751,15 @@ function mainView (state, emit) {
         </div>
         <div class="flex flex-column-reverse flex-row-ns flex-column-reverse-m w-100" style="max-width:1000px">
 
-          <div style="" class="overflow-y-auto w-50-ns w-100 w-100-m ">
-          <p>${ raw(i18next.t('intro', {
-            hydra: 'https://hydra.ojack.xyz/',
-            gettingStarted: 'https://github.com/ojack/hydra#Getting-Started',
-            hydraBook: 'https://hydra-book.glitch.me/',
-            tb: 'target="_blank"'
-          })) }</p>
+          <div style="" class="overflow-y-auto w-50-ns w-100 w-100-m mr2">
+            <p>${ raw(i18next.t('intro', {
+              hydra: 'https://hydra.ojack.xyz/',
+              gettingStarted: 'https://github.com/ojack/hydra#Getting-Started',
+              hydraBook: 'https://hydra-book.glitch.me/',
+              att: 'class=blue target=_blank'
+            })) }</p>
 
-          ${ functionListView(state, emit) }
+            ${ functionListView(state, emit) }
           </div>
         ${ editorView(state, emit) }
         </div>
@@ -4830,9 +4835,9 @@ module.exports = {
       'example': 'Example',
       'usage': 'Usage',
       'title': 'Hydra functions',
-      'intro': `There are five types of functions in <a href="{{hydra}}" {{tb}}>hydra</a>: source, geometry, color, blend, and modulate.
-      Click on a function below to show its usage.  ( For more detailed documentation, see the <a href="{{hydra}}" {{tb}}>hydra website</a>,
-        <a href="{{gettingStarted}}" {{tb}}>getting started tutorial</a> or <a href="{{hydraBook}}" {{tb}}>Hydra Book.</a>)`,
+      'intro': `There are five types of functions in <a href="{{hydra}}" {{att}}>hydra</a>: source, geometry, color, blend, and modulate.
+      Click on a function below to show its usage. (For more detailed documentation, see the <a href="{{hydra}}" {{att}}>hydra website</a>,
+        <a href="{{gettingStarted}}" {{att}}>getting started tutorial</a> or <a href="{{hydraBook}}" {{att}}>Hydra Book</a>.)`,
       'editor-info': 'You can directly edit the code and press "▶" button or "ctrl+enter" to run it!',
       'source': 'Source',
       'geometry': 'Geometry',
@@ -4850,9 +4855,9 @@ module.exports = {
       'example': 'サンプル',
       'usage': '使い方',
       'title': 'Hydra 関数',
-      'intro': `<a href="{{hydra}}" {{tb}}> hydra</a> にはソース (source)、ジオメトリ (geometry)、カラー (color)、ブレンド (blend)、モジュレート (modulate) の五つのタイプの関数があります。
-      使い方を表示するには下の関数一覧をクリックしてください。（詳細は<a href="{{hydra}}" {{tb}}>hydra ウェブサイト</a>、
-        <a href="{{gettingStarted}}" {{tb}}>チュートリアル</a>、<a href="{{hydraBook}}" {{tb}}>Hydra Book</a>を参照してください）`,
+      'intro': `<a href="{{hydra}}" {{att}}> hydra</a> にはソース (source)、ジオメトリ (geometry)、カラー (color)、ブレンド (blend)、モジュレート (modulate) の五つのタイプの関数があります。
+      使い方を表示するには下の関数一覧をクリックしてください。（詳細は<a href="{{hydra}}" {{att}}>hydra ウェブサイト</a>、
+        <a href="{{gettingStarted}}" {{att}}>チュートリアル</a>、<a href="{{hydraBook}}" {{att}}>Hydra Book</a> を参照してください）`,
       'editor-info': '直接コードを編集して、「▶」ボタンか "ctrl+enter" を押せばコードを実行できます！',
       'source': 'ソース (Source)',
       'geometry': 'ジオメトリ (Geometry)',

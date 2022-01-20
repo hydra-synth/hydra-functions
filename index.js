@@ -56,7 +56,7 @@ function indexToHsl (index, s, l) {
   return `hsl(${ 20 + index * 60 }, ${ s }%, ${ l }%)`
 }
 
-function tabView (state, emit) {
+function exampleTabView (state, emit) {
   let obj = state.selected
   if (obj !== null) {
     const d = examples[obj.name]
@@ -88,7 +88,6 @@ function tabView (state, emit) {
 function editorView (state, emit) {
   obj = state.selected
   //  if(obj === null) return ''
-  let tabs = tabView(state, emit)
 
   return html`<div class="pa2 overflow-y-auto w-50-ns w-100 w-100-m h-100 ${obj===null?'dn':'db'}">
     <div class="pa3" style="background-color:${ indexToHsl(state.selectedIndex, 100, 80) }">
@@ -104,7 +103,7 @@ function editorView (state, emit) {
             ${ hydraCanvas.render(state) }
         </div>
       </div>
-      ${ tabs }
+      ${ exampleTabView(state, emit) }
       ${ cmEditor.render(state) }
     </div>
   </div>`
@@ -129,6 +128,34 @@ function languageView (state, emit) {
     }
   }
   return languageButtons
+}
+
+function functionListView (state, emit) {
+  const groups = []
+  for (const group of formattedFunctionGroups) {
+    const { type, val, funcs } = group
+    const functions = []
+    for (const obj of funcs) {
+      const onclick = () => {
+        emit('show details', obj, 0)
+      }
+      const func = html`
+        <div class="courier dib ma1 pointer dim token function pa1 pv1 ${ obj.undocumented ? 'gray' : '' }" onclick=${ onclick }
+          title=${obj.name}
+          style="border-bottom: 4px solid ${ indexToHsl(obj.typeIndex, 100, 70) };line-height:0.6"
+          >${obj.name}</div>
+      `
+      functions.push(func)
+    }
+    const view = html`
+      <div class="pv2">
+        <div class="mb3 f5">${ i18next.t(val.label) }</div>
+        ${ functions }
+      </div>
+    `
+    groups.push(view)
+  }
+  return groups
 }
 
 function mainView (state, emit) {
@@ -190,20 +217,7 @@ function mainView (state, emit) {
             ${i18next.t('intro2')}
           </p>
 
-          ${ formattedFunctionGroups.map(({ type, val, funcs }) => html`
-            <div class="pv2">
-              <div class="mb3 f5">${i18next.t(val.label)}</div>
-              ${funcs.map((obj, index) => html`
-              <div class="courier dib ma1 pointer dim token function pa1 pv1 ${ obj.undocumented ? 'gray' : '' }" onclick=${ () => {
-                console.log(obj)
-                emit('show details', obj, 0)
-              } }
-                title=${obj.name}
-                style="border-bottom: 4px solid ${ indexToHsl(obj.typeIndex, 100, 70) };line-height:0.6"
-                >${obj.name}</div>
-            `)}
-            </div>
-          `) }
+          ${ functionListView(state, emit) }
           </div>
         ${ editorView(state, emit) }
         </div>

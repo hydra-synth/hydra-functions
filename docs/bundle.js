@@ -4652,8 +4652,8 @@ function editorView (state, emit) {
     )}`)
   }
 
-  return html`<div class="pa2 overflow-y-auto w-50-ns w-100 w-100-m h-100 ${obj===null?'dn':'db'}">
-    <div class="pa3" style="background-color:${ indexToHsl(state.page.selected?.typeIndex, 100, 80) }">
+  return html`<div class="overflow-y-auto w-50-ns w-100 w-100-m h-100 ${obj===null?'dn':'db'}">
+    <div class="pa2" style="background-color:${ indexToHsl(state.page.selected?.typeIndex, 100, 80) }">
       <div class="pv2 f5">
         ${ i18next.t('usage') }
       </div>
@@ -4740,7 +4740,7 @@ function mainView (state, emit) {
   return html`
     <body class="pa2 f6 georgia w-100 h-100 flex justify-center" style="background-color:${color};transition: background-color 1s;">
       <div style = "max-width: 1000px">
-        <div class="flex justify-between items-end">
+        <div class="flex justify-between items-end mv2">
           <div class="pt2 f3"> ${i18next.t('title')}${state.page.selected === null ? '' : `::: ${state.page.selected.name}`} </div>
           <div class="pv1"> ${ languageView(state, emit) } </div>
         </div>

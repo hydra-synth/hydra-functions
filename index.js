@@ -77,9 +77,7 @@ function exampleTabView (state, emit) {
     }
 
     const functionName =   `${obj.name}( ${obj.inputs.map((input) => `${input.name}${input.default ? `: ${input.default}`: ''}`).join(', ')} )`
-    // cmUsage.setCode(functionName)
-    state.cm.usage = functionName
-    emit('rendered:usage')
+    cmUsage.setCode(functionName)
     return tabs = html`<div class="tabs">${tabs}</div>`
   }
   return ''
@@ -159,48 +157,8 @@ function functionListView (state, emit) {
 }
 
 function mainView (state, emit) {
-  state.cm = {}
-  const allFuncs = []
-  for (const group of formattedFunctionGroups) {
-    allFuncs.push(...group.funcs)
-  }
-  const obj = allFuncs.find(e => e.name === state.params.function)
-  if (obj !== undefined) {
-    state.selected = obj
-    state.selectedIndex = obj.typeIndex
-    state.tabIndex = state.params.tab
-    console.log(obj)
-
-    function getExampleCode(name, index) {
-      const d = examples[name]
-      let code = ''
-      if(d && d.example) {
-        if(Array.isArray(d.example)) {
-          code = d.example[index]
-        }
-        else {
-          code = d.example
-        }
-      }
-      return code
-    }
-    let code = getExampleCode(obj.name, state.tabIndex)
-    if (code === undefined) {
-      // illegal index
-      state.tabIndex = 0
-      code = getExampleCode(obj.name, state.tabIndex)
-      emit('pushState', `#functions/${ obj.name }/${ state.tabIndex }`)
-    }
-
-    code = code.replace(/^\n*/, '')
-    // cmEditor.setCode(code)
-    state.cm.editor = code
-  }
-
   //const inputs = obj.inputs.map((input))
   const color = state.selectedIndex === null ? 'white' : indexToHsl(state.selectedIndex, 100, 90)
-
-  emit('rendered:editor')
 
   return html`
     <body class="pa2 f6 georgia w-100 h-100 flex justify-center" style="background-color:${color};transition: background-color 1s;">
@@ -228,6 +186,7 @@ function mainView (state, emit) {
 
 function store (state, emitter) {
   //const functions = new HydraGen()
+  state.cm = { editor: '' }
   state.selected = null
   state.selectedIndex = null
   state.tabIndex = 0
@@ -235,18 +194,14 @@ function store (state, emitter) {
 
   emitter.on('show details', (obj, tabIndex) => {
     emitter.emit('pushState', `#functions/${ obj.name }/${ tabIndex }`)
+    emitter.emit('editor:update')
     emitter.emit('render')
   })
 
   emitter.on('DOMContentLoaded', () => {
-    cmUsage.setCode(state.cm.usage)
-    cmEditor.setCode(state.cm.editor)
-  })
-
-  emitter.on('rendered:usage', () => {
-    if (cmUsage.view !== undefined) {
-      cmUsage.setCode(state.cm.usage)
-    }
+    emitter.emit('editor:update')
+    // TODO: not sure this is a good idea to rerender
+    emitter.emit('render')
   })
 
   emitter.on('rendered:editor', () => {
@@ -258,5 +213,44 @@ function store (state, emitter) {
 
   emitter.on('navigate', () => {
     console.log(state.params)
+  })
+
+  emitter.on('editor:update', () => {
+    const allFuncs = []
+    for (const group of formattedFunctionGroups) {
+      allFuncs.push(...group.funcs)
+    }
+    const obj = allFuncs.find(e => e.name === state.params.function)
+    if (obj !== undefined) {
+      state.selected = obj
+      state.selectedIndex = obj.typeIndex
+      state.tabIndex = state.params.tab
+      console.log(obj)
+  
+      function getExampleCode(name, index) {
+        const d = examples[name]
+        let code = ''
+        if(d && d.example) {
+          if(Array.isArray(d.example)) {
+            code = d.example[index]
+          }
+          else {
+            code = d.example
+          }
+        }
+        return code
+      }
+      let code = getExampleCode(obj.name, state.tabIndex)
+      if (code === undefined) {
+        // illegal index
+        state.tabIndex = 0
+        code = getExampleCode(obj.name, state.tabIndex)
+        emit('pushState', `#functions/${ obj.name }/${ state.tabIndex }`)
+      }
+  
+      code = code.replace(/^\n*/, '')
+      state.cm.editor = code
+      cmEditor.setCode(code)
+    }
   })
 }

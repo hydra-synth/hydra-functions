@@ -1,11 +1,10 @@
 var html = require('choo/html')
 var devtools = require('choo-devtools')
 var choo = require('choo')
-const hydraFunctions = require('hydra-synth/src/glsl/glsl-functions')
-const hydraTypes = require('./types.js')
-const examples = require('./examples.js')
 const HydraComponent = require('./hydra.js')
 const CodeMirrorComponent = require('./codemirror.js')
+
+const { formattedFunctionGroups, getExamples, getExample } = require('./hydra-reference.js')
 
 const i18next = require('i18next')
 const i18nextBrowserLanguageDetector = require('i18next-browser-languagedetector')
@@ -32,22 +31,6 @@ app.route('/docs/functions/:function/:tab', mainView)
 app.route('/hydra-functions/functions/:function/:tab', mainView)
 app.mount('body')
 
-const formattedFunctionGroups = []
-
-Object.entries(hydraTypes).map(([type, val], typeIndex) => {
-  const formattedFunctionGroup = { type, val, typeIndex, funcs: [] }
-  const sortedObjList = hydraFunctions.filter((obj) => obj.type === type).sort((a, b) => a.name - b.name)
-  sortedObjList.map((obj, index) => {
-    if (examples[obj.name] === undefined) {
-      // functions that are not documented
-      obj.undocumented = true
-    }
-    obj.typeIndex = typeIndex
-    formattedFunctionGroup.funcs.push(obj)
-  })
-  formattedFunctionGroups.push(formattedFunctionGroup);
-})
-
 const hydraCanvas = new HydraComponent('hydra-canvas', app.state, app.emit)
 const cmEditor = new CodeMirrorComponent('cm-editor', app.state, app.emit)
 const cmUsage = new CodeMirrorComponent('cm-usage', app.state, app.emit, false)
@@ -59,21 +42,17 @@ function indexToHsl (index, s, l) {
 function exampleTabView (state, emit) {
   let obj = state.selected
   if (obj !== null) {
-    const d = examples[obj.name]
+    const examples = getExamples(obj.name)
 
     let tabs = [];
-    if(d && d.example) {
-      if(Array.isArray(d.example)) {
-        for(let i = 0; i < d.example.length; i++) {
-          const isSelected = i == state.tabIndex;
-          const hsl = indexToHsl(state.selectedIndex, isSelected?100:20, isSelected?90:60)
-          tabs.push(html`
-            <div class="tab courier pointer dib ma1 pa1 pv1" style="background-color:${hsl}" onclick=${()=>emit('show details', obj, i)}>
-              ${i18next.t('example')} ${i}
-            </div>
-          `)
-        }
-      }
+    for(let i = 0; i < examples.length; i++) {
+      const isSelected = i == state.tabIndex;
+      const hsl = indexToHsl(state.selectedIndex, isSelected?100:20, isSelected?90:60)
+      tabs.push(html`
+        <div class="tab courier pointer dib ma1 pa1 pv1" style="background-color:${hsl}" onclick=${()=>emit('show details', obj, i)}>
+          ${i18next.t('example')} ${i}
+        </div>
+      `)
     }
 
     const functionName =   `${obj.name}( ${obj.inputs.map((input) => `${input.name}${input.default ? `: ${input.default}`: ''}`).join(', ')} )`
@@ -190,7 +169,6 @@ function store (state, emitter) {
   state.selected = null
   state.selectedIndex = null
   state.tabIndex = 0
-  state.functions = Object.values(hydraFunctions)
 
   emitter.on('show details', (obj, tabIndex) => {
     emitter.emit('pushState', `#functions/${ obj.name }/${ tabIndex }`)
@@ -228,24 +206,15 @@ function store (state, emitter) {
       console.log(obj)
   
       function getExampleCode(name, index) {
-        const d = examples[name]
-        let code = ''
-        if(d && d.example) {
-          if(Array.isArray(d.example)) {
-            code = d.example[index]
-          }
-          else {
-            code = d.example
-          }
-        }
-        return code
+        const examples = getExamples(name)
+        return examples[index]
       }
       let code = getExampleCode(obj.name, state.tabIndex)
       if (code === undefined) {
         // illegal index
         state.tabIndex = 0
         code = getExampleCode(obj.name, state.tabIndex)
-        emit('pushState', `#functions/${ obj.name }/${ state.tabIndex }`)
+        emitter.emit('pushState', `#functions/${ obj.name }/${ state.tabIndex }`)
       }
   
       code = code.replace(/^\n*/, '')

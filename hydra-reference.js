@@ -15,6 +15,7 @@ class Category {
 class HydraReference {
   constructor () {
     this.formattedFunctionGroups = []
+    this.allFuncs = []
 
     for (const typeIndex in hydraTypes) {
       const hydraType = hydraTypes[typeIndex]
@@ -30,13 +31,7 @@ class HydraReference {
         formattedFunctionGroup.funcs.push(obj)
       }
       this.formattedFunctionGroups.push(formattedFunctionGroup)
-    }
-    Object.entries(hydraTypes).map(([type, val], typeIndex) => {
-    })
-
-    this.allFuncs = []
-    for (const group of this.formattedFunctionGroups) {
-      this.allFuncs.push(...group.funcs)
+      this.allFuncs.push(...formattedFunctionGroup.funcs)
     }
   }
 

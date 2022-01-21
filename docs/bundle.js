@@ -4497,22 +4497,36 @@ const hydraFunctions = require('hydra-synth/src/glsl/glsl-functions')()
 const hydraTypes = require('./types.js')
 const examples = require('./examples.js')
 
+class Item {
+  constructor (obj) {
+  }
+}
+
+class Category {
+  constructor (obj) {
+  }
+}
+
 class HydraReference {
   constructor () {
     this.formattedFunctionGroups = []
 
-    Object.entries(hydraTypes).map(([type, val], typeIndex) => {
-      const formattedFunctionGroup = { type, val, typeIndex, funcs: [] }
-      const sortedObjList = hydraFunctions.filter((obj) => obj.type === type).sort((a, b) => a.name - b.name)
-      sortedObjList.map((obj, index) => {
+    for (const typeIndex in hydraTypes) {
+      const hydraType = hydraTypes[typeIndex]
+      const type = hydraType.key
+      const formattedFunctionGroup = { type, typeIndex, funcs: [] }
+      const objList = hydraFunctions.filter((obj) => obj.type === type)//.sort((a, b) => a.name > b.name)
+      for (const obj of objList) {
         if (examples[obj.name] === undefined) {
           // functions that are not documented
           obj.undocumented = true
         }
         obj.typeIndex = typeIndex
         formattedFunctionGroup.funcs.push(obj)
-      })
+      }
       this.formattedFunctionGroups.push(formattedFunctionGroup)
+    }
+    Object.entries(hydraTypes).map(([type, val], typeIndex) => {
     })
 
     this.allFuncs = []
@@ -4713,7 +4727,7 @@ function languageView (state, emit) {
 function functionListView (state, emit) {
   const groups = []
   for (const group of state.hydraReference.getGroups()) {
-    const { type, val, funcs } = group
+    const { type, funcs } = group
     const functions = []
     for (const obj of funcs) {
       const onclick = () => {
@@ -4729,7 +4743,7 @@ function functionListView (state, emit) {
     }
     const view = html`
       <div class="pv2">
-        <div class="mb3 f5">${ i18next.t(val.label) }</div>
+        <div class="mb3 f5">${ i18next.t(type) }</div>
         ${ functions }
       </div>
     `
@@ -4838,12 +4852,12 @@ module.exports = {
       'intro': `There are five types of functions in <a href="{{hydra}}" {{att}}>hydra</a>: source, geometry, color, blend, and modulate.
       Click on a function below to show its usage. (For more detailed documentation, see the <a href="{{hydra}}" {{att}}>hydra website</a>,
         <a href="{{gettingStarted}}" {{att}}>getting started tutorial</a> or <a href="{{hydraBook}}" {{att}}>Hydra Book</a>.)`,
-      'editor-info': 'You can directly edit the code and press "▶" button or "ctrl+enter" to run it!',
-      'source': 'Source',
-      'geometry': 'Geometry',
+      'editor-info': 'Directly edit the code and press "▶" button or "ctrl+enter" to run it!',
+      'src': 'Source',
+      'coord': 'Geometry',
       'color': 'Color',
-      'blend': 'Blend',
-      'modulate': 'Modulate',
+      'combine': 'Blend',
+      'combineCoord': 'Modulate',
       'run': 'run',
       'reset': 'reset',
       'openin': 'open in editor',
@@ -4859,11 +4873,11 @@ module.exports = {
       使い方を表示するには下の関数一覧をクリックしてください。（詳細は<a href="{{hydra}}" {{att}}>hydra ウェブサイト</a>、
         <a href="{{gettingStarted}}" {{att}}>チュートリアル</a>、<a href="{{hydraBook}}" {{att}}>Hydra Book</a> を参照してください）`,
       'editor-info': '直接コードを編集して、「▶」ボタンか "ctrl+enter" を押せばコードを実行できます！',
-      'source': 'ソース (Source)',
-      'geometry': 'ジオメトリ (Geometry)',
+      'src': 'ソース (Source)',
+      'coord': 'ジオメトリ (Geometry)',
       'color': 'カラー (Color)',
-      'blend': 'ブレンド (Blend)',
-      'modulate': 'モジュレート (Modulate)',
+      'combine': 'ブレンド (Blend)',
+      'combineCoord': 'モジュレート (Modulate)',
       'run': '実行',
       'reset': 'リセット',
       'openin': '外部エディタを開く',
@@ -40171,27 +40185,27 @@ function has (object, property) {
 }
 
 },{"assert":94}],133:[function(require,module,exports){
-module.exports = {
-  src: {
-    label: "source",
-    color: "#f33"
+module.exports = [
+  {
+    key: 'src',
+    color: '#f33'
   },
-  coord: {
-    label: "geometry",
-    color: "#ff3"
+  {
+    key: 'coord',
+    color: '#ff3'
   },
-  color: {
-    label: 'color',
+  {
+    key: 'color',
     color: '#3f3'
   },
-  combine: {
-    label: "blend",
-    color: "#3ff"
+  {
+    key: 'combine',
+    color: '#3ff'
   },
-  combineCoord: {
-    label: "modulate",
-    color: "#33f"
+  {
+    key: 'combineCoord',
+    color: '#33f'
   }
-}
+]
 
 },{}]},{},[16]);

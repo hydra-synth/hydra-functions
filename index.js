@@ -138,7 +138,7 @@ function languageView (state, emit) {
 function functionListView (state, emit) {
   const groups = []
   for (const group of state.hydraReference.getGroups()) {
-    const { type, val, funcs } = group
+    const { type, funcs } = group
     const functions = []
     for (const obj of funcs) {
       const onclick = () => {
@@ -154,7 +154,7 @@ function functionListView (state, emit) {
     }
     const view = html`
       <div class="pv2">
-        <div class="mb3 f5">${ i18next.t(val.label) }</div>
+        <div class="mb3 f5">${ i18next.t(type) }</div>
         ${ functions }
       </div>
     `

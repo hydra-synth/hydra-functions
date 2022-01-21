@@ -2,22 +2,36 @@ const hydraFunctions = require('hydra-synth/src/glsl/glsl-functions')()
 const hydraTypes = require('./types.js')
 const examples = require('./examples.js')
 
+class Item {
+  constructor (obj) {
+  }
+}
+
+class Category {
+  constructor (obj) {
+  }
+}
+
 class HydraReference {
   constructor () {
     this.formattedFunctionGroups = []
 
-    Object.entries(hydraTypes).map(([type, val], typeIndex) => {
-      const formattedFunctionGroup = { type, val, typeIndex, funcs: [] }
-      const sortedObjList = hydraFunctions.filter((obj) => obj.type === type).sort((a, b) => a.name - b.name)
-      sortedObjList.map((obj, index) => {
+    for (const typeIndex in hydraTypes) {
+      const hydraType = hydraTypes[typeIndex]
+      const type = hydraType.key
+      const formattedFunctionGroup = { type, typeIndex, funcs: [] }
+      const objList = hydraFunctions.filter((obj) => obj.type === type)//.sort((a, b) => a.name > b.name)
+      for (const obj of objList) {
         if (examples[obj.name] === undefined) {
           // functions that are not documented
           obj.undocumented = true
         }
         obj.typeIndex = typeIndex
         formattedFunctionGroup.funcs.push(obj)
-      })
+      }
       this.formattedFunctionGroups.push(formattedFunctionGroup)
+    }
+    Object.entries(hydraTypes).map(([type, val], typeIndex) => {
     })
 
     this.allFuncs = []

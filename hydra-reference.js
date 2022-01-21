@@ -8,30 +8,35 @@ class Item {
 }
 
 class Category {
-  constructor (obj) {
+  constructor ({ type, colorIndex, allFuncs }) {
+    this.type = type
+    this.colorIndex = colorIndex
+    this.funcs = []
+    const objList = allFuncs.filter((obj) => obj.type === type)//.sort((a, b) => a.name > b.name)
+    for (const obj of objList) {
+      if (examples[obj.name] === undefined) {
+        // functions that are not documented
+        obj.undocumented = true
+      }
+      obj.colorIndex = colorIndex
+      this.funcs.push(obj)
+    }
+
   }
 }
 
 class HydraReference {
   constructor () {
     this.formattedFunctionGroups = []
-    this.allFuncs = []
+    this.allFuncs = hydraFunctions
 
-    for (const typeIndex in hydraTypes) {
-      const hydraType = hydraTypes[typeIndex]
-      const type = hydraType.key
-      const formattedFunctionGroup = { type, typeIndex, funcs: [] }
-      const objList = hydraFunctions.filter((obj) => obj.type === type)//.sort((a, b) => a.name > b.name)
-      for (const obj of objList) {
-        if (examples[obj.name] === undefined) {
-          // functions that are not documented
-          obj.undocumented = true
-        }
-        obj.typeIndex = typeIndex
-        formattedFunctionGroup.funcs.push(obj)
-      }
-      this.formattedFunctionGroups.push(formattedFunctionGroup)
-      this.allFuncs.push(...formattedFunctionGroup.funcs)
+    for (const index in hydraTypes) {
+      const type = hydraTypes[index].key
+      this.formattedFunctionGroups.push(new Category({
+        type,
+        colorIndex: index,
+        allFuncs: this.allFuncs,
+      }))
     }
   }
 

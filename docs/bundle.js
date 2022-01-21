@@ -4503,30 +4503,35 @@ class Item {
 }
 
 class Category {
-  constructor (obj) {
+  constructor ({ type, colorIndex, allFuncs }) {
+    this.type = type
+    this.colorIndex = colorIndex
+    this.funcs = []
+    const objList = allFuncs.filter((obj) => obj.type === type)//.sort((a, b) => a.name > b.name)
+    for (const obj of objList) {
+      if (examples[obj.name] === undefined) {
+        // functions that are not documented
+        obj.undocumented = true
+      }
+      obj.colorIndex = colorIndex
+      this.funcs.push(obj)
+    }
+
   }
 }
 
 class HydraReference {
   constructor () {
     this.formattedFunctionGroups = []
-    this.allFuncs = []
+    this.allFuncs = hydraFunctions
 
-    for (const typeIndex in hydraTypes) {
-      const hydraType = hydraTypes[typeIndex]
-      const type = hydraType.key
-      const formattedFunctionGroup = { type, typeIndex, funcs: [] }
-      const objList = hydraFunctions.filter((obj) => obj.type === type)//.sort((a, b) => a.name > b.name)
-      for (const obj of objList) {
-        if (examples[obj.name] === undefined) {
-          // functions that are not documented
-          obj.undocumented = true
-        }
-        obj.typeIndex = typeIndex
-        formattedFunctionGroup.funcs.push(obj)
-      }
-      this.formattedFunctionGroups.push(formattedFunctionGroup)
-      this.allFuncs.push(...formattedFunctionGroup.funcs)
+    for (const index in hydraTypes) {
+      const type = hydraTypes[index].key
+      this.formattedFunctionGroups.push(new Category({
+        type,
+        colorIndex: index,
+        allFuncs: this.allFuncs,
+      }))
     }
   }
 
@@ -4635,7 +4640,7 @@ function exampleTabView (state, emit) {
     let tabs = [];
     for(let i = 0; i < examples.length; i++) {
       const isSelected = i == state.page.tabIndex;
-      const hsl = indexToHsl(state.page.selected.typeIndex, isSelected?100:20, isSelected?90:60)
+      const hsl = indexToHsl(state.page.selected.colorIndex, isSelected?100:20, isSelected?90:60)
       tabs.push(html`
         <div class="tab plex-mono pointer dib mr2 pa2 pv1" style="background-color:${hsl}" onclick=${()=>emit('show details', obj, i)}>
           <!--${i18next.t('example')}-->
@@ -4667,7 +4672,7 @@ function editorView (state, emit) {
   }
 
   return html`<div class="overflow-y-auto w-50-ns w-100 w-100-m h-100 ${obj===null?'dn':'db'}">
-    <div class="pa2" style="background-color:${ indexToHsl(state.page.selected?.typeIndex, 100, 80) }">
+    <div class="pa2" style="background-color:${ indexToHsl(state.page.selected?.colorIndex, 100, 80) }">
       <div class="pv2 f5">
         ${ i18next.t('usage') }
       </div>
@@ -4731,7 +4736,7 @@ function functionListView (state, emit) {
       const func = html`
         <div class="plex-mono dib ma1 pointer dim token function pa1 pv1 ${ obj.undocumented ? 'gray' : '' }" onclick=${ onclick }
           title=${obj.name}
-          style="border-bottom: 4px solid ${ indexToHsl(obj.typeIndex, 100, 70) };line-height:0.6"
+          style="border-bottom: 4px solid ${ indexToHsl(obj.colorIndex, 100, 70) };line-height:0.6"
           >${obj.name}</div>
       `
       functions.push(func)
@@ -4749,7 +4754,7 @@ function functionListView (state, emit) {
 
 function mainView (state, emit) {
   //const inputs = obj.inputs.map((input))
-  const color = indexToHsl(state.page.selected?.typeIndex, 100, 90)
+  const color = indexToHsl(state.page.selected?.colorIndex, 100, 90)
 
   return html`
     <body class="pa2 f6 w-100 h-100 flex justify-center" style="font-family: 'Chivo', 'Noto Sans JP', sans-serif;background-color:${color};transition: background-color 1s;">

@@ -3,7 +3,15 @@ const hydraTypes = require('./types.js')
 const examples = require('./examples.js')
 
 class Item {
-  constructor (obj) {
+  constructor ({ obj, colorIndex }) {
+    this.name = obj.name
+    this.colorIndex = colorIndex
+    this.inputs = obj.inputs
+
+    if (examples[this.name] === undefined) {
+      // functions that are not documented
+      this.undocumented = true
+    }
   }
 }
 
@@ -14,38 +22,36 @@ class Category {
     this.funcs = []
     const objList = allFuncs.filter((obj) => obj.type === type)//.sort((a, b) => a.name > b.name)
     for (const obj of objList) {
-      if (examples[obj.name] === undefined) {
-        // functions that are not documented
-        obj.undocumented = true
-      }
-      obj.colorIndex = colorIndex
-      this.funcs.push(obj)
+      const item = new Item({ obj, colorIndex })
+      this.funcs.push(item)
     }
-
   }
 }
 
 class HydraReference {
   constructor () {
-    this.formattedFunctionGroups = []
+    this.categories = []
     this.allFuncs = hydraFunctions
+    this.allItems = []
 
     for (const index in hydraTypes) {
       const type = hydraTypes[index].key
-      this.formattedFunctionGroups.push(new Category({
+      const category = new Category({
         type,
         colorIndex: index,
         allFuncs: this.allFuncs,
-      }))
+      })
+      this.categories.push(category)
+      this.allItems.push(...category.funcs)
     }
   }
 
   getGroups () {
-    return this.formattedFunctionGroups
+    return this.categories
   }
 
   getPage (name) {
-    return this.allFuncs.find(e => e.name === name)
+    return this.allItems.find(e => e.name === name)
   }
 
   getExamples (name) {

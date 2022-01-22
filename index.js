@@ -226,7 +226,7 @@ function store (state, emitter) {
   })
 
   emitter.on('editor:update', () => {
-    const obj = state.hydraReference.getPage(state.params.function)
+    const obj = state.hydraReference.getItem(state.params.function)
     if (obj !== undefined) {
       state.page.selected = obj
       state.page.tabIndex = state.params.tab

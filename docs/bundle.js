@@ -4505,13 +4505,26 @@ class Item {
     this.inputs = obj.inputs
 
     if (this.category.type === "combine" || this.category.type === "combineCoord") {
-      console.log(this.inputs)
       this.inputs = [ { type: "vec4", name: "texture" }, ...this.inputs]
     }
 
-    if (examples[this.name] === undefined) {
+    this.initExamples()
+  }
+
+  initExamples () {
+    let ref = examples[this.name]
+    if (ref === undefined || ref.example === undefined) {
       // functions that are not documented
       this.undocumented = true
+      this.examples = []
+    }
+    else {
+      if (Array.isArray(ref.example) === false) {
+        this.examples = [ref.example]
+      }
+      else {
+        this.examples = ref.example
+      }
     }
   }
 }
@@ -4551,22 +4564,12 @@ class HydraReference {
     return this.categories
   }
 
-  getPage (name) {
+  getItem (name) {
     return this.allItems.find(e => e.name === name)
   }
 
   getExamples (name) {
-    let ref = examples[name]
-    if (ref === undefined) {
-      return []
-    }
-    if (ref.example === undefined) {
-      return []
-    }
-    if (Array.isArray(ref.example) === false) {
-      return [ref.example]
-    }
-    return ref.example
+    return this.getItem(name).examples
   }
 }
 
@@ -4827,7 +4830,7 @@ function store (state, emitter) {
   })
 
   emitter.on('editor:update', () => {
-    const obj = state.hydraReference.getPage(state.params.function)
+    const obj = state.hydraReference.getItem(state.params.function)
     if (obj !== undefined) {
       state.page.selected = obj
       state.page.tabIndex = state.params.tab

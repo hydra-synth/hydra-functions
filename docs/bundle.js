@@ -4498,10 +4498,16 @@ const hydraTypes = require('./types.js')
 const examples = require('./examples.js')
 
 class Item {
-  constructor ({ obj, colorIndex }) {
+  constructor ({ obj, colorIndex, category }) {
     this.name = obj.name
+    this.category = category
     this.colorIndex = colorIndex
     this.inputs = obj.inputs
+
+    if (this.category.type === "combine" || this.category.type === "combineCoord") {
+      console.log(this.inputs)
+      this.inputs = [ { type: "vec4", name: "texture" }, ...this.inputs]
+    }
 
     if (examples[this.name] === undefined) {
       // functions that are not documented
@@ -4517,7 +4523,7 @@ class Category {
     this.funcs = []
     const objList = allFuncs.filter((obj) => obj.type === type)//.sort((a, b) => a.name > b.name)
     for (const obj of objList) {
-      const item = new Item({ obj, colorIndex })
+      const item = new Item({ obj, colorIndex, category: this })
       this.funcs.push(item)
     }
   }

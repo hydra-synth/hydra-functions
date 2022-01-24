@@ -143,7 +143,7 @@ function functionListView (state, emit) {
     const functions = []
     for (const obj of funcs) {
       const onclick = () => {
-        if (obj.undocumented === false) {
+        if (!obj.undocumented) {
           emit('show details', obj, 0)
         }
       }

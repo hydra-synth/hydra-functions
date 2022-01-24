@@ -64,6 +64,11 @@ module.exports = [
     name: 'render',
     type: 'settings',
     inputs: [
+      {
+        type: 'vec4',
+        name: 'texture',
+        default: 'all',
+      },
     ],
   },
   {
@@ -142,30 +147,60 @@ module.exports = [
     name: 'fast',
     type: 'array',
     inputs: [
+      {
+        type: 'number',
+        name: 'speed',
+        default: '1',
+      },
     ],
   },
   {
     name: 'smooth',
     type: 'array',
     inputs: [
+      {
+        type: 'number',
+        name: 'smooth',
+        default: '1',
+      },
     ],
   },
   {
     name: 'ease',
     type: 'array',
     inputs: [
+      {
+        type: 'string',
+        name: 'ease',
+        default: `'linear'`,
+      },
     ],
   },
   {
     name: 'offset',
     type: 'array',
     inputs: [
+      {
+        type: 'number',
+        name: 'offset',
+        default: '0.5',
+      },
     ],
   },
   {
     name: 'fit',
     type: 'array',
     inputs: [
+      {
+        type: 'number',
+        name: 'low',
+        default: '0',
+      },
+      {
+        type: 'number',
+        name: 'high',
+        default: '1',
+      },
     ],
   },
   {

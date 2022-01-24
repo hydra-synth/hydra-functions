@@ -26,6 +26,7 @@ module.exports = class CodeMirror extends Component {
   evaluate () {
     const code = this.view.state.doc.toString()
     try {
+      render(o0)
       Function(code)()
       this.view.dispatch({
         effects: this.theme.reconfigure(EditorView.theme({

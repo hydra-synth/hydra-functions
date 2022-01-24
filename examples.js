@@ -422,16 +422,53 @@ osc(30,0.1,1).colorama(-0.1).out(o0)`]
    initCam: {
       example: [`
 s0.initCam()
-src(s0).invert().out()`]
+src(s0).invert().out(o0)`]
    },
    initImage: {
       example: [`
 s0.initImage("https://upload.wikimedia.org/wikipedia/commons/2/25/Hydra-Foto.jpg")
-osc(6).modulate(src(s0),1).out()`]
+osc(6).modulate(src(s0),1).out(o0)`]
    },
    initVideo: {
       example: [`
 s0.initVideo("https://media.giphy.com/media/AS9LIFttYzkc0/giphy.mp4")
-src(s0).modulate(noise(3)).out()`]
+src(s0).modulate(noise(3)).out(o0)`]
+   },
+   render: {
+      example: [`
+osc(30,0.1,1.5).out(o0)
+noise().out(o1)
+solid(1).out(o2)
+gradient().out(o3)
+render()`,
+`
+voronoi().out(o1)
+render(o1)`]
+   },
+   fast: {
+      example: [`
+osc([10,30,60].fast(2),0.1,1.5).out(o0)`,
+`
+// argument less than 1 makes transition slower
+osc([10,30,60].fast(0.5),0.1,1.5).out(o0)`,]
+   },
+   smooth: {
+      example: [`
+shape(999).scrollX([-0.2,0.2].smooth()).out(o0)`,]
+   },
+   ease: {
+      example: [`
+shape(4).rotate([-3.14,3.14].ease('easeInOutCubic')).out(o0)`,]
+   },
+   offset: {
+      example: [`
+shape(999).scrollY(.2).scrollX([-0.2,0.2])
+  .add(
+  shape(4).scrollY(-.2).scrollX([-0.2,0.2].offset(0.5))
+  ).out(o0)`,]
+   },
+   fit: {
+      example: [`
+shape().scrollX([0,1,2,3,4].fit(-0.2,0.2)).out()`,]
    },
 }

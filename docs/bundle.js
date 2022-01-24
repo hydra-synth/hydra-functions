@@ -4514,7 +4514,7 @@ module.exports = [
     type: 'ext',
     inputs: [
       {
-        type: 'int',
+        type: 'number',
         name: 'index',
         default: 0,
       },
@@ -4568,6 +4568,132 @@ module.exports = [
         type: 'string',
         name: 'name',
       },
+    ],
+  },
+  {
+    name: 'render',
+    type: 'settings',
+    inputs: [
+    ],
+  },
+  {
+    name: 'setResolution',
+    type: 'settings',
+    inputs: [
+      {
+        type: 'number',
+        name: 'width',
+      },
+      {
+        type: 'number',
+        name: 'height',
+      },
+    ],
+  },
+  {
+    name: 'hush',
+    type: 'settings',
+    inputs: [
+    ],
+  },
+  {
+    name: 'setFunction',
+    type: 'settings',
+    inputs: [
+      {
+        type: 'object',
+        name: 'options',
+      },
+    ],
+  },
+  {
+    name: 'fps',
+    type: 'settings',
+    inputs: [
+    ],
+  },
+  {
+    name: 'speed',
+    type: 'settings',
+    inputs: [
+    ],
+  },
+  {
+    name: 'bpm',
+    type: 'settings',
+    inputs: [
+    ],
+  },
+  {
+    name: 'width',
+    type: 'settings',
+    inputs: [
+    ],
+  },
+  {
+    name: 'height',
+    type: 'settings',
+    inputs: [
+    ],
+  },
+  {
+    name: 'time',
+    type: 'settings',
+    inputs: [
+    ],
+  },
+  {
+    name: 'mouse',
+    type: 'settings',
+    inputs: [
+    ],
+  },
+  {
+    name: 'fast',
+    type: 'array',
+    inputs: [
+    ],
+  },
+  {
+    name: 'smooth',
+    type: 'array',
+    inputs: [
+    ],
+  },
+  {
+    name: 'ease',
+    type: 'array',
+    inputs: [
+    ],
+  },
+  {
+    name: 'offset',
+    type: 'array',
+    inputs: [
+    ],
+  },
+  {
+    name: 'fit',
+    type: 'array',
+    inputs: [
+    ],
+  },
+  {
+    name: 'setSmooth',
+    type: 'audio',
+    inputs: [
+    ],
+  },
+  {
+    name: 'setCutoff',
+    type: 'audio',
+    inputs: [
+    ],
+  },
+  {
+    name: 'fft',
+    type: 'audio',
+    inputs: [
     ],
   },
 ]
@@ -4960,6 +5086,9 @@ module.exports = {
       'combine': 'Blend',
       'combineCoord': 'Modulate',
       'ext': 'External Sources',
+      'settings': 'Synth Settings',
+      'array': 'Array',
+      'audio': 'Audio',
       'run': 'run',
       'reset': 'reset',
       'openin': 'open in editor',
@@ -4980,6 +5109,10 @@ module.exports = {
       'color': 'カラー (Color)',
       'combine': 'ブレンド (Blend)',
       'combineCoord': 'モジュレート (Modulate)',
+      'ext': '外部入力',
+      'settings': 'シンセ設定',
+      'array': '配列',
+      'audio': 'オーディオ',
       'run': '実行',
       'reset': 'リセット',
       'openin': '外部エディタを開く',
@@ -40310,7 +40443,15 @@ module.exports = [
   },
   {
     key: 'ext',
-    // color: '#33f'
+  },
+  {
+    key: 'settings',
+  },
+  {
+    key: 'array',
+  },
+  {
+    key: 'audio',
   },
 ]
 

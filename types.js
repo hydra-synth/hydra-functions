@@ -21,6 +21,14 @@ module.exports = [
   },
   {
     key: 'ext',
-    // color: '#33f'
+  },
+  {
+    key: 'settings',
+  },
+  {
+    key: 'array',
+  },
+  {
+    key: 'audio',
   },
 ]

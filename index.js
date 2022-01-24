@@ -39,7 +39,7 @@ const cmUsage = new CodeMirrorComponent('cm-usage', app.state, app.emit, false, 
 
 function indexToHsl (index, s, l) {
   if (index !== undefined) {
-    return `hsl(${ 20 + index * 60 }, ${ s }%, ${ l }%)`
+    return `hsl(${ 10 + index * 40 }, ${ s }%, ${ l }%)`
   }
   return 'white'
 }

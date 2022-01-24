@@ -418,5 +418,20 @@ osc(20)
   .out(o0)`,
 `// negative value is less harsh
 osc(30,0.1,1).colorama(-0.1).out(o0)`]
-   }
+   },
+   initCam: {
+      example: [`
+s0.initCam()
+src(s0).invert().out()`]
+   },
+   initImage: {
+      example: [`
+s0.initImage("https://upload.wikimedia.org/wikipedia/commons/2/25/Hydra-Foto.jpg")
+osc(6).modulate(src(s0),1).out()`]
+   },
+   initVideo: {
+      example: [`
+s0.initVideo("https://media.giphy.com/media/AS9LIFttYzkc0/giphy.mp4")
+src(s0).modulate(noise(3)).out()`]
+   },
 }

@@ -18,5 +18,9 @@ module.exports = [
   {
     key: 'combineCoord',
     // color: '#33f'
-  }
+  },
+  {
+    key: 'ext',
+    // color: '#33f'
+  },
 ]

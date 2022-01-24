@@ -23,6 +23,7 @@ i18next
 
 var app = choo({ hash: true })
 app.use(devtools())
+app.use(pageStore)
 app.use(store)
 app.route('/', mainView)
 app.route('/docs', mainView)
@@ -142,10 +143,12 @@ function functionListView (state, emit) {
     const functions = []
     for (const obj of funcs) {
       const onclick = () => {
-        emit('show details', obj, 0)
+        if (obj.undocumented === false) {
+          emit('show details', obj, 0)
+        }
       }
       const func = html`
-        <div class="plex-mono dib ma1 pointer dim token function pa1 pv1 ${ obj.undocumented ? 'gray' : '' }" onclick=${ onclick }
+        <div class="plex-mono dib ma1 token function pa1 pv1 ${ obj.undocumented ? 'gray' : 'pointer dim' }" onclick=${ onclick }
           title=${obj.name}
           style="border-bottom: 4px solid ${ indexToHsl(obj.colorIndex, 100, 70) };line-height:0.6"
           >${obj.name}</div>
@@ -193,37 +196,13 @@ function mainView (state, emit) {
   `
 }
 
-function store (state, emitter) {
-  //const functions = new HydraGen()
+function pageStore (state, emitter) {
   state.hydraReference = HydraReference()
   state.cm = { editor: '' }
   state.page = {
     selected: null,
     tabIndex: 0,
   }
-
-  emitter.on('show details', (obj, tabIndex) => {
-    emitter.emit('pushState', `#functions/${ obj.name }/${ tabIndex }`)
-    emitter.emit('editor:update')
-    emitter.emit('render')
-  })
-
-  emitter.on('DOMContentLoaded', () => {
-    emitter.emit('editor:update')
-    // TODO: not sure this is a good idea to rerender
-    emitter.emit('render')
-  })
-
-  emitter.on('rendered:editor', () => {
-    // by chance, this can be used for resetting too
-    if (cmEditor.view !== undefined) {
-      cmEditor.setCode(state.cm.editor)
-    }
-  })
-
-  emitter.on('navigate', () => {
-    console.log(state.params)
-  })
 
   emitter.on('editor:update', () => {
     const obj = state.hydraReference.getItem(state.params.function)
@@ -248,5 +227,31 @@ function store (state, emitter) {
       state.cm.editor = code
       cmEditor.setCode(code)
     }
+  })
+}
+
+function store (state, emitter) {
+  //const functions = new HydraGen()
+  emitter.on('show details', (obj, tabIndex) => {
+    emitter.emit('pushState', `#functions/${ obj.name }/${ tabIndex }`)
+    emitter.emit('editor:update')
+    emitter.emit('render')
+  })
+
+  emitter.on('DOMContentLoaded', () => {
+    emitter.emit('editor:update')
+    // TODO: not sure this is a good idea to rerender
+    emitter.emit('render')
+  })
+
+  emitter.on('rendered:editor', () => {
+    // by chance, this can be used for resetting too
+    if (cmEditor.view !== undefined) {
+      cmEditor.setCode(state.cm.editor)
+    }
+  })
+
+  emitter.on('navigate', () => {
+    console.log(state.params)
   })
 }

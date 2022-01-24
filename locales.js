@@ -15,6 +15,7 @@ module.exports = {
       'color': 'Color',
       'combine': 'Blend',
       'combineCoord': 'Modulate',
+      'ext': 'External Sources',
       'run': 'run',
       'reset': 'reset',
       'openin': 'open in editor',

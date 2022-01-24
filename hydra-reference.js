@@ -1,4 +1,5 @@
 const hydraFunctions = require('hydra-synth/src/glsl/glsl-functions')()
+const hydraPlugins = require('./hydra-plugins.js')
 const hydraTypes = require('./types.js')
 const examples = require('./examples.js')
 
@@ -50,7 +51,7 @@ class Category {
 class HydraReference {
   constructor () {
     this.categories = []
-    this.allFuncs = hydraFunctions
+    this.allFuncs = [...hydraFunctions, ...hydraPlugins]
     this.allItems = []
 
     for (const index in hydraTypes) {

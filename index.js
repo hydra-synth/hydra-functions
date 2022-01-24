@@ -163,7 +163,11 @@ function functionListView (state, emit) {
     `
     groups.push(view)
   }
-  return groups
+  return html`
+  <div class="relative h-100 overflow-y-scroll-ns overflow-y-auto-m">
+    ${ groups }
+  </div>
+  `
 }
 
 function mainView (state, emit) {
@@ -171,16 +175,16 @@ function mainView (state, emit) {
   const color = indexToHsl(state.page.selected?.colorIndex, 100, 90)
 
   return html`
-    <body class="pa2 f6 w-100 h-100 flex justify-center" style="font-family: 'Chivo', 'Noto Sans JP', sans-serif;background-color:${color};transition: background-color 1s;">
-      <div style = "max-width: 1000px">
-        <div class="flex justify-between items-end mv2">
+    <body class="absolute pa2 f6 w-100 h-100-ns h-auto-m flex justify-center" style="font-family: 'Chivo', 'Noto Sans JP', sans-serif;background-color:${color};transition: background-color 1s;">
+      <div class="relative flex flex-column" style="max-width: 1000px">
+        <div class="relative flex justify-between items-end mv2">
           <div class="pt2 f3"> ${i18next.t('title')}${state.page.selected === null ? '' : `::: ${state.page.selected.name}`} </div>
           <div class="pv1"> ${ languageView(state, emit) } </div>
         </div>
-        <div class="flex flex-column-reverse flex-row-ns flex-column-reverse-m w-100" style="max-width:1000px">
+        <div class="relative flex flex-column-reverse flex-row-ns flex-column-reverse-m w-100 h-100 overflow-y-hidden overflow-x-hidden" style="max-width:1000px">
 
-          <div style="" class="overflow-y-auto w-50-ns w-100 w-100-m mr2">
-            <p>${ raw(i18next.t('intro', {
+          <div style="" class="relative flex flex-column h-100 w-50-ns w-100 w-100-m mr2">
+            <p class="relative">${ raw(i18next.t('intro', {
               hydra: 'https://hydra.ojack.xyz/',
               gettingStarted: 'https://github.com/ojack/hydra#Getting-Started',
               hydraBook: 'https://hydra-book.glitch.me/',

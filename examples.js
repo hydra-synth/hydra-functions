@@ -1,43 +1,101 @@
 module.exports = {
    noise: {
       description: "Generate [Perlin noise](https://en.wikipedia.org/wiki/Perlin_noise).",
-      example: [`
-// default
-noise(10, 0.1).out(o0)`,
-`// noise interpolating between different scales and offsets
-noise( ({time}) => Math.sin(time/10)*50 , ({time}) => Math.sin(time/2)/500 )
+      example: [
+         {
+            code: `noise(10, 0.1).out(o0)`,
+            comments: {
+               en: "default",
+               ja: "デフォルト",
+            }
+         },
+         {
+            code: `
+noise( () => Math.sin(time/10)*50 , () => Math.sin(time/2)/500 )
 .out(o0)`,
-]
+            comments: {
+               en: "noise interpolating between different scales and offsets",
+               ja: "noise の異なるスケールやオフセットを補間",
+            }
+         }
+      ]
    },
    voronoi: {
       description: "Generate [voronoi shapes](https://en.wikipedia.org/wiki/Voronoi_diagram).",
-      example: [`
-// default
-voronoi(5,0.3,0.3).out(o0)`,
-`// fireflies
-voronoi(25,2,10).color(1,1,0).brightness(0.15).out(o0)`]
+      example: [
+         {
+            code: `voronoi(5,0.3,0.3).out(o0)`,
+            comments: {
+               en: "default",
+               ja: "デフォルト",
+            }
+         },
+         {
+            code: `voronoi(25,2,10).color(1,1,0).brightness(0.15).out(o0)`,
+            comments: {
+               en: "fireflies",
+               ja: "蛍",
+            }
+         }
+      ]
    },
    osc: {
-      example: [`
-// frequency
-osc( [1,10,50,100,250,500].fast(2) ).out(o0)`,
-`// frequency 2
-osc( ({time}) => Math.sin(time/10) * 100 ).out(o0)`,
-`// sync
-osc( 10, [-10,-1,-0.1,0,0.1,1,10], 0 ).out(o0)`,
-`// offset
-osc(10,0.1, ({time}) => Math.sin(time/10) * 100 ).out(o0)`]
+      example: [
+         {
+            code: `osc( [1,10,50,100,250,500].fast(2) ).out(o0)`,
+            comments: {
+               en: "frequency",
+               ja: "周波数",
+            }
+         },
+         {
+            code: `osc( () => Math.sin(time/10) * 100 ).out(o0)`,
+            comments: {
+               en: "frequency 2",
+               ja: "周波数 2",
+            }
+         },
+         {
+            code: `osc( 10, [-10,-1,-0.1,0,0.1,1,10], 0 ).out(o0)`,
+            comments: {
+               en: "sync",
+               ja: "シンク（同期）",
+            }
+         },
+         {
+            code: `osc(10,0.1, ({time}) => Math.sin(time/10) * 100 ).out(o0)`,
+            comments: {
+               en: "offset",
+               ja: "オフセット",
+            }
+         },
+      ]
    },
    shape: {
-      example: [`
-// triangle
-shape(3,0.5,0.001).out(o0)`,
-`// ellipse
-shape(100,0.5,0.001).out(o0)`,
-`
-// inverting blurry circle
-shape(100,0.01,1).invert(({time})=>Math.sin(time)*2).out(o0)`,
-`// a... rainbow ball?
+      example: [
+         {
+            code: `shape(3,0.5,0.001).out(o0)`,
+            comments: {
+               en: "triangle",
+               ja: "三角形",
+            }
+         },
+         {
+            code: `shape(100,0.5,0.001).out(o0)`,
+            comments: {
+               en: "ellipse",
+               ja: "楕円",
+            }
+         },
+         {
+            code: `shape(100,0.01,1).invert(()=>Math.sin(time)*2).out(o0)`,
+            comments: {
+               en: "inverting blurry circle",
+               ja: "反転するぼかした円",
+            }
+         },
+         {
+            code: `
 shape(5,0.5,0.1).repeat(19,19)
   .mult(osc(10,1,2))
   .rotate( ({time}) => time%360 )
@@ -45,33 +103,90 @@ shape(5,0.5,0.1).repeat(19,19)
   .mult(shape(15,0.3,0.01)
   .rotate( ({time}) => time%360 )
   .scrollX(1,-0.25))
-  .out(o0)`]
+  .out(o0)`,
+            comments: {
+               en: "a... rainbow ball?",
+               ja: "虹色のボール…？",
+            }
+         },
+      ]
    },
    gradient: {
-      example: [`
-// gradient sequence at speeds of 1, 2 & 4
-gradient([1,2,4]).out(o0)`,
-`// saw oscillator
-gradient(0).r().repeat(16,1).scrollX(0,0.1).out(o0)`]
+      example: [
+         {
+            code: `gradient([1,2,4]).out(o0)`,
+            comments: {
+               en: "gradient sequence at speeds of 1, 2 & 4",
+               ja: "グラデーションのスピードを 1, 2, 4 の順に変える",
+            }
+         },
+         {
+            code: `gradient(0).r().repeat(16,1).scrollX(0,0.1).out(o0)`,
+            comments: {
+               en: "saw oscillator",
+               ja: "のこぎり波",
+            }
+         },
+      ]
    },
    src: {
-      description: "See `hydra-examples` repository"
+      description: "See `hydra-examples` repository",
+      example: [
+         {
+            code: `src(o0).modulate(noise(3),0.005).blend(shape(4),0.01).out(o0)`,
+            comments: {
+               en: "feedback",
+               ja: "フィードバック",
+            }
+         },
+      ]
    },
    solid: {
-      example: [`
-// cycling through red, green and blue
-solid([1,0,0],[0,1,0],[0,0,1],1).out(o0)`]
+      example: [
+         {
+            code: `solid([1,0,0],[0,1,0],[0,0,1],1).out(o0)`,
+            comments: {
+               en: "cycling through red, green and blue",
+               ja: "赤、緑、青を行き来する",
+            }
+         },
+      ]
    },
    rotate: {
       description: "Rotate texture.",
-      example: [`
-osc(50).rotate( ({time}) => time%360 ).out(o0)`,
-`osc(10,1,1)
-  .rotate( ({time}) => time%360, ({time}) => Math.sin(time*0.1)*0.05 )
-  .out(o0)`]
+      example: [
+         {
+            code: `osc(50).rotate( () => time%360 ).out(o0)`,
+            comments: {
+               en: "constant rotation",
+               ja: "一定速度で回転",
+            }
+         },
+         {
+            code: `
+osc(10,1,1)
+  .rotate( () => time%360, () => Math.sin(time*0.1)*0.05 )
+  .out(o0)`,
+            comments: {
+               en: "modulate rotation speed",
+               ja: "回転速度を変化させる",
+            }
+         },
+      ]
    },
+}
+let a={
    scale: {
       description: "Scale texture.",
+      example: [
+         {
+            code: ``,
+            comments: {
+               en: "",
+               ja: "",
+            }
+         },
+      ],
       example: [`
 // default
 shape().scale(1.5,1,1).out()`,

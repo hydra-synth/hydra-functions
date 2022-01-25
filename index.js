@@ -124,6 +124,7 @@ function languageView (state, emit) {
       i18next.changeLanguage(lang, (err, t) => {
         console.log(err, t)
         emit('render')
+        emit('editor:update')
       })
     }
     languageButtons.push(html`
@@ -217,7 +218,13 @@ function pageStore (state, emitter) {
   
       function getExampleCode(name, index) {
         const examples = state.hydraReference.getExamples(name)
-        return examples[index]
+        let comment = examples[index].comments[i18next.language]
+        if (comment === undefined) {
+          comment = examples[index].comments['en']
+        }
+        return `// ${ comment }
+${ examples[index].code.replace(/^\n*/, '') }
+`
       }
       let code = getExampleCode(obj.name, state.page.tabIndex)
       if (code === undefined) {
@@ -227,7 +234,6 @@ function pageStore (state, emitter) {
         emitter.emit('pushState', `#functions/${ obj.name }/${ state.page.tabIndex }`)
       }
   
-      code = code.replace(/^\n*/, '')
       state.cm.editor = code
       cmEditor.setCode(code)
     }

@@ -5603,6 +5603,9 @@ function editorView (state, emit) {
 
   return html`<div class="overflow-y-auto w-50-ns w-100 w-100-m h-100 ${obj===null?'dn':'db'}">
     <div class="pa2" style="background-color:${ indexToHsl(state.page.selected?.colorIndex, 100, 80) }">
+      <div class="dib pointer tr w-100" onclick=${ () => emit('clear details') }>
+        close
+      </div>
       <div class="pv2 f5">
         ${ i18next.t('usage') }
       </div>
@@ -5697,7 +5700,12 @@ function mainView (state, emit) {
     <body class="absolute pa2 f6 w-100 h-100-ns h-auto-m flex justify-center" style="font-family: 'Chivo', 'Noto Sans JP', sans-serif;background-color:${color};transition: background-color 1s;">
       <div class="relative flex flex-column" style="max-width: 1000px">
         <div class="relative flex justify-between items-end mv2">
-          <div class="pt2 f3"> ${i18next.t('title')}${state.page.selected === null ? '' : `::: ${state.page.selected.name}`} </div>
+          <div class="pt2 f3">
+            <div class="dib pointer" onclick=${ () => emit('clear details') }>
+              ${i18next.t('title')}
+            </div>
+            ${state.page.selected === null ? '' : `::: ${state.page.selected.name}`}
+          </div>
           <div class="pv1"> ${ languageView(state, emit) } </div>
         </div>
         <div class="relative flex flex-column-reverse flex-row-ns flex-column-reverse-m w-100 h-100 overflow-y-hidden overflow-x-hidden" style="max-width:1000px">
@@ -5766,6 +5774,12 @@ function store (state, emitter) {
   emitter.on('show details', (obj, tabIndex) => {
     emitter.emit('pushState', `#functions/${ obj.name }/${ tabIndex }`)
     emitter.emit('editor:update')
+    emitter.emit('render')
+  })
+
+  emitter.on('clear details', () => {
+    state.page.selected = null
+    emitter.emit('pushState', window.location.pathname)
     emitter.emit('render')
   })
 

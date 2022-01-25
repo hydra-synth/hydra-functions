@@ -85,8 +85,10 @@ function editorView (state, emit) {
 
   return html`<div class="overflow-y-auto w-50-ns w-100 w-100-m h-100 ${obj===null?'dn':'db'}">
     <div class="pa2" style="background-color:${ indexToHsl(state.page.selected?.colorIndex, 100, 80) }">
-      <div class="dib pointer tr w-100" onclick=${ () => emit('clear details') }>
-        close
+      <div class="flex justify-end w-100">
+        <div class="dib pointer pa1" style="background-color:rgba(255,255,255,0.5)" onclick=${ () => emit('clear details') }>
+          ✖
+        </div>
       </div>
       <div class="pv2 f5">
         ${ i18next.t('usage') }

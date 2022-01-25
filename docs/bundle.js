@@ -5683,7 +5683,7 @@ function functionListView (state, emit) {
     groups.push(view)
   }
   return html`
-  <div class="relative h-100 overflow-y-scroll-ns overflow-y-auto-m">
+  <div class="relative h-100 overflow-y-scroll-ns overflow-y-auto-m" style="scrollbar-width: thin;">
     ${ groups }
   </div>
   `

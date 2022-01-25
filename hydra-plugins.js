@@ -101,47 +101,35 @@ module.exports = [
       },
     ],
   },
-  {
-    name: 'fps',
-    type: 'settings',
-    inputs: [
-    ],
-  },
+  // {
+  //   name: 'fps',
+  //   type: 'settings',
+  //   inputs: [
+  //   ],
+  // },
   {
     name: 'speed',
     type: 'settings',
-    inputs: [
-    ],
   },
   {
     name: 'bpm',
     type: 'settings',
-    inputs: [
-    ],
   },
   {
     name: 'width',
     type: 'settings',
-    inputs: [
-    ],
   },
   {
     name: 'height',
     type: 'settings',
-    inputs: [
-    ],
   },
   {
     name: 'time',
     type: 'settings',
-    inputs: [
-    ],
   },
   {
     name: 'mouse',
     type: 'settings',
-    inputs: [
-    ],
   },
   {
     name: 'fast',
@@ -204,6 +192,10 @@ module.exports = [
     ],
   },
   {
+    name: 'fft',
+    type: 'audio',
+  },
+  {
     name: 'setSmooth',
     type: 'audio',
     inputs: [
@@ -211,12 +203,6 @@ module.exports = [
   },
   {
     name: 'setCutoff',
-    type: 'audio',
-    inputs: [
-    ],
-  },
-  {
-    name: 'fft',
     type: 'audio',
     inputs: [
     ],

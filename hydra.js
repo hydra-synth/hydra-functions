@@ -9,7 +9,7 @@ module.exports = class Hydra extends Component {
   }
 
   load (element) {
-    const hydra = new HydraSynth({ detectAudio: false, canvas: element.querySelector("canvas")})
+    const hydra = new HydraSynth({ detectAudio: true, canvas: element.querySelector("canvas")})
     console.log(hydra)
   //  osc().out()
   }

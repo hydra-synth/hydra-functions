@@ -4335,7 +4335,15 @@ osc().posterize(3,1)
       ],
    },
    shift: {
-
+      example: [
+         {
+            code: `osc().shift(0.1,0.9,0.3).out()`,
+            comments: {
+               en: "default",
+               ja: "デフォルト",
+            }
+         },
+      ]
    },
    repeat: {
       example: [
@@ -4499,6 +4507,17 @@ osc(9,-0.1,0.1)
          },
       ],
    },
+   scroll: {
+      example: [
+         {
+            code: `shape(3).scroll(0.1,-0.3).out(o0)`,
+            comments: {
+               en: "default",
+               ja: "デフォルト",
+            }
+         },
+      ],
+   },
    scrollX: {
       example: [
          {
@@ -4644,6 +4663,24 @@ voronoi(25,0,0)
          },
       ],
    },
+   sub: {
+      example: [
+         {
+            code: `osc().sub(osc(6)).out(o0)`,
+            comments: {
+               en: "default",
+               ja: "デフォルト",
+            }
+         },
+         {
+            code: `osc(6,0,1.5).modulate(noise(3).sub(gradient()),1).out(o0)`,
+            comments: {
+               en: "color remapping",
+               ja: "",
+            }
+         },
+      ],
+   },
    layer: {
       description: "Overlay texture based on alpha value.\nThe `texture` parameter can be any kind of [source](#sources), for\nexample a [`color`](#color), [`src`](#src), or [`shape`](#shape).",
       example: [
@@ -4777,6 +4814,13 @@ gradient(5).repeat(50,50).kaleid([3,5,7,9].fast(0.5))
   .out(o0)`,
             comments: {
                en: "cosmic radiation",
+               ja: "",
+            }
+         },
+         {
+            code: `shape(4).modulateScale(gradient().g(),2,0.5).out(o0)`,
+            comments: {
+               en: "perspective",
                ja: "",
             }
          },
@@ -5047,6 +5091,39 @@ osc(20)
          },
       ],
    },
+   r: {
+      example: [
+         {
+            code: `osc(60,0.1,1.5).layer(gradient().r()).out(o0)`,
+            comments: {
+               en: "default",
+               ja: "デフォルト",
+            }
+         },
+      ],
+   },
+   g: {
+      example: [
+         {
+            code: `osc(60,0.1,1.5).layer(gradient().g()).out(o0)`,
+            comments: {
+               en: "default",
+               ja: "デフォルト",
+            }
+         },
+      ],
+   },
+   b: {
+      example: [
+         {
+            code: `osc(60,0.1,1.5).layer(gradient().colorama(1).b()).out(o0)`,
+            comments: {
+               en: "default",
+               ja: "デフォルト",
+            }
+         },
+      ],
+   },
    initCam: {
       example: [
          {
@@ -5111,6 +5188,42 @@ render(o1)`,
          },
       ],
    },
+   setFunction: {
+      example: [
+         {
+            code: `
+setFunction({
+  name: 'chroma',
+  type: 'color',
+  inputs: [
+    ],
+  glsl: \`
+   float maxrb = max( _c0.r, _c0.b );
+   float k = clamp( (_c0.g-maxrb)*5.0, 0.0, 1.0 );
+   float dg = _c0.g; 
+   _c0.g = min( _c0.g, maxrb*0.8 ); 
+   _c0 += vec4(dg - _c0.g);
+   return vec4(_c0.rgb, 1.0 - k);
+\`})
+osc(60,0.1,1.5).chroma().out(o0)`,
+            comments: {
+               en: "from https://www.shadertoy.com/view/XsfGzn",
+               ja: "",
+            }
+         },
+      ],
+   },
+   time: {
+      example: [
+         {
+            code: `shape(2,0.8).kaleid(()=>6+Math.sin(time)*4).out(o0)`,
+            comments: {
+               en: "default",
+               ja: "デフォルト",
+            }
+         },
+      ],
+   },
    fast: {
       example: [
          {
@@ -5169,7 +5282,18 @@ shape(999).scrollY(.2).scrollX([-0.2,0.2])
    fit: {
       example: [
          {
-            code: `shape().scrollX([0,1,2,3,4].fit(-0.2,0.2)).out()`,
+            code: `shape().scrollX([0,1,2,3,4].fit(-0.2,0.2)).out(o0)`,
+            comments: {
+               en: "default",
+               ja: "デフォルト",
+            }
+         },
+      ],
+   },
+   fft: {
+      example: [
+         {
+            code: `osc().modulate(noise(3),()=>a.fft[0]).out(o0)`,
             comments: {
                en: "default",
                ja: "デフォルト",
@@ -5283,47 +5407,35 @@ module.exports = [
       },
     ],
   },
-  {
-    name: 'fps',
-    type: 'settings',
-    inputs: [
-    ],
-  },
+  // {
+  //   name: 'fps',
+  //   type: 'settings',
+  //   inputs: [
+  //   ],
+  // },
   {
     name: 'speed',
     type: 'settings',
-    inputs: [
-    ],
   },
   {
     name: 'bpm',
     type: 'settings',
-    inputs: [
-    ],
   },
   {
     name: 'width',
     type: 'settings',
-    inputs: [
-    ],
   },
   {
     name: 'height',
     type: 'settings',
-    inputs: [
-    ],
   },
   {
     name: 'time',
     type: 'settings',
-    inputs: [
-    ],
   },
   {
     name: 'mouse',
     type: 'settings',
-    inputs: [
-    ],
   },
   {
     name: 'fast',
@@ -5386,6 +5498,10 @@ module.exports = [
     ],
   },
   {
+    name: 'fft',
+    type: 'audio',
+  },
+  {
     name: 'setSmooth',
     type: 'audio',
     inputs: [
@@ -5393,12 +5509,6 @@ module.exports = [
   },
   {
     name: 'setCutoff',
-    type: 'audio',
-    inputs: [
-    ],
-  },
-  {
-    name: 'fft',
     type: 'audio',
     inputs: [
     ],
@@ -5501,7 +5611,7 @@ module.exports = class Hydra extends Component {
   }
 
   load (element) {
-    const hydra = new HydraSynth({ detectAudio: false, canvas: element.querySelector("canvas")})
+    const hydra = new HydraSynth({ detectAudio: true, canvas: element.querySelector("canvas")})
     console.log(hydra)
   //  osc().out()
   }
@@ -5579,7 +5689,13 @@ function exampleTabView (state, emit) {
       `)
     }
 
-    const functionName =   `${obj.name}( ${obj.inputs.map((input) => `${input.name}${input.default ? `: ${input.default}`: ''}`).join(', ')} )`
+    let functionName;
+    if (obj.inputs !== undefined) {
+      functionName = `${obj.name}( ${obj.inputs.map((input) => `${input.name}${input.default ? `: ${input.default}`: ''}`).join(', ')} )`
+    }
+    else {
+      functionName = obj.name
+    }
     cmUsage.setCode(functionName)
     return tabs = html`<div class="tabs">${tabs}</div>`
   }

@@ -219,12 +219,15 @@ function pageStore (state, emitter) {
       function getExampleCode(name, index) {
         const examples = state.hydraReference.getExamples(name)
         let comment = examples[index].comments[i18next.language]
-        if (comment === undefined) {
+        if (comment === undefined || comment.length === 0) {
           comment = examples[index].comments['en']
         }
-        return `// ${ comment }
-${ examples[index].code.replace(/^\n*/, '') }
-`
+        if (comment.length > 0) {
+          comment = comment.replace(/^\n*/, '')
+          comment = comment.split('\n').map(c => `// ${ c }`).join('\n')
+          comment = comment + '\n'
+        }
+        return comment + examples[index].code.replace(/^\n*/, '')
       }
       let code = getExampleCode(obj.name, state.page.tabIndex)
       if (code === undefined) {

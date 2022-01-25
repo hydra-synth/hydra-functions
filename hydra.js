@@ -19,6 +19,6 @@ module.exports = class Hydra extends Component {
   }
 
   createElement () {
-    return html`<div><canvas width="300" height="200"></canvas></div>`
+    return html`<div><canvas class="bg-black" width="300" height="200"></canvas></div>`
   }
 }

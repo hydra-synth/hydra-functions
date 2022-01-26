@@ -63,10 +63,15 @@ function exampleTabView (state, emit) {
 
     let functionName;
     if (obj.inputs !== undefined) {
-      functionName = `${obj.name}( ${obj.inputs.map((input) => `${input.name}${input.default ? `: ${input.default}`: ''}`).join(', ')} )`
+      functionName = `${obj.name}( ${obj.inputs.map((input) => `${input.name}${input.default ? ` = ${input.default}`: ''}`).join(', ')} )`
     }
     else {
-      functionName = obj.name
+      if (obj.default !== undefined) {
+        functionName = `${obj.name} = ${obj.default}`
+      }
+      else {
+        functionName = obj.name
+      }
     }
     cmUsage.setCode(functionName)
     return tabs = html`<div class="tabs">${tabs}</div>`

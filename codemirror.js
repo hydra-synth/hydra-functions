@@ -6,7 +6,6 @@ const {defaultHighlightStyle} = require('@codemirror/highlight')
 const {EditorView, keymap, KeyBinding} = require('@codemirror/view')
 const {defaultKeymap} = require('@codemirror/commands')
 const {javascript} = require('@codemirror/lang-javascript')
-const { default: i18next } = require('i18next')
 
 const defaultStyle = {
   // fontFamily: "'IBM Plex Mono', monospace",
@@ -26,7 +25,17 @@ module.exports = class CodeMirror extends Component {
   evaluate () {
     const code = this.view.state.doc.toString()
     try {
+      setResolution(300, 200)
+      update = () => {}
+      bpm = 30
+      speed = 1
       render(o0)
+      a.setBins(4)
+      a.setCutoff(2)
+      a.setSmooth(0.4)
+      a.setScale(10)
+      a.hide()
+
       Function(code)()
       this.view.dispatch({
         effects: this.theme.reconfigure(EditorView.theme({

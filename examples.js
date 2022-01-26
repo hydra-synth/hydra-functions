@@ -1091,6 +1091,38 @@ src(s0).modulate(noise(3)).out(o0)`,
          },
       ],
    },
+   init: {
+      example: [
+         {
+            code: `
+canvas = document.createElement("canvas")
+canvas.width = 200
+canvas.height = 200
+ctx = canvas.getContext("2d")
+ctx.fillStyle = "crimson"
+ctx.fillRect(100,50,100,100)
+s0.init({src:canvas})
+src(s0).modulate(osc().kaleid(999)).out(o0)`,
+            comments: {
+               en: "load canvas",
+               ja: "canvas をロード",
+            }
+         },
+      ],
+   },
+   initScreen: {
+      example: [
+         {
+            code: `
+s0.initScreen()
+src(s0).colorama(0.5).out(o0)`,
+            comments: {
+               en: "select a window",
+               ja: "画面を選択",
+            }
+         },
+      ],
+   },
    render: {
       example: [
          {
@@ -1111,6 +1143,46 @@ voronoi().out(o1)
 render(o1)`,
             comments: {
                en: "specify display buffer",
+               ja: "",
+            }
+         },
+      ],
+   },
+   update: {
+      example: [
+         {
+            code: `
+b = 0
+update = () => b += 0.01 * Math.sin(time)
+shape().scrollX(()=>b).out(o0)`,
+            comments: {
+               en: "update is called every frame",
+               ja: "",
+            }
+         },
+      ],
+   },
+   setResolution: {
+      example: [
+         {
+            code: `
+setResolution(100,100)
+osc().out(o0)`,
+            comments: {
+               en: "make the canvas small (100 pixel x 100 pixel)",
+               ja: "",
+            }
+         },
+      ],
+   },
+   hush: {
+      example: [
+         {
+            code: `
+osc().out(o0)
+hush()`,
+            comments: {
+               en: "clear the buffers",
                ja: "",
             }
          },
@@ -1141,6 +1213,74 @@ osc(60,0.1,1.5).chroma().out(o0)`,
          },
       ],
    },
+   speed: {
+      example: [
+         {
+            code: `
+speed = 3
+osc(60,0.1,[0,1.5]).out(o0)`,
+            comments: {
+               en: "change overall speed",
+               ja: "",
+            }
+         },
+         {
+            code: `
+speed = 0.1
+osc(60,0.1,[0,1.5]).out(o0)`,
+            comments: {
+               en: "change overall speed",
+               ja: "",
+            }
+         },
+      ],
+   },
+   bpm: {
+      example: [
+         {
+            code: `
+bpm = 60
+osc(60,0.1,[0,1.5]).out(o0)`,
+            comments: {
+               en: "change array speed",
+               ja: "",
+            }
+         },
+         {
+            code: `
+bpm = 15
+osc(60,0.1,[0,1.5]).out(o0)`,
+            comments: {
+               en: "change array speed",
+               ja: "",
+            }
+         },
+      ],
+   },
+   width: {
+      example: [
+         {
+            code: `
+shape(99).scrollX(() => -mouse.x / width).out(o0)`,
+            comments: {
+               en: "",
+               ja: "",
+            }
+         },
+      ],
+   },
+   height: {
+      example: [
+         {
+            code: `
+shape(99).scrollY(() => -mouse.y / height).out(o0)`,
+            comments: {
+               en: "",
+               ja: "",
+            }
+         },
+      ],
+   },
    time: {
       example: [
          {
@@ -1148,6 +1288,21 @@ osc(60,0.1,1.5).chroma().out(o0)`,
             comments: {
                en: "default",
                ja: "デフォルト",
+            }
+         },
+      ],
+   },
+   mouse: {
+      example: [
+         {
+            code: `
+shape(99).scroll(
+  () => -mouse.x / width,
+  () => -mouse.y / height)
+  .out(o0)`,
+            comments: {
+               en: "",
+               ja: "",
             }
          },
       ],
@@ -1225,6 +1380,58 @@ shape(999).scrollY(.2).scrollX([-0.2,0.2])
             comments: {
                en: "default",
                ja: "デフォルト",
+            }
+         },
+      ],
+   },
+   setSmooth: {
+      example: [
+         {
+            code: `
+a.setSmooth(0.8)
+osc().modulate(noise(3),()=>a.fft[0]).out(o0)`,
+            comments: {
+               en: "default",
+               ja: "デフォルト",
+            }
+         },
+      ],
+   },
+   setCutoff: {
+      example: [
+         {
+            code: `
+a.setCutoff(4)
+osc().modulate(noise(3),()=>a.fft[0]).out(o0)`,
+            comments: {
+               en: "threshold",
+               ja: "",
+            }
+         },
+      ],
+   },
+   setBins: {
+      example: [
+         {
+            code: `
+a.setBins(8)
+osc(60,0.1,()=>a.fft[7]*3).modulate(noise(3),()=>a.fft[0]).out(o0)`,
+            comments: {
+               en: "change color with hissing noise",
+               ja: "",
+            }
+         },
+      ],
+   },
+   setScale: {
+      example: [
+         {
+            code: `
+a.setScale(5)
+osc().modulate(noise(3),()=>a.fft[0]).out(o0)`,
+            comments: {
+               en: "the smaller the scale is, the bigger the output is",
+               ja: "",
             }
          },
       ],

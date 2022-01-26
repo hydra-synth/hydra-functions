@@ -3938,7 +3938,6 @@ const {defaultHighlightStyle} = require('@codemirror/highlight')
 const {EditorView, keymap, KeyBinding} = require('@codemirror/view')
 const {defaultKeymap} = require('@codemirror/commands')
 const {javascript} = require('@codemirror/lang-javascript')
-const { default: i18next } = require('i18next')
 
 const defaultStyle = {
   // fontFamily: "'IBM Plex Mono', monospace",
@@ -3958,7 +3957,17 @@ module.exports = class CodeMirror extends Component {
   evaluate () {
     const code = this.view.state.doc.toString()
     try {
+      setResolution(300, 200)
+      update = () => {}
+      bpm = 30
+      speed = 1
       render(o0)
+      a.setBins(4)
+      a.setCutoff(2)
+      a.setSmooth(0.4)
+      a.setScale(10)
+      a.hide()
+
       Function(code)()
       this.view.dispatch({
         effects: this.theme.reconfigure(EditorView.theme({
@@ -4069,7 +4078,7 @@ module.exports = class CodeMirror extends Component {
   }
 }
 
-},{"@codemirror/commands":35,"@codemirror/highlight":36,"@codemirror/lang-javascript":37,"@codemirror/state":41,"@codemirror/view":44,"choo/component":59,"choo/html":60,"i18next":92}],13:[function(require,module,exports){
+},{"@codemirror/commands":35,"@codemirror/highlight":36,"@codemirror/lang-javascript":37,"@codemirror/state":41,"@codemirror/view":44,"choo/component":59,"choo/html":60}],13:[function(require,module,exports){
 module.exports = {
    noise: {
       description: "Generate [Perlin noise](https://en.wikipedia.org/wiki/Perlin_noise).",
@@ -5163,6 +5172,38 @@ src(s0).modulate(noise(3)).out(o0)`,
          },
       ],
    },
+   init: {
+      example: [
+         {
+            code: `
+canvas = document.createElement("canvas")
+canvas.width = 200
+canvas.height = 200
+ctx = canvas.getContext("2d")
+ctx.fillStyle = "crimson"
+ctx.fillRect(100,50,100,100)
+s0.init({src:canvas})
+src(s0).modulate(osc().kaleid(999)).out(o0)`,
+            comments: {
+               en: "load canvas",
+               ja: "canvas をロード",
+            }
+         },
+      ],
+   },
+   initScreen: {
+      example: [
+         {
+            code: `
+s0.initScreen()
+src(s0).colorama(0.5).out(o0)`,
+            comments: {
+               en: "select a window",
+               ja: "画面を選択",
+            }
+         },
+      ],
+   },
    render: {
       example: [
          {
@@ -5183,6 +5224,46 @@ voronoi().out(o1)
 render(o1)`,
             comments: {
                en: "specify display buffer",
+               ja: "",
+            }
+         },
+      ],
+   },
+   update: {
+      example: [
+         {
+            code: `
+b = 0
+update = () => b += 0.01 * Math.sin(time)
+shape().scrollX(()=>b).out(o0)`,
+            comments: {
+               en: "update is called every frame",
+               ja: "",
+            }
+         },
+      ],
+   },
+   setResolution: {
+      example: [
+         {
+            code: `
+setResolution(100,100)
+osc().out(o0)`,
+            comments: {
+               en: "make the canvas small (100 pixel x 100 pixel)",
+               ja: "",
+            }
+         },
+      ],
+   },
+   hush: {
+      example: [
+         {
+            code: `
+osc().out(o0)
+hush()`,
+            comments: {
+               en: "clear the buffers",
                ja: "",
             }
          },
@@ -5213,6 +5294,74 @@ osc(60,0.1,1.5).chroma().out(o0)`,
          },
       ],
    },
+   speed: {
+      example: [
+         {
+            code: `
+speed = 3
+osc(60,0.1,[0,1.5]).out(o0)`,
+            comments: {
+               en: "change overall speed",
+               ja: "",
+            }
+         },
+         {
+            code: `
+speed = 0.1
+osc(60,0.1,[0,1.5]).out(o0)`,
+            comments: {
+               en: "change overall speed",
+               ja: "",
+            }
+         },
+      ],
+   },
+   bpm: {
+      example: [
+         {
+            code: `
+bpm = 60
+osc(60,0.1,[0,1.5]).out(o0)`,
+            comments: {
+               en: "change array speed",
+               ja: "",
+            }
+         },
+         {
+            code: `
+bpm = 15
+osc(60,0.1,[0,1.5]).out(o0)`,
+            comments: {
+               en: "change array speed",
+               ja: "",
+            }
+         },
+      ],
+   },
+   width: {
+      example: [
+         {
+            code: `
+shape(99).scrollX(() => -mouse.x / width).out(o0)`,
+            comments: {
+               en: "",
+               ja: "",
+            }
+         },
+      ],
+   },
+   height: {
+      example: [
+         {
+            code: `
+shape(99).scrollY(() => -mouse.y / height).out(o0)`,
+            comments: {
+               en: "",
+               ja: "",
+            }
+         },
+      ],
+   },
    time: {
       example: [
          {
@@ -5220,6 +5369,21 @@ osc(60,0.1,1.5).chroma().out(o0)`,
             comments: {
                en: "default",
                ja: "デフォルト",
+            }
+         },
+      ],
+   },
+   mouse: {
+      example: [
+         {
+            code: `
+shape(99).scroll(
+  () => -mouse.x / width,
+  () => -mouse.y / height)
+  .out(o0)`,
+            comments: {
+               en: "",
+               ja: "",
             }
          },
       ],
@@ -5301,6 +5465,58 @@ shape(999).scrollY(.2).scrollX([-0.2,0.2])
          },
       ],
    },
+   setSmooth: {
+      example: [
+         {
+            code: `
+a.setSmooth(0.8)
+osc().modulate(noise(3),()=>a.fft[0]).out(o0)`,
+            comments: {
+               en: "default",
+               ja: "デフォルト",
+            }
+         },
+      ],
+   },
+   setCutoff: {
+      example: [
+         {
+            code: `
+a.setCutoff(4)
+osc().modulate(noise(3),()=>a.fft[0]).out(o0)`,
+            comments: {
+               en: "threshold",
+               ja: "",
+            }
+         },
+      ],
+   },
+   setBins: {
+      example: [
+         {
+            code: `
+a.setBins(8)
+osc(60,0.1,()=>a.fft[7]*3).modulate(noise(3),()=>a.fft[0]).out(o0)`,
+            comments: {
+               en: "change color with hissing noise",
+               ja: "",
+            }
+         },
+      ],
+   },
+   setScale: {
+      example: [
+         {
+            code: `
+a.setScale(5)
+osc().modulate(noise(3),()=>a.fft[0]).out(o0)`,
+            comments: {
+               en: "the smaller the scale is, the bigger the output is",
+               ja: "",
+            }
+         },
+      ],
+   },
 }
 
 },{}],14:[function(require,module,exports){
@@ -5360,10 +5576,6 @@ module.exports = [
     name: 'initScreen',
     type: 'ext',
     inputs: [
-      {
-        type: 'string',
-        name: 'name',
-      },
     ],
   },
   {
@@ -5375,6 +5587,12 @@ module.exports = [
         name: 'texture',
         default: 'all',
       },
+    ],
+  },
+  {
+    name: 'update',
+    type: 'settings',
+    inputs: [
     ],
   },
   {
@@ -5416,10 +5634,12 @@ module.exports = [
   {
     name: 'speed',
     type: 'settings',
+    default: 1,
   },
   {
     name: 'bpm',
     type: 'settings',
+    default: 30,
   },
   {
     name: 'width',
@@ -5436,6 +5656,7 @@ module.exports = [
   {
     name: 'mouse',
     type: 'settings',
+    default: '{ x, y }'
   },
   {
     name: 'fast',
@@ -5500,15 +5721,60 @@ module.exports = [
   {
     name: 'fft',
     type: 'audio',
+    default: 'Array(4)',
   },
   {
     name: 'setSmooth',
     type: 'audio',
     inputs: [
+      {
+        type: 'number',
+        name: 'smooth',
+        default: 0.4,
+      },
     ],
   },
   {
     name: 'setCutoff',
+    type: 'audio',
+    inputs: [
+      {
+        type: 'number',
+        name: 'cutoff',
+        default: 2,
+      },
+    ],
+  },
+  {
+    name: 'setBins',
+    type: 'audio',
+    inputs: [
+      {
+        type: 'number',
+        name: 'numBins',
+        default: 4,
+      },
+    ],
+  },
+  {
+    name: 'setScale',
+    type: 'audio',
+    inputs: [
+      {
+        type: 'number',
+        name: 'scale',
+        default: 10,
+      },
+    ],
+  },
+  {
+    name: 'hide',
+    type: 'audio',
+    inputs: [
+    ],
+  },
+  {
+    name: 'show',
     type: 'audio',
     inputs: [
     ],
@@ -5527,6 +5793,7 @@ class Item {
     this.category = category
     this.colorIndex = colorIndex
     this.inputs = obj.inputs
+    this.default = obj.default
 
     if (this.category.type === "combine" || this.category.type === "combineCoord") {
       this.inputs = [ { type: "vec4", name: "texture" }, ...this.inputs]
@@ -5691,10 +5958,15 @@ function exampleTabView (state, emit) {
 
     let functionName;
     if (obj.inputs !== undefined) {
-      functionName = `${obj.name}( ${obj.inputs.map((input) => `${input.name}${input.default ? `: ${input.default}`: ''}`).join(', ')} )`
+      functionName = `${obj.name}( ${obj.inputs.map((input) => `${input.name}${input.default ? ` = ${input.default}`: ''}`).join(', ')} )`
     }
     else {
-      functionName = obj.name
+      if (obj.default !== undefined) {
+        functionName = `${obj.name} = ${obj.default}`
+      }
+      else {
+        functionName = obj.name
+      }
     }
     cmUsage.setCode(functionName)
     return tabs = html`<div class="tabs">${tabs}</div>`

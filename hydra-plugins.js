@@ -54,10 +54,6 @@ module.exports = [
     name: 'initScreen',
     type: 'ext',
     inputs: [
-      {
-        type: 'string',
-        name: 'name',
-      },
     ],
   },
   {
@@ -69,6 +65,12 @@ module.exports = [
         name: 'texture',
         default: 'all',
       },
+    ],
+  },
+  {
+    name: 'update',
+    type: 'settings',
+    inputs: [
     ],
   },
   {
@@ -110,10 +112,12 @@ module.exports = [
   {
     name: 'speed',
     type: 'settings',
+    default: 1,
   },
   {
     name: 'bpm',
     type: 'settings',
+    default: 30,
   },
   {
     name: 'width',
@@ -130,6 +134,7 @@ module.exports = [
   {
     name: 'mouse',
     type: 'settings',
+    default: '{ x, y }'
   },
   {
     name: 'fast',
@@ -194,15 +199,60 @@ module.exports = [
   {
     name: 'fft',
     type: 'audio',
+    default: 'Array(4)',
   },
   {
     name: 'setSmooth',
     type: 'audio',
     inputs: [
+      {
+        type: 'number',
+        name: 'smooth',
+        default: 0.4,
+      },
     ],
   },
   {
     name: 'setCutoff',
+    type: 'audio',
+    inputs: [
+      {
+        type: 'number',
+        name: 'cutoff',
+        default: 2,
+      },
+    ],
+  },
+  {
+    name: 'setBins',
+    type: 'audio',
+    inputs: [
+      {
+        type: 'number',
+        name: 'numBins',
+        default: 4,
+      },
+    ],
+  },
+  {
+    name: 'setScale',
+    type: 'audio',
+    inputs: [
+      {
+        type: 'number',
+        name: 'scale',
+        default: 10,
+      },
+    ],
+  },
+  {
+    name: 'hide',
+    type: 'audio',
+    inputs: [
+    ],
+  },
+  {
+    name: 'show',
     type: 'audio',
     inputs: [
     ],

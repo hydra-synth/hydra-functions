@@ -9,6 +9,7 @@ class Item {
     this.category = category
     this.colorIndex = colorIndex
     this.inputs = obj.inputs
+    this.default = obj.default
 
     if (this.category.type === "combine" || this.category.type === "combineCoord") {
       this.inputs = [ { type: "vec4", name: "texture" }, ...this.inputs]

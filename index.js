@@ -31,6 +31,10 @@ app.route('/hydra-functions', mainView)
 app.route('#functions/:function/:tab', mainView)
 app.route('/docs/functions/:function/:tab', mainView)
 app.route('/hydra-functions/functions/:function/:tab', mainView)
+
+app.route('/api', mainView)
+app.route('/api/functions/:function/:tab', mainView)
+
 app.mount('body')
 
 const hydraCanvas = new HydraComponent('hydra-canvas', app.state, app.emit)

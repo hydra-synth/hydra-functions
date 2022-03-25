@@ -6,7 +6,7 @@ by Olivia Jack & Naoto Hieda
 
 ## Installation
 
-    sudo npm i -g budo
+    sudo npm i -g budo watchify browserify
     npm i
 
 ## Run

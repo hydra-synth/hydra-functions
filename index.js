@@ -203,7 +203,7 @@ function mainView (state, emit) {
             <div class="dib pointer" onclick=${ () => emit('clear details') }>
               ${i18next.t('title')}
             </div>
-            ${state.page.selected === null ? '' : `::: ${state.page.selected.name}`}
+            ${state.page.selected === null ? '' : ` ::: ${state.page.selected.name}`}
           </div>
           <div class="pv1"> ${ languageView(state, emit) } </div>
         </div>

@@ -30,14 +30,14 @@ module.exports = {
       'example': 'Ejemplo',
       'usage': 'Uso',
       'title': 'Funciones de hydra',
-      'intro': `Hay 5 tipos de funciones en <a href="{{hydra}}" {{att}}>hydra</a>: source, de geometría, de color, de mezcla, y de modulación.
+      'intro': `Hay 5 tipos de funciones en <a href="{{hydra}}" {{att}}>hydra</a>: señales generadoras (sources), de geometría, de color, de fusón, y de modulación.
       Haz click en cualquier función aquí abajo para ver su uso. (Para una documentación más detallada, puedes ver <a href="{{hydra}}" {{att}}>la página web de hydra</a>,
         <a href="{{gettingStarted}}" {{att}}>primeros pasos</a> o <a href="{{hydraBook}}" {{att}}>el Hydra Book</a>.)`,
       'editor-info': 'Edita el código y presiona el botón "▶" o usa "ctrl+enter" para ejecutarlo!',
       'src': 'Source',
       'coord': 'Geometría',
       'color': 'Color',
-      'combine': 'Mezcla',
+      'combine': 'Fusión',
       'combineCoord': 'Modulación',
       'ext': 'Fuentes externas',
       'settings': 'Ajustes del sintetizador',

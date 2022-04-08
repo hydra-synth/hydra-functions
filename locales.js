@@ -26,7 +26,7 @@ module.exports = {
   },
   es: {
     translation: {
-      'language-name': 'Spanish',
+      'language-name': 'Español',
       'example': 'Ejemplo',
       'usage': 'Uso',
       'title': 'Funciones de hydra',

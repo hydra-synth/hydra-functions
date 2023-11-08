@@ -1152,6 +1152,20 @@ osc(20)
          },
       ],
    },
+   out: {
+      example: [
+         {
+            code: `
+osc().out(o1)
+src(o1).out(o0)`,
+            comments: {
+               en: "default",
+               es: "default",
+               ja: "デフォルト",
+            }
+         },
+      ],
+   },
    initCam: {
       example: [
          {

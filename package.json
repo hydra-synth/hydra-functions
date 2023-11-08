@@ -15,7 +15,9 @@
     "i18next": "^21.6.6",
     "i18next-browser-languagedetector": "^6.1.2"
   },
-  "devDependencies": {},
+  "devDependencies": {
+    "budo": "^11.8.4"
+  },
   "scripts": {
     "dev": "budo index.js:bundle.js --open --live --dir docs",
     "watch": "watchify index.js -o docs/bundle.js",

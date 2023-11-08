@@ -5,6 +5,7 @@ export default defineConfig(({ command, mode, ssrBuild }) => {
   const commonConfig = {
     plugins: [],
     root: '.',
+    base: '',
     build: {
       minify: false,
       outDir: "docs",

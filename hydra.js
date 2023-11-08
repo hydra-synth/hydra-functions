@@ -1,8 +1,8 @@
-var html = require('choo/html')
-var Component = require('choo/component')
-const HydraSynth = require('hydra-synth')
+import html from "choo/html";
+import Component from "choo/component";
+import HydraSynth from "hydra-synth";
 
-module.exports = class Hydra extends Component {
+export default class Hydra extends Component {
   constructor (id, state, emit) {
     super(id)
     this.local = state.components[id] = {}

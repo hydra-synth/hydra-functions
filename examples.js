@@ -1,4 +1,4 @@
-module.exports = {
+export default {
    noise: {
       description: "Generate [Perlin noise](https://en.wikipedia.org/wiki/Perlin_noise).",
       example: [

@@ -1,7 +1,7 @@
-const hydraFunctions = require('hydra-synth/src/glsl/glsl-functions')()
-const hydraPlugins = require('./hydra-plugins.js')
-const hydraTypes = require('./types.js')
-const examples = require('./examples.js')
+import hydraFunctions from "hydra-synth/src/glsl/glsl-functions";
+import hydraPlugins from "./hydra-plugins.js";
+import hydraTypes from "./types.js";
+import examples from "./examples.js";
 
 class Item {
   constructor ({ obj, colorIndex, category }) {
@@ -52,7 +52,7 @@ class Category {
 class HydraReference {
   constructor () {
     this.categories = []
-    this.allFuncs = [...hydraFunctions, ...hydraPlugins]
+    this.allFuncs = [...hydraFunctions(), ...hydraPlugins]
     this.allItems = []
 
     for (const index in hydraTypes) {
@@ -80,4 +80,4 @@ class HydraReference {
   }
 }
 
-module.exports = () => new HydraReference
+export default () => new HydraReference

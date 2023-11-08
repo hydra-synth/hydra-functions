@@ -1,17 +1,17 @@
-const html = require('choo/html')
-const raw = require('choo/html/raw')
-const devtools = require('choo-devtools')
-const choo = require('choo')
+import html from "choo/html";
+import raw from "choo/html/raw";
+// import devtools from "choo-devtools";
+import choo from "choo";
 
-const HydraComponent = require('./hydra.js')
-const CodeMirrorComponent = require('./codemirror.js')
+import HydraComponent from "./hydra.js";
+import CodeMirrorComponent from "./codemirror.js";
 
-const HydraReference = require('./hydra-reference.js')
+import HydraReference from "./hydra-reference.js";
 
-const i18next = require('i18next')
-const i18nextBrowserLanguageDetector = require('i18next-browser-languagedetector')
+import i18next from "i18next";
+import i18nextBrowserLanguageDetector from "i18next-browser-languagedetector";
 
-const languageResources = require('./locales.js')
+import languageResources from "./locales.js";
 
 i18next
 .use(i18nextBrowserLanguageDetector)
@@ -22,7 +22,7 @@ i18next
 })
 
 var app = choo({ hash: true })
-app.use(devtools())
+// app.use(devtools())
 app.use(pageStore)
 app.use(store)
 app.route('/', mainView)
@@ -51,8 +51,10 @@ function indexToHsl (index, s, l) {
   return 'white'
 }
 
+let obj;
+
 function exampleTabView (state, emit) {
-  let obj = state.page.selected
+  obj = state.page.selected
   if (obj !== null) {
     const examples = state.hydraReference.getExamples(obj.name)
 

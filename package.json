@@ -16,12 +16,13 @@
     "i18next-browser-languagedetector": "^6.1.2"
   },
   "devDependencies": {
-    "budo": "^11.8.4"
+    "vite": "^4.3.8"
   },
+  "type": "module",
   "scripts": {
-    "dev": "budo index.js:bundle.js --open --live --dir docs",
-    "watch": "watchify index.js -o docs/bundle.js",
-    "build": "browserify index.js -o docs/bundle.js",
+    "start": "vite dev",
+    "build": "vite build",
+    "serve": "vite preview",
     "test": "echo \"Error: no test specified\" && exit 1",
     "deploy": "git subtree push --prefix docs origin gh-pages"
   },

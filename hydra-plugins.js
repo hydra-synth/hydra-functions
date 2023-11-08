@@ -1,4 +1,4 @@
-module.exports = [
+export default [
   {
     name: 'out',
     type: 'src',

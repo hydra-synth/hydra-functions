@@ -6,7 +6,7 @@
 // repeat
 // iq color palletes
 
-module.exports = {
+export default {
 
   _noise: {
     type: 'util',

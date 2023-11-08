@@ -1,4 +1,3 @@
-import html from "choo/html";
 export default {
   en: {
     translation: {

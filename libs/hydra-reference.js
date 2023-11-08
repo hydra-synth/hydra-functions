@@ -1,7 +1,7 @@
-import hydraFunctions from "hydra-synth/src/glsl/glsl-functions";
-import hydraPlugins from "./hydra-plugins.js";
-import hydraTypes from "./types.js";
-import examples from "./examples.js";
+import hydraFunctions from './hydra/glsl-functions.js'
+import hydraPlugins from './hydra/hydra-plugins.js'
+import hydraTypes from './hydra/types.js'
+import examples from '../examples.js'
 
 class Item {
   constructor ({ obj, colorIndex, category }) {
@@ -11,8 +11,8 @@ class Item {
     this.inputs = obj.inputs
     this.default = obj.default
 
-    if (this.category.type === "combine" || this.category.type === "combineCoord") {
-      this.inputs = [ { type: "vec4", name: "texture" }, ...this.inputs]
+    if (this.category.type === 'combine' || this.category.type === 'combineCoord') {
+      this.inputs = [ { type: 'vec4', name: 'texture' }, ...this.inputs]
     }
 
     this.initExamples()

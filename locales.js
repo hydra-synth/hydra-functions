@@ -1,5 +1,4 @@
-const html = require('choo/html')
-module.exports = {
+export default {
   en: {
     translation: {
       'language-name': 'English',

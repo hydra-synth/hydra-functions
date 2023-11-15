@@ -1,4 +1,4 @@
-module.exports = {
+export default {
    noise: {
       description: "Generate [Perlin noise](https://en.wikipedia.org/wiki/Perlin_noise).",
       example: [
@@ -1144,6 +1144,20 @@ osc(20)
       example: [
          {
             code: `osc(60,0.1,1.5).layer(gradient().colorama(1).b()).out(o0)`,
+            comments: {
+               en: "default",
+               es: "default",
+               ja: "デフォルト",
+            }
+         },
+      ],
+   },
+   out: {
+      example: [
+         {
+            code: `
+osc().out(o1)
+src(o1).out(o0)`,
             comments: {
                en: "default",
                es: "default",

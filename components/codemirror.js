@@ -1,11 +1,11 @@
-const html = require('choo/html')
-const Component = require('choo/component')
+import html from 'choo/html'
+import Component from 'choo/component'
 
-const {EditorState, Compartment} = require('@codemirror/state')
-const {defaultHighlightStyle} = require('@codemirror/highlight')
-const {EditorView, keymap, KeyBinding} = require('@codemirror/view')
-const {defaultKeymap} = require('@codemirror/commands')
-const {javascript} = require('@codemirror/lang-javascript')
+import { EditorState, Compartment } from '@codemirror/state'
+import { defaultHighlightStyle } from '@codemirror/highlight'
+import { EditorView, keymap } from '@codemirror/view'
+import { defaultKeymap } from '@codemirror/commands'
+import { javascript } from '@codemirror/lang-javascript'
 
 const defaultStyle = {
   // fontFamily: "'IBM Plex Mono', monospace",
@@ -13,13 +13,11 @@ const defaultStyle = {
   backgroundColor: 'rgba(255,255,255,0.5)',
 }
 
-module.exports = class CodeMirror extends Component {
-  constructor (id, state, emit, editable = true, i18next) {
+export default class CodeMirror extends Component {
+  constructor (id, state, emit) {
     super(id)
     this.local = state.components[id] = {}
-    this.editable = editable
     this.emit = emit
-    this.i18next = i18next
   }
 
   evaluate () {
@@ -128,7 +126,9 @@ module.exports = class CodeMirror extends Component {
     return false
   }
 
-  createElement () {
+  createElement (editable = true, i18next) {
+    this.editable = editable
+    this.i18next = i18next
     if (this.editable) {
       this.errorMessage = html`<p class="red h1 plex-mono pa0 ma0" style="background-color:rgba(255,255,255,0.3)"></p>`
       return html`

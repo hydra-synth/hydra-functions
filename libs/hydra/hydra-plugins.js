@@ -1,4 +1,15 @@
-module.exports = [
+export default [
+  {
+    name: 'out',
+    type: 'src',
+    inputs: [
+      {
+        type: 'vec4',
+        name: 'texture',
+        default: 'all',
+      },
+    ],
+  },
   {
     name: 'initCam',
     type: 'ext',

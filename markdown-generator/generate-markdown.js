@@ -21,8 +21,8 @@ function getUsage (obj) {
 }
 
 function getExampleCode(name, index = 0) {
-    const examples = h.getExamples(name)
-
+    const item = h.getItem(name)
+    const examples = item.examples
     if(examples.length > 0) {
           let comment = examples[index].comments[i18next.language]
     if (comment === undefined || comment.length === 0) {

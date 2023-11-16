@@ -3,6 +3,8 @@
 // WIP attempt at automatically generating markdown from files in this repo
 // import hydraPlugins from '../libs/hydra/hydra-plugins'
 import HydraReference from '../libs/hydra-reference.js'
+// import i18next from 'i18next'
+import languageResources from './../locales.js'
 import * as fs from 'fs';
 
 const h = HydraReference()
@@ -61,7 +63,7 @@ functionGroups.forEach((g) => {
     //console.log(g.type)
 
     const md = `
-# ${g.type}
+# ${languageResources[i18next.language][g.type]}
 
 ${g.funcs.map((f) => `
 ### ${f.name}
@@ -70,7 +72,7 @@ ${getUsage(f)}
 ${getExampleCode(f.name)}
 `).join('')}
 `
-    console.log(md)
+   // console.log(md)
     fs.writeFileSync(`./markdown/${g.type}.md`,md,{encoding:'utf8',flag:'w'})
 
     // g.funcs.forEach((f) => console.log(f.name))

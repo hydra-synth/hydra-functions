@@ -10,7 +10,7 @@ class Item {
     this.colorIndex = colorIndex
     this.inputs = obj.inputs
     this.default = obj.default
-
+    this.description = ''
     if (this.category.type === 'combine' || this.category.type === 'combineCoord') {
       this.inputs = [ { type: 'vec4', name: 'texture' }, ...this.inputs]
     }
@@ -32,6 +32,7 @@ class Item {
       else {
         this.examples = ref.example
       }
+      if(ref.description) this.description = ref.description
     }
   }
 }

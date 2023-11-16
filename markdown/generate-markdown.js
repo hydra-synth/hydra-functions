@@ -8,7 +8,7 @@ import languageResources from './../locales.js'
 import * as fs from 'fs';
 
 const h = HydraReference()
-const i18next = { language: 'en ' }
+const i18next = { language: 'en' }
 const functionGroups = h.getGroups()
 
 function getUsage(obj) {
@@ -25,6 +25,8 @@ function getUsage(obj) {
     }
 }
 
+
+
 function getExampleCode(name, index = 0) {
     const item = h.getItem(name)
     const examples = item.examples
@@ -40,40 +42,44 @@ function getExampleCode(name, index = 0) {
             comment = comment + '\n'
         }
         // return comment + examples[index].code.replace(/^\n*/, '')
-        exampleCode = `
-\`\`\`hydra
+        exampleCode = `\`\`\`hydra
 ${comment + examples[index].code.replace(/^\n*/, '')}
 \`\`\``
     }
- //   console.log(item)
-//    return `${item.description}
-   
-//    ${exampleCode}
-//    `
-if(item.description.length > 0) {
-    return `${item.description}
-   
+    //   console.log(item)
+    //    return `${item.description}
+
+    //    ${exampleCode}
+    //    `
+    if (item.description.length > 0) {
+        return `${item.description}
 ${exampleCode}`
-} else {
- return exampleCode
+    } else {
+        return exampleCode
+    }
 }
-}
+
+// console.log(languageResources[i18next.language])
+var todayDate = new Date().toISOString().slice(0, 10);
 
 functionGroups.forEach((g) => {
     //console.log(g.type)
-
-    const md = `
-# ${languageResources[i18next.language][g.type]}
-
+    const title = languageResources[i18next.language].translation[g.type]
+    const md = `---
+title: ${title}
+date: ${todayDate}
+---
+# ${title}
 ${g.funcs.map((f) => `
 ### ${f.name}
+\`\`\`javascript
 ${getUsage(f)}
-
+\`\`\`
 ${getExampleCode(f.name)}
 `).join('')}
 `
-   // console.log(md)
-    fs.writeFileSync(`./markdown/${g.type}.md`,md,{encoding:'utf8',flag:'w'})
+    // console.log(md)
+    fs.writeFileSync(`./markdown/${g.type}.md`, md, { encoding: 'utf8', flag: 'w' })
 
     // g.funcs.forEach((f) => console.log(f.name))
 })

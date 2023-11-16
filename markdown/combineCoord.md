@@ -1,15 +1,16 @@
-
-# combineCoord
-
+---
+title: Modulate
+date: 2023-11-16
+---
+# Modulate
 
 ### modulateRepeat
+```javascript
 modulateRepeat( texture, repeatX = 3, repeatY = 3, offsetX = 0.5, offsetY = 0.5 )
-
+```
 
 The `texture` parameter can be any kind of [source](#sources), for
 example a [`color`](#color), [`src`](#src), or [`shape`](#shape).
-   
-
 ```hydra
 // default
 shape(4,0.9)
@@ -19,13 +20,12 @@ shape(4,0.9)
 ```
 
 ### modulateRepeatX
+```javascript
 modulateRepeatX( texture, reps = 3, offset = 0.5 )
-
+```
 
 The `texture` parameter can be any kind of [source](#sources), for
 example a [`color`](#color), [`src`](#src), or [`shape`](#shape).
-   
-
 ```hydra
 // straight lines illusion
 shape(4,0.9)
@@ -36,13 +36,12 @@ shape(4,0.9)
 ```
 
 ### modulateRepeatY
+```javascript
 modulateRepeatY( texture, reps = 3, offset = 0.5 )
-
+```
 
 The `texture` parameter can be any kind of [source](#sources), for
 example a [`color`](#color), [`src`](#src), or [`shape`](#shape).
-   
-
 ```hydra
 // morphing grid
 shape(4,0.9)
@@ -53,14 +52,13 @@ shape(4,0.9)
 ```
 
 ### modulateKaleid
+```javascript
 modulateKaleid( texture, nSides = 4 )
-
+```
 
 The `texture` parameter can be any kind of [source](#sources), for
 example a [`color`](#color), [`src`](#src), or [`shape`](#shape).
 See also: [`kaleid`](#kaleid).
-   
-
 ```hydra
 // default
 osc(9,-0.1,0.1)
@@ -72,14 +70,13 @@ osc(9,-0.1,0.1)
 ```
 
 ### modulateScrollX
+```javascript
 modulateScrollX( texture, scrollX = 0.5, speed )
-
+```
 
 The `texture` parameter can be any kind of [source](#sources), for
 example a [`color`](#color), [`src`](#src), or [`shape`](#shape).
 See also: [`scrollX`](#scrollX)
-   
-
 ```hydra
 // default
 voronoi(25,0,0)
@@ -88,14 +85,13 @@ voronoi(25,0,0)
 ```
 
 ### modulateScrollY
+```javascript
 modulateScrollY( texture, scrollY = 0.5, speed )
-
+```
 
 The `texture` parameter can be any kind of [source](#sources), for
 example a [`color`](#color), [`src`](#src), or [`shape`](#shape).
 See also: [`scrollY`](#scrollY)
-   
-
 ```hydra
 // default
 voronoi(25,0,0)
@@ -104,15 +100,14 @@ voronoi(25,0,0)
 ```
 
 ### modulate
+```javascript
 modulate( texture, amount = 0.1 )
-
+```
 
 Modulate texture.
 More about modulation at: <https://lumen-app.com/guide/modulation/>
 The `texture` parameter can be any kind of [source](#sources), for
 example a [`color`](#color), [`src`](#src), or [`shape`](#shape).
-   
-
 ```hydra
 // chocolate whirlpool
 voronoi()
@@ -127,14 +122,13 @@ voronoi()
 ```
 
 ### modulateScale
+```javascript
 modulateScale( texture, multiple = 1, offset = 1 )
-
+```
 
 The `texture` parameter can be any kind of [source](#sources), for
 example a [`color`](#color), [`src`](#src), or [`shape`](#shape).
 See also: [`scale`](#scale).
-   
-
 ```hydra
 // cosmic radiation
 gradient(5).repeat(50,50).kaleid([3,5,7,9].fast(0.5))
@@ -143,14 +137,13 @@ gradient(5).repeat(50,50).kaleid([3,5,7,9].fast(0.5))
 ```
 
 ### modulatePixelate
+```javascript
 modulatePixelate( texture, multiple = 10, offset = 3 )
-
+```
 
 The `texture` parameter can be any kind of [source](#sources), for
 example a [`color`](#color), [`src`](#src), or [`shape`](#shape).
 See also: [`pixelate`](#pixelate)
-   
-
 ```hydra
 // what lies beneath
 voronoi(10,1,5).brightness(()=>Math.random()*0.15)
@@ -159,14 +152,13 @@ voronoi(10,1,5).brightness(()=>Math.random()*0.15)
 ```
 
 ### modulateRotate
+```javascript
 modulateRotate( texture, multiple = 1, offset )
-
+```
 
 The `texture` parameter can be any kind of [source](#sources), for
 example a [`color`](#color), [`src`](#src), or [`shape`](#shape).
 See also: [`rotate`](#rotate)
-   
-
 ```hydra
 // wormhole
 voronoi(100,3,5)
@@ -176,14 +168,13 @@ voronoi(100,3,5)
 ```
 
 ### modulateHue
+```javascript
 modulateHue( texture, amount = 1 )
-
+```
 
 Changes coordinates based on hue of second input. Based on: https://www.shadertoy.com/view/XtcSWM
 The `texture` parameter can be any kind of [source](#sources), for
 example a [`color`](#color), [`src`](#src), or [`shape`](#shape).
-   
-
 ```hydra
 src(o0)
   .modulateHue(src(o0).scale(1.01),1)
